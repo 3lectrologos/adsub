@@ -1,0 +1,41 @@
+﻿\appendix
+\chapter{Proofs}
+
+\section{Definitions}
+
+\begin{itemize}
+  \item[\underline{Ground set}] $E$
+  \item[\underline{Observation set}] $O$
+  \item[\underline{Realization}] $\phi : E \to O$
+  \item[\underline{Partial realization}] $\psi \subseteq E \times O$ with $\psi(e) \defeq o,\ \forall (e, o) \in \psi$
+  \item[\underline{Partial realiz. domain}] $\dom(\psi) \defeq \{e \in E \mid \exists o \in O : (e, o) \in \psi\}$
+  \item[\underline{Consistency}] $\phi \sim \psi \iff \phi(e) = \psi(e),\ \forall e \in \dom(\psi)$
+  \item[\underline{Subrealization}] $\psi_1 \subseteq \psi_2$
+  \item[\underline{Probability simplex}] $\mathcal{P}(E) \defeq \{\*x \in \mathbb{R}^E \mid \sum_{e \in E} x_e = 1,\ x_e \geq 0\ \forall e \in E\}$
+  \item[\underline{Policy}] $\pi \subseteq 2^{E \times O} \times \mathcal{P}(E)$ with $\pi(e\mid\psi) \defeq p(e),\ \forall (\psi, p) \in \pi$
+  \item[\underline{Policy domain}] $\dom(\pi) \defeq \{\psi \in 2^{E \times O} \mid \exists p \in \mathcal{P}(E) : (\psi, p) \in \pi\}$
+  \item[\underline{Selected items}] $E(\pi, \phi) \subseteq E$
+  \item[\underline{Function}] $f : 2^E \times O^E \to \mathbb{R}_{\geq 0}$
+  \item[\underline{Exp. value of policy}] $\favg(\pi) \defeq \Ephi[f(E(\pi, \Phi), \Phi)]$
+  \item[\underline{Marginal gain of $e$}] $\D(e\mmid\psi) \defeq \Ephi[f(\dom(\psi) \cup \{e\}, \Phi) - f(\dom(\psi), \Phi) \mid \Phi \sim \psi]$
+  \item[\underline{Marginal gain of $\pi$}] $\D(\pi\mmid\psi) \defeq \Ephi[f(\dom(\psi) \cup E(\pi, \Phi), \Phi) - f(\dom(\psi), \Phi) \mid \Phi \sim \psi]$
+  \item[\underline{Random greedy set}] $\mathcal{M}_k(\psi) \in \displaystyle\argmax_{S \subseteq E, |S| = k}\left\{\sum_{e \in S} \D(e\mmid\psi) \right\}$
+\end{itemize}
+
+
+\section{Monotone adaptive submodular}
+
+\todo{Need to add dummy elements, so that it's always possible to choose $k$ of them with non-negative expected marginal gains.}
+
+\todo{Maybe talk about pairs $(f, p_{\Phi})$ being adaptive submodular, instead of just $f$?}
+
+\begin{lemma}
+  For any partial realization $\psi$, let $\mathcal{M}_k(\psi)$ be a set containing the $k$ elements with the largest expected marginal gains.
+  If $f$ is adaptive submodular, then for any policy $\pi$ it holds that
+  \begin{align*}
+    \D(\pi\mmid\psi) \leq \sum_{e \in \mathcal{M}_k(\psi)} \D(e\mmid\psi).
+  \end{align*}
+\end{lemma}
+\begin{proof}
+\todo{proof}
+\end{proof}

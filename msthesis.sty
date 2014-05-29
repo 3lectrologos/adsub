@@ -1,0 +1,312 @@
+\NeedsTeXFormat{LaTeX2e}
+\ProvidesPackage{msthesis}[2013/01/28 v0.1 M.Sc. Thesis style]
+
+% -----------------------------------------------------------------------------
+% Hyperrefs and citations
+% -----------------------------------------------------------------------------
+
+% Style (taken from ICML 2013)
+\RequirePackage{hyperref}
+\RequirePackage{color}
+\definecolor{mydarkblue}{rgb}{0,0.08,0.45}
+\hypersetup{ %
+  pdftitle={},
+  pdfauthor={},
+  pdfsubject={},
+  pdfkeywords={},
+  pdfborder=0 0 0,
+  pdfpagemode=UseNone,
+  colorlinks=true,
+  linkcolor=mydarkblue,
+  citecolor=mydarkblue,
+  filecolor=mydarkblue,
+  urlcolor=mydarkblue,
+  pdfview=FitH}
+
+% Custom commands
+\newcommand{\sectref}[1]{\hyperref[#1]{Section \ref*{#1}}}
+\newcommand{\chapref}[1]{\hyperref[#1]{Chapter \ref*{#1}}}
+\newcommand{\figref}[1]{\hyperref[#1]{Figure \ref*{#1}}}
+\newcommand{\figsref}[1]{\hyperref[#1]{Figures \ref*{#1}}}
+\newcommand{\tabref}[1]{\hyperref[#1]{ Table \ref*{#1}}}
+\newcommand{\algoref}[1]{\hyperref[#1]{Algorithm \ref*{#1}}}
+\newcommand{\theoremref}[1]{\hyperref[#1]{Theorem \ref*{#1}}}
+\newcommand{\lemmaref}[1]{\hyperref[#1]{Lemma \ref*{#1}}}
+\newcommand{\lemmasref}[1]{\hyperref[#1]{Lemmas \ref*{#1}}}
+\newcommand{\corref}[1]{\hyperref[#1]{Corollary \ref*{#1}}}
+\newcommand{\eqtref}[1]{\hyperref[#1]{\mbox{(\ref*{#1})}}}
+\newcommand{\appref}[1]{\hyperref[#1]{Appendix \ref*{#1}}}
+\newcommand{\lineref}[1]{\hyperref[#1]{line \ref*{#1}}}
+\newcommand{\linesref}[2]{\hyperref[#1]{lines \ref*{#1}--\ref*{#2}}}
+\newcommand{\linsref}[1]{\hyperref[#1]{lines \ref*{#1}}}
+
+
+% Modification to natbib citations (taken from ICML 2013)
+\newcommand{\yrcite}[1]{\citeyearpar{#1}}
+\renewcommand{\cite}[1]{\citep{#1}}
+\setcitestyle{authoryear,round,citesep={;},aysep={,},yysep={;}}
+
+
+% -----------------------------------------------------------------------------
+% Page margins
+% -----------------------------------------------------------------------------
+
+\RequirePackage{geometry}
+\geometry{paper=a4paper,includeall,vscale=0.85,hscale=0.85,bottom=0.9in,
+          bindingoffset=0.35in,outer=0.25in}
+
+% Space between text and footnotes
+\setlength{\skip\footins}{2em}
+
+% Space between text and bottom page number
+\setlength{\footskip}{3em}
+
+
+% -----------------------------------------------------------------------------
+% Math
+% -----------------------------------------------------------------------------
+
+\newcommand{\twopartdef}[4]
+{
+	\left\{
+		\begin{array}{ll}
+			#1\,,& \mbox{if } #2 \\
+			#3\,,& \mbox{if } #4
+		\end{array}
+	\right.
+}
+
+\newcommand{\argmax}{\operatornamewithlimits{argmax}}
+\newcommand{\argmin}{\operatornamewithlimits{argmin}}
+
+% Bold math symbol shortcut
+\RequirePackage{bm}
+\def\*#1{\bm{#1}}
+
+% Theory environments
+\newtheorem{definition}{Definition}
+\newtheorem{theorem}{Theorem}
+\newtheorem{lemma}{Lemma}
+\newtheorem{cor}{Corollary}
+
+
+% -----------------------------------------------------------------------------
+% Chapter/Section title styles
+% -----------------------------------------------------------------------------
+
+\RequirePackage{xstring}
+\RequirePackage[usenames,dvipsnames]{xcolor}
+\RequirePackage[sf]{titlesec}
+
+% Chapter colorbox definition
+\fboxrule=1pt
+\newcommand{\colorchapter}[1]{%
+  \if\ttl@key@numberless
+    \fcolorbox{cyan!50!black}{cyan!40!black}{%
+    \parbox[b][3em][c]{\dimexpr 1.3in+\hoffset+\oddsidemargin+\textwidth-2\fboxsep-2\fboxrule}
+    {%
+    \hspace{\dimexpr 1in+\hoffset+\oddsidemargin-8pt}
+    \color{white}{\fontsize{45}{45}\selectfont\textrm{\textbf{\thechapter}}}
+    \quad\quad\LARGE\raisebox{0.5em}{#1}}%
+    }
+  \else
+    \fcolorbox{cyan!50!black}{cyan!40!black}{%
+    \parbox[b][2em][c]{\dimexpr 1.3in+\hoffset+\oddsidemargin+\textwidth-2\fboxsep-2\fboxrule}
+    {%
+    \hspace{\dimexpr 1in+\hoffset+\oddsidemargin-4pt}
+    \LARGE\color{white}#1}%
+    }
+  \fi%
+}
+
+% Chapter title format
+\titleformat{\chapter}[block]
+{\sffamily}
+{}
+{0pt}
+{\hspace{\dimexpr -1in-\hoffset-\oddsidemargin-\fboxrule}\colorchapter}
+
+\titlespacing*{\chapter}{0pt}{0pt}{30pt}
+
+% Section colorbox definition
+\fboxrule=1pt
+\newcommand{\colorsection}[1]{%
+  \fcolorbox{cyan!50!black}{cyan!40!black}{%
+  \parbox[b][1.2em][c]{\dimexpr 1in+\hoffset+\oddsidemargin+\textwidth-2\fboxsep-2\fboxrule+2.2em}
+  {%
+   \ifodd\value{page}
+     \hspace{\dimexpr 1in+\hoffset+\oddsidemargin-2pt}
+     \Large\color{white}
+     \if\ttl@key@numberless
+       \textbf{\thesection}\quad
+     \fi
+     #1
+   \else
+     \hspace{14pt}
+     \Large\color{white}
+     \if\ttl@key@numberless
+       \textbf{\thesection}\quad
+     \fi
+     #1
+   \fi%
+  }}}
+
+% Section title format
+\titleformat{\section}[block]
+{\sffamily}
+{}
+{0pt}
+{\ifodd\value{page}%
+   \hspace{\dimexpr -1in-\hoffset-\oddsidemargin-\fboxrule-0.1em}%
+ \else
+   \hspace{-2em}%
+ \fi
+ \colorsection}
+ 
+% Paragraph title format
+\newcommand{\adddot}[1]{#1.}
+\titleformat{\paragraph}[runin]
+{\bfseries\sffamily}
+{}
+{0pt}
+{\adddot}
+
+% -----------------------------------------------------------------------------
+% Headers and Footers
+% -----------------------------------------------------------------------------
+
+\RequirePackage{fancyhdr}
+
+\fancypagestyle{frontmatter}{%
+  \renewcommand{\headrulewidth}{0pt}% No header rule
+  \renewcommand{\footrulewidth}{0pt}% No footer rule
+  \fancyhf{}% Clear header/footer
+  \fancyfoot[C]{\textsf{\thepage}}%
+}
+
+\fancypagestyle{mainmatter}{%
+  \renewcommand{\headrulewidth}{0.4pt}% No header rule
+  \renewcommand{\footrulewidth}{0pt}% No footer rule
+  \fancyhf{} % clear all header fields
+  \fancyhead[LE]{\textsf{\thepage\quad\quad Random Greedy for Adaptive Submodular Functions}}
+  \fancyhead[RO]{\textsf{\leftmark\quad\quad\thepage}}
+  \fancyheadoffset[LE,RO]{2em}
+}
+
+\fancypagestyle{plain}{%
+\fancyhf{} % clear all header and footer fields
+\fancyfoot[C]{\textsf{\thepage}} % except the center
+\renewcommand{\headrulewidth}{0pt}
+\renewcommand{\footrulewidth}{0pt}}
+
+% Omit headers/footers for empty pages between chapters
+\let\origdoublepage\cleardoublepage
+\newcommand{\clearemptydoublepage}{%
+  \clearpage
+  {\pagestyle{empty}\origdoublepage}%
+}
+\let\cleardoublepage\clearemptydoublepage
+
+% -----------------------------------------------------------------------------
+% Abstract and Acknowledgements
+% -----------------------------------------------------------------------------
+
+\RequirePackage{fancyhdr}
+
+\newenvironment{abstract}
+{
+ \cleardoublepage
+ \vspace{2in}
+ \chapter*{Abstract}
+}
+{}
+
+% -----------------------------------------------------------------------------
+% Tikz figures setup
+% -----------------------------------------------------------------------------
+
+\RequirePackage{tikz}
+\RequirePackage{pgfplots}
+\RequirePackage{makecell}
+
+\usetikzlibrary{arrows,positioning,shapes,fit,external}
+
+\tikzset{external/system call={xelatex --enable-write18 -halt-on-error -interaction=batchmode -jobname "\image" "\texsource"}}
+\tikzset{external/force remake}
+\tikzexternalize
+\tikzsetexternalprefix{figures/}
+\pgfplotsset{compat=newest}
+\pgfplotsset{plot coordinates/math parser=false}
+\newlength\figureheight
+\newlength\figurewidth
+
+\tikzset{
+    %Define standard arrow tip
+    >=stealth',
+    %Define style for boxes
+    st/.style={
+           rectangle,
+           %rounded corners,
+           draw=black, very thick,
+           %text width=6.5em,
+           minimum height=2em,
+           text centered},
+    % Define arrow style
+    pil/.style={
+           ->,
+           thick,
+           shorten <=2pt,
+           shorten >=2pt,}
+}
+
+
+% -----------------------------------------------------------------------------
+% Looser float parameters
+% -----------------------------------------------------------------------------
+
+\renewcommand{\topfraction}{1.0}	% max fraction of floats at top
+\renewcommand{\bottomfraction}{1.0}	% max fraction of floats at bottom
+%   Parameters for TEXT pages (not float pages):
+\setcounter{topnumber}{2}
+\setcounter{bottomnumber}{2}
+\setcounter{totalnumber}{10}     % 2 may work better
+\setcounter{dbltopnumber}{2}    % for 2-column pages
+\renewcommand{\dbltopfraction}{0.9}	% fit big float above 2-col. text
+\renewcommand{\textfraction}{0}	% allow minimal text w. figs
+
+
+% -----------------------------------------------------------------------------
+% Algorithm related
+% -----------------------------------------------------------------------------
+\RequirePackage{algorithm}
+\RequirePackage{algorithmic}
+
+\renewcommand{\algorithmicrequire}{\textbf{Input:}}
+\renewcommand{\algorithmicensure}{\textbf{Output:}}
+\newcommand*\LNot{\textbf{not}\xspace}
+\newcommand*\LAnd{\textbf{and}\xspace}
+\newcommand*\LET[2]{\STATE #1 $\gets$ #2}
+\newcommand*\Fcall[1]{\textsc{#1}}
+\makeatletter
+\newcommand{\setalglineno}[1]{%
+  \setcounter{ALC@line}{\numexpr#1-1}}
+\makeatother
+\renewcommand{\algorithmiccomment}[1]{// #1}
+\newcommand{\LINEIF}[2]{%
+    \STATE\algorithmicif\ {#1}\ \algorithmicthen\ {#2}%
+}
+\newcommand{\LINEELSE}[1]{%
+    \STATE\algorithmicelse\ {#1}%
+}
+
+% Highlight changes
+\newcommand\new[1]{{\color{RubineRed}#1}}
+
+% -----------------------------------------------------------------------------
+% Misc
+% -----------------------------------------------------------------------------
+
+\newcommand{\todo}[1]{\noindent\texttt{\color[rgb]{0.5,0.1,0.1} TODO: #1}}
+
+% Import external pdfs. Needs to be imported *after* xcolor!
+\usepackage{pdfpages}

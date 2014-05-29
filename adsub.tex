@@ -1,0 +1,74 @@
+\documentclass[a4paper,11pt,twoside]{book}
+
+\usepackage{fontspec}
+\usepackage{leading}
+\usepackage{natbib}
+\usepackage{graphicx}
+\usepackage{adjustbox}         % For trimming included graphics in xetex
+\usepackage{caption}
+\usepackage{subcaption}
+\usepackage{wrapfig}
+\usepackage{amsmath,amssymb}
+\usepackage{amsthm}            % For theorems, lemmas, etc.
+\usepackage{mathtools}         % For \vcentcolon
+\usepackage{xspace}            % Controls space after user-defined command
+\usepackage{enumitem}
+\usepackage{fixltx2e}          % For subscripts in normal text
+\usepackage[nottoc]{tocbibind} % Include bibliography in TOC
+\usepackage{placeins}          % \FloatBarrier
+\usepackage{float}             % H option for floats
+\usepackage{msthesis}
+
+% Fonts
+\setmainfont[Mapping=tex-text]{Linux Libertine}
+\setsansfont{Myriad Pro}
+\setmonofont[Scale=0.9]{Consolas}
+%\leading{9pt}
+
+% Abbreviations
+\newcommand{\gpucb}{\textsf{GP-UCB}\xspace}
+\newcommand{\gpbucb}{\textsf{GP-BUCB}\xspace}
+\newcommand{\acl}{\textsf{LSE}\xspace}
+\newcommand{\fullacl}{Level Set Estimation\xspace}
+\newcommand{\iacl}{\textsf{LSE\textsubscript{imp}}\xspace}
+\newcommand{\bacl}{\textsf{LSE\textsubscript{batch}}\xspace}
+\newcommand{\ibacl}{\textsf{LSE\textsubscript{imp-batch}}\xspace}
+\newcommand{\str}{\textsf{STR}\xspace}
+\newcommand{\istr}{\textsf{STR\textsubscript{imp}}\xspace}
+\newcommand{\bstr}{\textsf{STR\textsubscript{batch}}\xspace}
+\newcommand{\rstr}{\textsf{STR\textsubscript{rank}}\xspace}
+\newcommand{\var}{\textsf{VAR}\xspace}
+
+% Hyphenations
+\hyphenation{Sri-ni-vas}
+\hyphenation{Ra-hi-mi}
+\hyphenation{Co-ver}
+
+% Misc
+\newcommand{\trimlen}{0pt}
+\newcommand{\favg}{f_{\mathrm{avg}}}
+\DeclareMathOperator{\dom}{dom}
+\newcommand{\defeq}{\vcentcolon=}
+\newcommand{\E}{\mathbb{E}}
+\newcommand{\Ephi}{\mathbb{E}_{\Phi}}
+\newcommand{\Epsi}{\mathbb{E}_{\Psi}}
+\newcommand{\D}{\Delta}
+\newcommand{\mmid}{\,|\,}
+\newcommand{\smid}{\ \middle\vert\ }
+
+
+\begin{document}
+
+\mainmatter
+\pagestyle{mainmatter}
+\renewcommand{\chaptermark}[1]{\markboth{#1}{}}
+%\renewcommand{\chaptermark}[1]{\markright{\thechapter #1}}
+
+\input{proofs.tex}
+
+\backmatter
+\pagestyle{frontmatter}
+\bibliography{adsub}
+\bibliographystyle{icml2013}
+
+\end{document}
