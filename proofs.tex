@@ -14,11 +14,12 @@
   \item[\underline{Probability simplex}] $\mathcal{P}(E) \defeq \{\*x \in \mathbb{R}^E \mid \sum_{e \in E} x_e = 1,\ x_e \geq 0\ \forall e \in E\}$
   \item[\underline{Policy}] $\pi \subseteq 2^{E \times O} \times \mathcal{P}(E)$ with $\pi(e\mid\psi) \defeq p(e),\ \forall (\psi, p) \in \pi$
   \item[\underline{Policy domain}] $\dom(\pi) \defeq \{\psi \in 2^{E \times O} \mid \exists p \in \mathcal{P}(E) : (\psi, p) \in \pi\}$
+  \item[\underline{Truncated policy}] $\pik \subseteq 2^{E \times O} \times \mathcal{P}(E)$ such that $\dom(\pik) = \{\psi \in \dom(\pi) \mid |\psi| < k\}$ and $\pik(\psi) = \pi(\psi),\ \forall \psi \in \dom(\pik)$
   \item[\underline{Selected items}] $E(\pi, \phi) \subseteq E$
   \item[\underline{Function}] $f : 2^E \times O^E \to \mathbb{R}_{\geq 0}$
-  \item[\underline{Exp. value of policy}] $\favg(\pi) \defeq \Ephi[f(E(\pi, \Phi), \Phi)]$
+  \item[\underline{Exp. value of policy}] $\favg(\pi) \defeq \Epp[f(E(\pi, \Phi), \Phi)]$
   \item[\underline{Marginal gain of $e$}] $\D(e\mmid\psi) \defeq \Ephi[f(\dom(\psi) \cup \{e\}, \Phi) - f(\dom(\psi), \Phi) \mid \Phi \sim \psi]$
-  \item[\underline{Marginal gain of $\pi$}] $\D(\pi\mmid\psi) \defeq \Ephi[f(\dom(\psi) \cup E(\pi, \Phi), \Phi) - f(\dom(\psi), \Phi) \mid \Phi \sim \psi]$
+  \item[\underline{Marginal gain of $\pi$}] $\D(\pi\mmid\psi) \defeq \Epp[f(\dom(\psi) \cup E(\pi, \Phi), \Phi) - f(\dom(\psi), \Phi) \mid \Phi \sim \psi]$
   \item[\underline{Random greedy set}] $\mathcal{M}_k(\psi) \in \displaystyle\argmax_{S \subseteq E, |S| = k}\left\{\sum_{e \in S} \D(e\mmid\psi) \right\}$
 \end{itemize}
 
@@ -27,15 +28,38 @@
 
 \todo{Need to add dummy elements, so that it's always possible to choose $k$ of them with non-negative expected marginal gains.}
 
-\todo{Maybe talk about pairs $(f, p_{\Phi})$ being adaptive submodular, instead of just $f$?}
-
 \begin{lemma}
   For any partial realization $\psi$, let $\mathcal{M}_k(\psi)$ be a set containing the $k$ elements with the largest expected marginal gains.
   If $f$ is adaptive submodular, then for any policy $\pi$ it holds that
   \begin{align*}
-    \D(\pi\mmid\psi) \leq \sum_{e \in \mathcal{M}_k(\psi)} \D(e\mmid\psi).
+    \D(\pik\mmid\psi) \leq \sum_{e \in \mathcal{M}_k(\psi)} \D(e\mmid\psi).
   \end{align*}
 \end{lemma}
 \begin{proof}
-\todo{proof}
+  First note that by definition of $\pik$ it holds that $|E(\pik, \phi)| \leq k,$ for all $\phi$, which also implies that $\Epp\left[|E(\pik, \Phi)|\right] \leq k$.
+  Let $p(e)$ denote the probability that element $e$ will be selected by the truncated policy $\pik$, that is, $p(e) \defeq \Ppp\left[e \in E(\pik, \Phi)\right]$.
+  Then, we have
+  \begin{align}
+    \label{eq:pre}
+    \begin{split}
+      k &\geq \Ephi\left[|E(\pik, \Phi)|\right]\\
+        &= \sum_{e \in E}\Ppp\left[e \in E(\pik, \Phi)\right]\\
+        &= \sum_{e \in E}p(e).
+    \end{split}
+  \end{align}
+  If we define $p(\psi'\mmid\psi) \defeq \Ppp\left[\dom(\psi') \subseteq E(\pik, \Phi) \mid \Phi \sim \psi\right]$, i.e., the probability that partial realization $\psi' \supseteq \psi$ will come up when running policy $\pik$, the gain $\D(\pik\mmid\psi)$ can be bounded as follows:
+  \begin{align*}
+    \D(\pik\mmid\psi) &= \sum_{\psi' \in \dom(\pik)}p(\psi'\mmid\psi)\sum_{e \in E}\pi(e\mmid\psi')\D(e\mmid\psi')\\
+    &\leq \sum_{\psi' \in \dom(\pik)}p(\psi'\mmid\psi)\sum_{e \in E}\pi(e\mmid\psi')\D(e\mmid\psi) \tag*{(by AS)}\\
+    &= \sum_{e \in E}\D(e\mmid\psi) \sum_{\psi' \in \dom(\pik)}\pi(e\mmid\psi')p(\psi'\mmid\psi)\\
+    &= \sum_{e \in E}\D(e\mmid\psi) p(e)\\
+    &\leq \sum_{e \in \mathcal{M}_k(\psi)} \D(e\mmid\psi)
+  \end{align*}
+  The last inequality above follows from considering the fractional knapsack problem
+  \begin{align*}
+    \textrm{maximize} & \quad \sum_{e \in E}p(e)\D(e\mmid\psi)\\
+    \textrm{subject to} & \quad \sum_{e \in E}p(e) \leq k \tag*{(by \eqref{eq:pre})}\\
+               & \quad 0 \leq p(e) \leq 1,\ \forall e \in E \tag*{($p(e)$ are probabilities)}
+  \end{align*}
+  and noting that $\mathcal{M}_k(\psi)$ is a maximizer, since Assumption 1 guarantees that all elements in  $\mathcal{M}_k(\psi)$ have non-negative expected marginal gains, that is, $\D(e\mmid\psi) \geq 0,\ \forall e \in \mathcal{M}_k(\psi)$.
 \end{proof}

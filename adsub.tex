@@ -20,9 +20,10 @@
 \usepackage{msthesis}
 
 % Fonts
-\setmainfont[Mapping=tex-text]{Linux Libertine}
-\setsansfont{Myriad Pro}
-\setmonofont[Scale=0.9]{Consolas}
+\usepackage{libertine}
+%\setmainfont[Mapping=tex-text]{Linux Libertine}
+%\setsansfont{Myriad Pro}
+%\setmonofont[Scale=0.9]{Consolas}
 %\leading{9pt}
 
 % Abbreviations
@@ -52,9 +53,20 @@
 \newcommand{\E}{\mathbb{E}}
 \newcommand{\Ephi}{\mathbb{E}_{\Phi}}
 \newcommand{\Epsi}{\mathbb{E}_{\Psi}}
+\newcommand{\Epp}{\mathbb{E}_{\Phi, \Pi}}
+\newcommand{\Prob}{\mathbb{P}}
+\newcommand{\Pphi}{\mathbb{P}_{\Phi}}
+\newcommand{\Ppp}{\mathbb{P}_{\Phi, \Pi}}
 \newcommand{\D}{\Delta}
-\newcommand{\mmid}{\,|\,}
+\newcommand{\mmid}{\,\vert\,}
 \newcommand{\smid}{\ \middle\vert\ }
+\newcommand{\pii}{\pi_{[i]}}
+\newcommand{\pik}{\pi_{[k]}}
+% Fix spacing problem with \left and \right
+\let\originalleft\left
+\let\originalright\right
+\renewcommand{\left}{\mathopen{}\mathclose\bgroup\originalleft}
+\renewcommand{\right}{\aftergroup\egroup\originalright}
 
 
 \begin{document}
