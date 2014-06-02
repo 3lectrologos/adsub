@@ -12,6 +12,7 @@
 \usepackage{amsthm}            % For theorems, lemmas, etc.
 \usepackage{mathtools}         % For \vcentcolon
 \usepackage{xspace}            % Controls space after user-defined command
+\usepackage{xparse}            % Optional arguments in commands
 \usepackage{enumitem}
 \usepackage{fixltx2e}          % For subscripts in normal text
 \usepackage[nottoc]{tocbibind} % Include bibliography in TOC
@@ -50,23 +51,47 @@
 \newcommand{\favg}{f_{\mathrm{avg}}}
 \DeclareMathOperator{\dom}{dom}
 \newcommand{\defeq}{\vcentcolon=}
-\newcommand{\E}{\mathbb{E}}
-\newcommand{\Ephi}{\mathbb{E}_{\Phi}}
-\newcommand{\Epsi}{\mathbb{E}_{\Psi}}
-\newcommand{\Epp}{\mathbb{E}_{\Phi, \Pi}}
-\newcommand{\Prob}{\mathbb{P}}
-\newcommand{\Pphi}{\mathbb{P}_{\Phi}}
-\newcommand{\Ppp}{\mathbb{P}_{\Phi, \Pi}}
-\newcommand{\D}{\Delta}
-\newcommand{\mmid}{\,\vert\,}
-\newcommand{\smid}{\ \middle\vert\ }
-\newcommand{\pii}{\pi_{[i]}}
-\newcommand{\pik}{\pi_{[k]}}
+
 % Fix spacing problem with \left and \right
 \let\originalleft\left
 \let\originalright\right
 \renewcommand{\left}{\mathopen{}\mathclose\bgroup\originalleft}
 \renewcommand{\right}{\aftergroup\egroup\originalright}
+
+\newcommand{\smid}{\ \middle\vert\ }
+\newcommand{\mmid}{\,\vert\,}
+
+\DeclareDocumentCommand \E { o m o }{%
+  \IfValueTF {#1} {%
+    \mathbb{E}_{#1}
+  }{%
+    \mathbb{E}
+  }%
+  \left[#2
+  \IfValueT {#3} {%
+    \smid #3
+  }%
+  \right]
+}
+
+\DeclareDocumentCommand \P { o m o }{%
+  \IfValueTF {#1} {%
+    \mathbb{P}_{#1}
+  }{%
+    \mathbb{P}
+  }%
+  \left[#2
+  \IfValueT {#3} {%
+    \smid #3
+  }%
+  \right]
+}
+
+\newcommand{\D}[2]{\Delta(#1\mmid#2)}
+\newcommand{\sdef}[2]{\left\{#1\smid#2\right\}}
+
+\newcommand{\pii}{\pi_{[i]}}
+\newcommand{\pik}{\pi_{[k]}}
 
 
 \begin{document}

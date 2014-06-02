@@ -1,3 +1,9 @@
 *~
 *.bbl
 *.auxlock
+*.aux
+*.blg
+*.log
+*.out
+*.synctex.gz
+adsub.pdf

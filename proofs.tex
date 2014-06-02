@@ -8,19 +8,19 @@
   \item[\underline{Observation set}] $O$
   \item[\underline{Realization}] $\phi : E \to O$
   \item[\underline{Partial realization}] $\psi \subseteq E \times O$ with $\psi(e) \defeq o,\ \forall (e, o) \in \psi$
-  \item[\underline{Partial realiz. domain}] $\dom(\psi) \defeq \{e \in E \mid \exists o \in O : (e, o) \in \psi\}$
+  \item[\underline{Partial realiz. domain}] $\dom(\psi) \defeq \sdef{e \in E}{\exists o \in O : (e, o) \in \psi}$
   \item[\underline{Consistency}] $\phi \sim \psi \iff \phi(e) = \psi(e),\ \forall e \in \dom(\psi)$
   \item[\underline{Subrealization}] $\psi_1 \subseteq \psi_2$
-  \item[\underline{Probability simplex}] $\mathcal{P}(E) \defeq \{\*x \in \mathbb{R}^E \mid \sum_{e \in E} x_e = 1,\ x_e \geq 0\ \forall e \in E\}$
+  \item[\underline{Probability simplex}] $\mathcal{P}(E) \defeq \sdef{\*x \in \mathbb{R}^E}{\sum_{e \in E} x_e = 1,\ x_e \geq 0\ \forall e \in E}$
   \item[\underline{Policy}] $\pi \subseteq 2^{E \times O} \times \mathcal{P}(E)$ with $\pi(e\mid\psi) \defeq p(e),\ \forall (\psi, p) \in \pi$
-  \item[\underline{Policy domain}] $\dom(\pi) \defeq \{\psi \in 2^{E \times O} \mid \exists p \in \mathcal{P}(E) : (\psi, p) \in \pi\}$
-  \item[\underline{Truncated policy}] $\pik \subseteq 2^{E \times O} \times \mathcal{P}(E)$ such that $\dom(\pik) = \{\psi \in \dom(\pi) \mid |\psi| < k\}$ and $\pik(\psi) = \pi(\psi),\ \forall \psi \in \dom(\pik)$
+  \item[\underline{Policy domain}] $\dom(\pi) \defeq \sdef{\psi \in 2^{E \times O}}{\exists p \in \mathcal{P}(E) : (\psi, p) \in \pi}$
+  \item[\underline{Truncated policy}] $\pik \subseteq 2^{E \times O} \times \mathcal{P}(E)$ such that $\dom(\pik) = \sdef{\psi \in \dom(\pi)}{|\psi| < k}$ and $\pik(\psi) = \pi(\psi),\ \forall \psi \in \dom(\pik)$
   \item[\underline{Selected items}] $E(\pi, \phi) \subseteq E$
   \item[\underline{Function}] $f : 2^E \times O^E \to \mathbb{R}_{\geq 0}$
-  \item[\underline{Exp. value of policy}] $\favg(\pi) \defeq \Epp[f(E(\pi, \Phi), \Phi)]$
-  \item[\underline{Marginal gain of $e$}] $\D(e\mmid\psi) \defeq \Ephi[f(\dom(\psi) \cup \{e\}, \Phi) - f(\dom(\psi), \Phi) \mid \Phi \sim \psi]$
-  \item[\underline{Marginal gain of $\pi$}] $\D(\pi\mmid\psi) \defeq \Epp[f(\dom(\psi) \cup E(\pi, \Phi), \Phi) - f(\dom(\psi), \Phi) \mid \Phi \sim \psi]$
-  \item[\underline{Random greedy set}] $\mathcal{M}_k(\psi) \in \displaystyle\argmax_{S \subseteq E, |S| = k}\left\{\sum_{e \in S} \D(e\mmid\psi) \right\}$
+  \item[\underline{Exp. value of policy}] $\favg(\pi) \defeq \E[\Phi,\Pi][f(E(\pi, \Phi), \Phi)]$
+  \item[\underline{Marginal gain of $e$}] $\D{e}{\psi} \defeq \E[\Phi]{f(\dom(\psi) \cup \{e\}, \Phi) - f(\dom(\psi), \Phi)}[\Phi \sim \psi]$
+  \item[\underline{Marginal gain of $\pi$}] $\D{\pi}{\psi} \defeq \E[\Phi,\Pi]{f(\dom(\psi) \cup E(\pi, \Phi), \Phi) - f(\dom(\psi), \Phi)}[\Phi \sim \psi]$
+  \item[\underline{Random greedy set}] $\mathcal{M}_k(\psi) \in \displaystyle\argmax_{S \subseteq E, |S| = k}\left\{\sum_{e \in S} \D{e}{\psi} \right\}$
 \end{itemize}
 
 
@@ -32,34 +32,34 @@
   For any partial realization $\psi$, let $\mathcal{M}_k(\psi)$ be a set containing the $k$ elements with the largest expected marginal gains.
   If $f$ is adaptive submodular, then for any policy $\pi$ it holds that
   \begin{align*}
-    \D(\pik\mmid\psi) \leq \sum_{e \in \mathcal{M}_k(\psi)} \D(e\mmid\psi).
+    \D{\pik}{\psi} \leq \sum_{e \in \mathcal{M}_k(\psi)} \D{e}{\psi}.
   \end{align*}
 \end{lemma}
 \begin{proof}
-  First note that by definition of $\pik$ it holds that $|E(\pik, \phi)| \leq k,$ for all $\phi$, which also implies that $\Epp\left[|E(\pik, \Phi)|\right] \leq k$.
-  Let $p(e)$ denote the probability that element $e$ will be selected by the truncated policy $\pik$, that is, $p(e) \defeq \Ppp\left[e \in E(\pik, \Phi)\right]$.
+  First note that by definition of $\pik$ it holds that $|E(\pik, \phi)| \leq k,$ for all $\phi$, which also implies that $\E[\Phi,\Pi]{|E(\pik, \Phi)|} \leq k$.
+  Let $p(e)$ denote the probability that element $e$ will be selected by the truncated policy $\pik$, that is, $p(e) \defeq \P[\Phi,\Pi]{e \in E(\pik, \Phi)}$.
   Then, we have
   \begin{align}
     \label{eq:pre}
     \begin{split}
-      k &\geq \Ephi\left[|E(\pik, \Phi)|\right]\\
-        &= \sum_{e \in E}\Ppp\left[e \in E(\pik, \Phi)\right]\\
+      k &\geq \E[\Phi]{|E(\pik, \Phi)|}\\
+        &= \sum_{e \in E}\P[\Phi,\Pi]{e \in E(\pik, \Phi)}\\
         &= \sum_{e \in E}p(e).
     \end{split}
   \end{align}
-  If we define $p(\psi'\mmid\psi) \defeq \Ppp\left[\dom(\psi') \subseteq E(\pik, \Phi) \mid \Phi \sim \psi\right]$, i.e., the probability that partial realization $\psi' \supseteq \psi$ will come up when running policy $\pik$, the gain $\D(\pik\mmid\psi)$ can be bounded as follows:
+  If we define $p(\psi'\mmid\psi) \defeq \P[\Phi,\Pi]{\dom(\psi') \subseteq E(\pik, \Phi)}[\Phi \sim \psi]$, i.e., the probability that partial realization $\psi' \supseteq \psi$ will come up when running policy $\pik$, the gain $\D{\pik}{\psi}$ can be bounded as follows:
   \begin{align*}
-    \D(\pik\mmid\psi) &= \sum_{\psi' \in \dom(\pik)}p(\psi'\mmid\psi)\sum_{e \in E}\pi(e\mmid\psi')\D(e\mmid\psi')\\
-    &\leq \sum_{\psi' \in \dom(\pik)}p(\psi'\mmid\psi)\sum_{e \in E}\pi(e\mmid\psi')\D(e\mmid\psi) \tag*{(by AS)}\\
-    &= \sum_{e \in E}\D(e\mmid\psi) \sum_{\psi' \in \dom(\pik)}\pi(e\mmid\psi')p(\psi'\mmid\psi)\\
-    &= \sum_{e \in E}\D(e\mmid\psi) p(e)\\
-    &\leq \sum_{e \in \mathcal{M}_k(\psi)} \D(e\mmid\psi)
+    \D{\pik}{\psi} &= \sum_{\psi' \in \dom(\pik)}p(\psi'\mmid\psi)\sum_{e \in E}\pi(e\mmid\psi')\D{e}{\psi'}\\
+    &\leq \sum_{\psi' \in \dom(\pik)}p(\psi'\mmid\psi)\sum_{e \in E}\pi(e\mmid\psi')\D{e}{\psi} \tag*{(by AS)}\\
+    &= \sum_{e \in E}\D{e}{\psi} \sum_{\psi' \in \dom(\pik)}\pi(e\mmid\psi')p(\psi'\mmid\psi)\\
+    &= \sum_{e \in E}\D{e}{\psi} p(e)\\
+    &\leq \sum_{e \in \mathcal{M}_k(\psi)} \D{e}{\psi}
   \end{align*}
   The last inequality above follows from considering the fractional knapsack problem
   \begin{align*}
-    \textrm{maximize} & \quad \sum_{e \in E}p(e)\D(e\mmid\psi)\\
+    \textrm{maximize} & \quad \sum_{e \in E}p(e)\D{e}{\psi}\\
     \textrm{subject to} & \quad \sum_{e \in E}p(e) \leq k \tag*{(by \eqref{eq:pre})}\\
                & \quad 0 \leq p(e) \leq 1,\ \forall e \in E \tag*{($p(e)$ are probabilities)}
   \end{align*}
-  and noting that $\mathcal{M}_k(\psi)$ is a maximizer, since Assumption 1 guarantees that all elements in  $\mathcal{M}_k(\psi)$ have non-negative expected marginal gains, that is, $\D(e\mmid\psi) \geq 0,\ \forall e \in \mathcal{M}_k(\psi)$.
+  and noting that $\mathcal{M}_k(\psi)$ is a maximizer, since Assumption 1 guarantees that all elements in  $\mathcal{M}_k(\psi)$ have non-negative expected marginal gains, that is, $\D{e}{\psi} \geq 0,\ \forall e \in \mathcal{M}_k(\psi)$.
 \end{proof}
