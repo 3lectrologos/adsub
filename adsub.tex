@@ -1,6 +1,6 @@
-\documentclass[a4paper,11pt,twoside]{book}
+\documentclass[a4paper,11pt]{article}
 
-\usepackage{fontspec}
+%\usepackage{fontspec}
 \usepackage{leading}
 \usepackage{natbib}
 \usepackage{graphicx}
@@ -22,6 +22,7 @@
 
 % Fonts
 \usepackage{libertine}
+\usepackage{inconsolata}
 %\setmainfont[Mapping=tex-text]{Linux Libertine}
 %\setsansfont{Myriad Pro}
 %\setmonofont[Scale=0.9]{Consolas}
@@ -93,18 +94,12 @@
 \newcommand{\pii}{\pi_{[i]}}
 \newcommand{\pik}{\pi_{[k]}}
 
+\newcommand{\uitem}[1]{\item[\underline{#1}]}
 
 \begin{document}
 
-\mainmatter
-\pagestyle{mainmatter}
-\renewcommand{\chaptermark}[1]{\markboth{#1}{}}
-%\renewcommand{\chaptermark}[1]{\markright{\thechapter #1}}
-
 \input{proofs.tex}
 
-\backmatter
-\pagestyle{frontmatter}
 \bibliography{adsub}
 \bibliographystyle{icml2013}
 

@@ -1,26 +1,26 @@
-﻿\appendix
-\chapter{Proofs}
+﻿%\chapter{Proofs}
 
 \section{Definitions}
 
 \begin{itemize}
-  \item[\underline{Ground set}] $E$
-  \item[\underline{Observation set}] $O$
-  \item[\underline{Realization}] $\phi : E \to O$
-  \item[\underline{Partial realization}] $\psi \subseteq E \times O$ with $\psi(e) \defeq o,\ \forall (e, o) \in \psi$
-  \item[\underline{Partial realiz. domain}] $\dom(\psi) \defeq \sdef{e \in E}{\exists o \in O : (e, o) \in \psi}$
-  \item[\underline{Consistency}] $\phi \sim \psi \iff \phi(e) = \psi(e),\ \forall e \in \dom(\psi)$
-  \item[\underline{Subrealization}] $\psi_1 \subseteq \psi_2$
-  \item[\underline{Probability simplex}] $\mathcal{P}(E) \defeq \sdef{\*x \in \mathbb{R}^E}{\sum_{e \in E} x_e = 1,\ x_e \geq 0\ \forall e \in E}$
-  \item[\underline{Policy}] $\pi \subseteq 2^{E \times O} \times \mathcal{P}(E)$ with $\pi(e\mid\psi) \defeq p(e),\ \forall (\psi, p) \in \pi$
-  \item[\underline{Policy domain}] $\dom(\pi) \defeq \sdef{\psi \in 2^{E \times O}}{\exists p \in \mathcal{P}(E) : (\psi, p) \in \pi}$
-  \item[\underline{Truncated policy}] $\pik \subseteq 2^{E \times O} \times \mathcal{P}(E)$ such that $\dom(\pik) = \sdef{\psi \in \dom(\pi)}{|\psi| < k}$ and $\pik(\psi) = \pi(\psi),\ \forall \psi \in \dom(\pik)$
-  \item[\underline{Selected items}] $E(\pi, \phi) \subseteq E$
-  \item[\underline{Function}] $f : 2^E \times O^E \to \mathbb{R}_{\geq 0}$
-  \item[\underline{Exp. value of policy}] $\favg(\pi) \defeq \E[\Phi,\Pi][f(E(\pi, \Phi), \Phi)]$
-  \item[\underline{Marginal gain of $e$}] $\D{e}{\psi} \defeq \E[\Phi]{f(\dom(\psi) \cup \{e\}, \Phi) - f(\dom(\psi), \Phi)}[\Phi \sim \psi]$
-  \item[\underline{Marginal gain of $\pi$}] $\D{\pi}{\psi} \defeq \E[\Phi,\Pi]{f(\dom(\psi) \cup E(\pi, \Phi), \Phi) - f(\dom(\psi), \Phi)}[\Phi \sim \psi]$
-  \item[\underline{Random greedy set}] $\mathcal{M}_k(\psi) \in \displaystyle\argmax_{S \subseteq E, |S| = k}\left\{\sum_{e \in S} \D{e}{\psi} \right\}$
+  \uitem{Ground set} $E$
+  \uitem{Observation set} $O$
+  \uitem{Realization} $\phi : E \to O$
+  \uitem{Partial realization} $\psi \subseteq E \times O$ with $\psi(e) \defeq o,\ \forall (e, o) \in \psi$
+  \uitem{Partial realiz. domain} $\dom(\psi) \defeq \sdef{e \in E}{\exists o \in O : (e, o) \in \psi}$
+  \uitem{Consistency} $\phi \sim \psi \iff \phi(e) = \psi(e),\ \forall e \in \dom(\psi)$
+  \uitem{Subrealization} $\psi_1 \subseteq \psi_2$
+  \uitem{Probability simplex} $\mathcal{P}(E) \defeq \sdef{\*x \in \mathbb{R}^E}{\sum_{e \in E} x_e = 1,\ x_e \geq 0\ \forall e \in E}$
+  \uitem{Policy} $\pi \subseteq 2^{E \times O} \times \mathcal{P}(E)$ with $\pi(e\mid\psi) \defeq p(e),\ \forall (\psi, p) \in \pi$
+  \uitem{Policy domain} $\dom(\pi) \defeq \sdef{\psi \in 2^{E \times O}}{\exists p \in \mathcal{P}(E) : (\psi, p) \in \pi}$
+  \uitem{Truncated policy} $\pik \subseteq 2^{E \times O} \times \mathcal{P}(E)$ such that $\dom(\pik) = \sdef{\psi \in \dom(\pi)}{|\psi| < k}$ and $\pik(\psi) = \pi(\psi),\ \forall \psi \in \dom(\pik)$
+  \uitem{Policy concatenation} $\pi_1 @ \pi_2$
+  \uitem{Selected items} $E(\pi, \phi) \subseteq E$
+  \uitem{Function} $f : 2^E \times O^E \to \mathbb{R}_{\geq 0}$
+  \uitem{Exp. value of policy} $\favg(\pi) \defeq \E[\Phi,\Pi]{f(E(\pi, \Phi), \Phi)}$
+  \uitem{Marginal gain of $e$} $\D{e}{\psi} \defeq \E[\Phi]{f(\dom(\psi) \cup \{e\}, \Phi) - f(\dom(\psi), \Phi)}[\Phi \sim \psi]$
+  \uitem{Marginal gain of $\pi$} $\D{\pi}{\psi} \defeq \E[\Phi,\Pi]{f(\dom(\psi) \cup E(\pi, \Phi), \Phi) - f(\dom(\psi), \Phi)}[\Phi \sim \psi]$
+  \uitem{Random greedy set} $\mathcal{M}_k(\psi) \in \displaystyle\argmax_{S \subseteq E, |S| = k}\left\{\sum_{e \in S} \D{e}{\psi} \right\}$
 \end{itemize}
 
 
