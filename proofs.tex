@@ -24,7 +24,7 @@
 \end{itemize}
 
 
-\section{Monotone adaptive submodular}
+\section{Adaptive monotone submodular}
 
 \todo{Need to add dummy elements, so that it's always possible to choose $k$ of them with non-negative expected marginal gains.}
 
@@ -62,4 +62,31 @@
                & \quad 0 \leq p(e) \leq 1,\ \forall e \in E \tag*{($p(e)$ are probabilities)}
   \end{align*}
   and noting that $\mathcal{M}_k(\psi)$ is a maximizer, since Assumption 1 guarantees that all elements in  $\mathcal{M}_k(\psi)$ have non-negative expected marginal gains, that is, $\D{e}{\psi} \geq 0,\ \forall e \in \mathcal{M}_k(\psi)$.
+\end{proof}
+
+\begin{lemma}
+  For any policy $\pi$ and any non-negative integer $i < k$, if $f$ is adaptive submodular, the expected marginal gain obtained during the $i$-th step of random greedy policy $\pig$ can bounded as follows:
+  \begin{align*}
+    \favg(\pigii) - \favg(\pigi) \geq \frac{1}{k}\left(\favg(\pigi @ \pi) - \favg(\pigi)\right).
+  \end{align*}
+\end{lemma}
+\begin{proof}
+\todo{}
+\end{proof}
+
+\begin{lemma}
+  Function $f$ is adaptive monotone if and only if for all policies $\pi_1$ and $\pi_2$ it holds that $\favg(\pi_1) \leq \favg(\pi_1 @ \pi_2)$.
+\end{lemma}
+\begin{proof}
+See Lemma A.8 of \citet{golovin11}.
+\end{proof}
+
+\begin{theorem}
+  If $f$ is adaptive monotone submodular, then for any policy $\pi$ and all non-negative integers $\ell$ and $k$ it holds that
+  \begin{align*}
+    \favg(\pigl) \geq (1 - e^{-\ell/k})\favg(\pik).
+  \end{align*}
+\end{theorem}
+\begin{proof}
+\todo{}
 \end{proof}
