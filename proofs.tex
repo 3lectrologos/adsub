@@ -71,20 +71,21 @@
   \end{align*}
 \end{lemma}
 \begin{proof}
-  For every $i$, let $U_i$ be a random variable denoting the element chosen at the $i$-th step of the random greedy policy. Due to the way the random greedy policy selects the next element at each step, the distribution of $U_{i+1}$ conditioned on the partial realization $\psi$ up to step $i$ is
-  \begin{align*}
-    \P[\Pi]{U_{i+1} = e} = \twopartdefo{1/k}{e \in \mathcal{M}_k(\psi)}{0}.
-  \end{align*}
-  Also, let $\Psi$ be a random variable denoting the partial realization that results from running the random greedy policy for $i$ steps, distributed as
+  Fix $i < k$ and let $\Psi$ be a random variable denoting the partial realization that results from running the random greedy policy for $i$ steps, distributed as
   \begin{align*}
     \P[\Psi]{\Psi = \psi} = \P[\Phi, \Pi]{E(\pigi, \Phi) = \dom(\psi)}[\Phi \sim \psi].
   \end{align*}
+  Also, let $U_i$ be a random variable denoting the element chosen at the $i$-th step of the random greedy policy. Due to the way the random greedy policy selects the next element at each step, the distribution of $U_{i+1}$ conditioned on some partial realization $\psi$ up to step $i$ is
+  \begin{align}\label{eq:ui}
+    \P[\Pi]{U_{i+1} = e} = \twopartdefo{1/k}{e \in \mathcal{M}_k(\psi)}{0}.
+  \end{align}
+
   Then, for the expected marginal gain at the $i$-th step we have
   \begin{align*}
      &\ \favg(\pigii) - \favg(\pigi)\\
     =&\ \E[\Phi, \Pi]{f(E(\pigii, \Phi), \Phi) - f(E(\pigi, \Phi), \Phi)}\\
     =&\ \E[\Psi, \Phi, \Pi]{f(\dom(\Psi) \cup \{U_{i+1}\}, \Phi) - f(\dom(\Psi), \Phi)}[\Phi \sim \Psi]\\
-    =&\ \E[\Psi, \Phi]{\sum_{e \in \mathcal{M}_k(\Psi)}\frac{1}{k}\left[f(\dom(\Psi) \cup \{e\}, \Phi) - f(\dom(\Psi), \Phi)\right]}[\Phi \sim \Psi]\\
+    =&\ \E[\Psi, \Phi]{\sum_{e \in \mathcal{M}_k(\Psi)}\frac{1}{k}\left[f(\dom(\Psi) \cup \{e\}, \Phi) - f(\dom(\Psi), \Phi)\right]}[\Phi \sim \Psi] \tag*{(by \eqref{eq:ui})}\\
     =&\ \frac{1}{k}\,\E[\Psi]{\sum_{e \in \mathcal{M}_k(\Psi)}\D{e}{\Psi}}\\
     \geq&\ \frac{1}{k}\,\E[\Psi]{\D{\pi}{\Psi}} \tag*{(by~\lemmaref{lem:mon_subm})}\\
     =&\ \frac{1}{k}\,\E[\Psi, \Phi]{f(\dom(\Psi) \cup E(\pi, \Phi), \Phi) - f(\dom(\Psi), \Phi)}[\Phi \sim \Psi]\\
