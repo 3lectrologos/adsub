@@ -28,7 +28,7 @@
 
 \todo{Need to add dummy elements, so that it's always possible to choose $k$ of them with non-negative expected marginal gains.}
 
-\begin{lemma}
+\begin{lemma}\label{lem:mon_subm}
   For any partial realization $\psi$, let $\mathcal{M}_k(\psi)$ be a set containing the $k$ elements with the largest expected marginal gains.
   If $f$ is adaptive submodular, then for any policy $\pi$ it holds that
   \begin{align*}
@@ -42,18 +42,18 @@
   \begin{align}
     \label{eq:pre}
     \begin{split}
-      k &\geq \E[\Phi]{|E(\pik, \Phi)|}\\
+      k &\geq \E[\Phi, \Pi]{|E(\pik, \Phi)|}\\
         &= \sum_{e \in E}\P[\Phi,\Pi]{e \in E(\pik, \Phi)}\\
         &= \sum_{e \in E}p(e).
     \end{split}
   \end{align}
-  If we define $p(\psi'\mmid\psi) \defeq \P[\Phi,\Pi]{\dom(\psi') \subseteq E(\pik, \Phi)}[\Phi \sim \psi]$, i.e., the probability that partial realization $\psi' \supseteq \psi$ will come up when running policy $\pik$, the gain $\D{\pik}{\psi}$ can be bounded as follows:
+  If we define $p(\psi'\mmid\psi) \defeq \P[\Phi,\Pi]{E(\pik, \Phi) \supseteq \dom(\psi')}[\Phi \sim \psi]$, i.e., the probability that partial realization $\psi' \supseteq \psi$ will come up when running policy $\pik$, the gain $\D{\pik}{\psi}$ can be bounded as follows:
   \begin{align*}
     \D{\pik}{\psi} &= \sum_{\psi' \in \dom(\pik)}p(\psi'\mmid\psi)\sum_{e \in E}\pi(e\mmid\psi')\D{e}{\psi'}\\
     &\leq \sum_{\psi' \in \dom(\pik)}p(\psi'\mmid\psi)\sum_{e \in E}\pi(e\mmid\psi')\D{e}{\psi} \tag*{(by AS)}\\
     &= \sum_{e \in E}\D{e}{\psi} \sum_{\psi' \in \dom(\pik)}\pi(e\mmid\psi')p(\psi'\mmid\psi)\\
     &= \sum_{e \in E}\D{e}{\psi} p(e)\\
-    &\leq \sum_{e \in \mathcal{M}_k(\psi)} \D{e}{\psi}
+    &\leq \sum_{e \in \mathcal{M}_k(\psi)} \D{e}{\psi}.
   \end{align*}
   The last inequality above follows from considering the fractional knapsack problem
   \begin{align*}
@@ -65,13 +65,31 @@
 \end{proof}
 
 \begin{lemma}
-  For any policy $\pi$ and any non-negative integer $i < k$, if $f$ is adaptive submodular, the expected marginal gain obtained during the $i$-th step of random greedy policy $\pig$ can bounded as follows:
+  For any policy $\pi$ and any non-negative integer $i < k$, if $f$ is adaptive submodular, the expected marginal gain obtained at the $i$-th step of random greedy policy $\pig$ can bounded as
   \begin{align*}
     \favg(\pigii) - \favg(\pigi) \geq \frac{1}{k}\left(\favg(\pigi @ \pi) - \favg(\pigi)\right).
   \end{align*}
 \end{lemma}
 \begin{proof}
-\todo{}
+  For every $i$, let $U_i$ be a random variable denoting the element chosen at the $i$-th step of the random greedy policy. Due to the way the random greedy policy selects the next element at each step, the distribution of $U_{i+1}$ conditioned on the partial realization $\psi$ up to step $i$ is
+  \begin{align*}
+    \P[\Pi]{U_{i+1} = e} = \twopartdefo{1/k}{e \in \mathcal{M}_k(\psi)}{0}.
+  \end{align*}
+  Also, let $\Psi$ be a random variable denoting the partial realization that results from running the random greedy policy for $i$ steps, distributed as
+  \begin{align*}
+    \P[\Psi]{\Psi = \psi} = \P[\Phi, \Pi]{E(\pigi, \Phi) = \dom(\psi)}[\Phi \sim \psi].
+  \end{align*}
+  Then, for the expected marginal gain at the $i$-th step we have
+  \begin{align*}
+     &\ \favg(\pigii) - \favg(\pigi)\\
+    =&\ \E[\Phi, \Pi]{f(E(\pigii, \Phi), \Phi) - f(E(\pigi, \Phi), \Phi)}\\
+    =&\ \E[\Psi, \Phi, \Pi]{f(\dom(\Psi) \cup \{U_{i+1}\}, \Phi) - f(\dom(\Psi), \Phi)}[\Phi \sim \Psi]\\
+    =&\ \E[\Psi, \Phi]{\sum_{e \in \mathcal{M}_k(\Psi)}\frac{1}{k}\left[f(\dom(\Psi) \cup \{e\}, \Phi) - f(\dom(\Psi), \Phi)\right]}[\Phi \sim \Psi]\\
+    =&\ \frac{1}{k}\,\E[\Psi]{\sum_{e \in \mathcal{M}_k(\Psi)}\D{e}{\Psi}}\\
+    \geq&\ \frac{1}{k}\,\E[\Psi]{\D{\pi}{\Psi}} \tag*{(by~\lemmaref{lem:mon_subm})}\\
+    =&\ \frac{1}{k}\,\E[\Psi, \Phi]{f(\dom(\Psi) \cup E(\pi, \Phi), \Phi) - f(\dom(\Psi), \Phi)}[\Phi \sim \Psi]\\
+    =& \ \frac{1}{k}\,\left(\favg(\pigi @ \pi) - \favg(\pigi)\right).
+  \end{align*}
 \end{proof}
 
 \begin{lemma}
