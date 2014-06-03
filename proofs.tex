@@ -2,7 +2,7 @@
 
 \section{Definitions}
 
-\begin{itemize}
+\begin{description}[labelindent=0pt,leftmargin=7pt,itemindent=-2pt,itemsep=0pt]
   \uitem{Ground set} $E$
   \uitem{Observation set} $O$
   \uitem{Realization} $\phi : E \to O$
@@ -21,12 +21,14 @@
   \uitem{Marginal gain of $e$} $\D{e}{\psi} \defeq \E[\Phi]{f(\dom(\psi) \cup \{e\}, \Phi) - f(\dom(\psi), \Phi)}[\Phi \sim \psi]$
   \uitem{Marginal gain of $\pi$} $\D{\pi}{\psi} \defeq \E[\Phi,\Pi]{f(\dom(\psi) \cup E(\pi, \Phi), \Phi) - f(\dom(\psi), \Phi)}[\Phi \sim \psi]$
   \uitem{Random greedy set} $\mathcal{M}_k(\psi) \in \displaystyle\argmax_{S \subseteq E, |S| = k}\left\{\sum_{e \in S} \D{e}{\psi} \right\}$
-\end{itemize}
+\end{description}
 
+\todo{Add adaptive submodular maximization under cardinality constraints definition.}\\
+\todo{Add definitions of adaptive monotonicity and submodularity.}\\
+\todo{Need to assume that $n \geq 2k$ by adding dummy elements, so that it's always possible to choose $k$ of them with non-negative expected marginal gains.}\\
+\todo{Need to assume non-negativity of $f$ (in expectation or for every $\phi$?)}
 
 \section{Adaptive monotone submodular}
-
-\todo{Need to add dummy elements, so that it's always possible to choose $k$ of them with non-negative expected marginal gains.}
 
 \begin{lemma}\label{lem:mon_subm}
   For any partial realization $\psi$, let $\mathcal{M}_k(\psi)$ be a set containing the $k$ elements with the largest expected marginal gains.
@@ -36,6 +38,7 @@
   \end{align*}
 \end{lemma}
 \begin{proof}
+  This is a more detailed version of the proof of Lemma A.9 of~\citet{golovin11}.
   First note that by definition of $\pik$ it holds that $|E(\pik, \phi)| \leq k,$ for all $\phi$, which also implies that $\E[\Phi,\Pi]{|E(\pik, \Phi)|} \leq k$.
   Let $p(e)$ denote the probability that element $e$ will be selected by the truncated policy $\pik$, that is, $p(e) \defeq \P[\Phi,\Pi]{e \in E(\pik, \Phi)}$.
   Then, we have
@@ -64,7 +67,7 @@
   and noting that $\mathcal{M}_k(\psi)$ is a maximizer, since Assumption 1 guarantees that all elements in  $\mathcal{M}_k(\psi)$ have non-negative expected marginal gains, that is, $\D{e}{\psi} \geq 0,\ \forall e \in \mathcal{M}_k(\psi)$.
 \end{proof}
 
-\begin{lemma}
+\begin{lemma}\label{lem:mon_main}
   For any policy $\pi$ and any non-negative integer $i < k$, if $f$ is adaptive submodular, the expected marginal gain obtained at the $i$-th step of random greedy policy $\pig$ can bounded as
   \begin{align*}
     \favg(\pigii) - \favg(\pigi) \geq \frac{1}{k}\left(\favg(\pigi @ \pi) - \favg(\pigi)\right).
@@ -86,26 +89,41 @@
     =&\ \E[\Phi, \Pi]{f(E(\pigii, \Phi), \Phi) - f(E(\pigi, \Phi), \Phi)}\\
     =&\ \E[\Psi, \Phi, \Pi]{f(\dom(\Psi) \cup \{U_{i+1}\}, \Phi) - f(\dom(\Psi), \Phi)}[\Phi \sim \Psi]\\
     =&\ \E[\Psi, \Phi]{\sum_{e \in \mathcal{M}_k(\Psi)}\frac{1}{k}\left[f(\dom(\Psi) \cup \{e\}, \Phi) - f(\dom(\Psi), \Phi)\right]}[\Phi \sim \Psi] \tag*{(by \eqref{eq:ui})}\\
-    =&\ \frac{1}{k}\,\E[\Psi]{\sum_{e \in \mathcal{M}_k(\Psi)}\D{e}{\Psi}}\\
-    \geq&\ \frac{1}{k}\,\E[\Psi]{\D{\pi}{\Psi}} \tag*{(by~\lemmaref{lem:mon_subm})}\\
-    =&\ \frac{1}{k}\,\E[\Psi, \Phi]{f(\dom(\Psi) \cup E(\pi, \Phi), \Phi) - f(\dom(\Psi), \Phi)}[\Phi \sim \Psi]\\
-    =& \ \frac{1}{k}\,\left(\favg(\pigi @ \pi) - \favg(\pigi)\right).
+    =&\ \frac{1}{k}\E[\Psi]{\sum_{e \in \mathcal{M}_k(\Psi)}\D{e}{\Psi}}\\
+    \geq&\ \frac{1}{k}\E[\Psi]{\D{\pi}{\Psi}} \tag*{(by~\lemmaref{lem:mon_subm})}\\
+    =&\ \frac{1}{k}\E[\Psi, \Phi]{f(\dom(\Psi) \cup E(\pi, \Phi), \Phi) - f(\dom(\Psi), \Phi)}[\Phi \sim \Psi]\\
+    =& \ \frac{1}{k}\left(\favg(\pigi @ \pi) - \favg(\pigi)\right).
   \end{align*}
 \end{proof}
 
-\begin{lemma}
-  Function $f$ is adaptive monotone if and only if for all policies $\pi_1$ and $\pi_2$ it holds that $\favg(\pi_1) \leq \favg(\pi_1 @ \pi_2)$.
+\begin{lemma}\label{lem:mon_mon}
+  Function $f$ is adaptive monotone if and only if for all policies $\pi_1$ and $\pi_2$ it holds that $\favg(\pi_2) \leq \favg(\pi_1 @ \pi_2)$.
 \end{lemma}
 \begin{proof}
 See Lemma A.8 of \citet{golovin11}.
 \end{proof}
 
 \begin{theorem}
-  If $f$ is adaptive monotone submodular, then for any policy $\pi$ and all non-negative integers $\ell$ and $k$ it holds that
+  If $f$ is adaptive monotone submodular, then for any policy $\pi$ and all integers $i, k \geq 0$ it holds that
   \begin{align*}
-    \favg(\pigl) \geq (1 - e^{-\ell/k})\favg(\pik).
+    \favg(\pigi) \geq \left(1 - e^{-i/k}\right)\favg(\pik).
   \end{align*}
 \end{theorem}
 \begin{proof}
-\todo{}
+  By combining \lemmasref{lem:mon_main} and~\ref{lem:mon_mon} it immediately follows that for all $i$, $k \geq 0$
+  \begin{align*}
+                   &\ \favg(\pigii) - \favg(\pigi) \geq \frac{1}{k}\left(\favg(\pik) - \favg(\pigi)\right)\\
+    \Leftrightarrow&\ \favg(\pigii) \geq \frac{1}{k}\favg(\pik) + \left(1 - \frac{1}{k}\right) \favg(\pigi)\\
+    \Leftrightarrow&\ \favg(\pik) - \favg(\pigii) \leq \left(1 - \frac{1}{k}\right)\left(\favg(\pik) - \favg(\pigi)\right)\\
+    \Leftrightarrow&\ \favg(\pik) - \favg(\pigi) \leq \left(1 - \frac{1}{k}\right)^{i}\left(\favg(\pik) - \favg(\pigo)\right)\\
+    \Leftrightarrow&\ \favg(\pigi) \geq \left(1 - \left(1 - \frac{1}{k}\right)^{i}\right)\favg(\pik)\tag*{(by non-negativity)}\\
+    \Leftrightarrow&\ \favg(\pigi) \geq \left(1 - e^{-i/k}\right)\favg(\pik)\tag*{($1 - x \leq e^{-x},\ \forall x \geq 0$)}
+  \end{align*}
 \end{proof}
+
+\begin{cor}
+If $f$ is adaptive monotone submodular, then for any policy $\pi$ and any non-negative integer $k$ it holds that
+  \begin{align*}
+    \favg(\pigk) \geq (1 - \frac{1}{e})\favg(\pik).
+  \end{align*}
+\end{cor}
