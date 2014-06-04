@@ -1,7 +1,8 @@
 ﻿%\chapter{Proofs}
 
-\section{Definitions}
+\section{Preliminaries}
 
+\subsection{Definitions}
 \begin{description}[labelindent=0pt,leftmargin=7pt,itemindent=-2pt,itemsep=0pt]
   \uitem{Ground set} $E$
   \uitem{Observation set} $O$
@@ -18,15 +19,24 @@
   \uitem{Selected items} $E(\pi, \phi) \subseteq E$
   \uitem{Function} $f : 2^E \times O^E \to \mathbb{R}_{\geq 0}$
   \uitem{Exp. value of policy} $\favg(\pi) \defeq \E[\Phi,\Pi]{f(E(\pi, \Phi), \Phi)}$
-  \uitem{Marginal gain of $e$} $\D{e}{\psi} \defeq \E[\Phi]{f(\dom(\psi) \cup \{e\}, \Phi) - f(\dom(\psi), \Phi)}[\Phi \sim \psi]$
-  \uitem{Marginal gain of $\pi$} $\D{\pi}{\psi} \defeq \E[\Phi,\Pi]{f(\dom(\psi) \cup E(\pi, \Phi), \Phi) - f(\dom(\psi), \Phi)}[\Phi \sim \psi]$
-  \uitem{Random greedy set} $\mathcal{M}_k(\psi) \in \displaystyle\argmax_{S \subseteq E, |S| = k}\left\{\sum_{e \in S} \D{e}{\psi} \right\}$
+  \uitem{Expected gain of element} $\D{e}{\psi} \defeq \E[\Phi]{f(\dom(\psi) \cup \{e\}, \Phi) - f(\dom(\psi), \Phi)}[\Phi \sim \psi]$
+  \uitem{Expected gain of policy} $\D{\pi}{\psi} \defeq \E[\Phi,\Pi]{f(\dom(\psi) \cup E(\pi, \Phi), \Phi) - f(\dom(\psi), \Phi)}[\Phi \sim \psi]$
+  \uitem{Random greedy policy} $\pig$
+  \uitem{Random greedy set} $\mathcal{M}_k(\psi) \in \displaystyle\argmax_{S \subseteq E, |S| \leq k}\left\{\sum_{e \in S} \D{e}{\psi} \right\}$
 \end{description}
 
-\todo{Add adaptive submodular maximization under cardinality constraints definition.}\\
-\todo{Add definitions of adaptive monotonicity and submodularity.}\\
-\todo{Need to assume that $n \geq 2k$ by adding dummy elements, so that it's always possible to choose $k$ of them with non-negative expected marginal gains.}\\
+\subsection{Problem statement}
+We consider the problem of adaptive maximization, i.e., of finding a policy $\pi$ that solves the following problem
+\begin{align*}
+  \textrm{maximize}&\quad  \favg(\pi)\\
+  \textrm{subject to}&\quad  |E(\pi, \phi)| \leq k,\ \forall \phi \in O^E.
+\end{align*}
+
+\subsection{Assumptions}
+
+\begin{assumption}\label{as:nonneg}
 \todo{Need to assume non-negativity of $f$ (in expectation or for every $\phi$?)}
+\end{assumption}
 
 \section{Adaptive monotone submodular}
 
@@ -50,21 +60,32 @@
         &= \sum_{e \in E}p(e).
     \end{split}
   \end{align}
-  If we define $p(\psi'\mmid\psi) \defeq \P[\Phi,\Pi]{E(\pik, \Phi) \supseteq \dom(\psi')}[\Phi \sim \psi]$, i.e., the probability that partial realization $\psi' \supseteq \psi$ will come up when running policy $\pik$, the gain $\D{\pik}{\psi}$ can be bounded as follows:
+  Now, consider the following fractional knapsack problem:
+  \begin{align*}
+    \textrm{maximize} & \quad g(\*w) \defeq \sum_{e \in E}\D{e}{\psi}w_e\\
+    \textrm{subject to} & \quad \sum_{e \in E}w_e \leq k\\
+               & \quad 0 \leq w_e \leq 1,\ \forall e \in E.
+  \end{align*}
+  Note that by \eqref{eq:pre} and the fact that $p(e)$ are probabilities, it follows that $\*p \defeq \left(p(e),\ e \in E\right)$ is a feasible vector for the above problem.
+  Furthermore, the vector $\*m$ defined by
+  \begin{align*}
+    m_e = \twopartdefo{1}{e \in \mathcal{M}_k(\psi)}{0}
+  \end{align*}
+  is an optimal solution. \todo{Could add a proof by contradiction here if this isn't obvious.}
+  Therefore, we have
+  \begin{align}\label{eq:knap}
+                    &\ g(\*p) \leq g(\*m) \notag\\
+    \Leftrightarrow &\ \sum_{e \in E}\D{e}{\psi}w_e \leq \sum_{e \in \mathcal{M}_k(\psi)} \D{e}{\psi}
+  \end{align}
+  
+  If we define the probability that partial realization $\psi' \supseteq \psi$ will come up when running policy $\pik$ as $p(\psi'\mmid\psi) \defeq \P[\Phi,\Pi]{E(\pik, \Phi) \supseteq \dom(\psi')}[\Phi \sim \psi]$, then the gain $\D{\pik}{\psi}$ can be bounded as follows:
   \begin{align*}
     \D{\pik}{\psi} &= \sum_{\psi' \in \dom(\pik)}p(\psi'\mmid\psi)\sum_{e \in E}\pi(e\mmid\psi')\D{e}{\psi'}\\
     &\leq \sum_{\psi' \in \dom(\pik)}p(\psi'\mmid\psi)\sum_{e \in E}\pi(e\mmid\psi')\D{e}{\psi} \tag*{(by AS)}\\
     &= \sum_{e \in E}\D{e}{\psi} \sum_{\psi' \in \dom(\pik)}\pi(e\mmid\psi')p(\psi'\mmid\psi)\\
     &= \sum_{e \in E}\D{e}{\psi} p(e)\\
-    &\leq \sum_{e \in \mathcal{M}_k(\psi)} \D{e}{\psi}.
+    &\leq \sum_{e \in \mathcal{M}_k(\psi)} \D{e}{\psi} \tag*{(by \eqref{eq:knap})}.
   \end{align*}
-  The last inequality above follows from considering the fractional knapsack problem
-  \begin{align*}
-    \textrm{maximize} & \quad \sum_{e \in E}p(e)\D{e}{\psi}\\
-    \textrm{subject to} & \quad \sum_{e \in E}p(e) \leq k \tag*{(by \eqref{eq:pre})}\\
-               & \quad 0 \leq p(e) \leq 1,\ \forall e \in E \tag*{($p(e)$ are probabilities)}
-  \end{align*}
-  and noting that $\mathcal{M}_k(\psi)$ is a maximizer, since Assumption 1 guarantees that all elements in  $\mathcal{M}_k(\psi)$ have non-negative expected marginal gains, that is, $\D{e}{\psi} \geq 0,\ \forall e \in \mathcal{M}_k(\psi)$.
 \end{proof}
 
 \begin{lemma}\label{lem:mon_main}
@@ -116,7 +137,7 @@ See Lemma A.8 of \citet{golovin11}.
     \Leftrightarrow&\ \favg(\pigii) \geq \frac{1}{k}\favg(\pik) + \left(1 - \frac{1}{k}\right) \favg(\pigi)\\
     \Leftrightarrow&\ \favg(\pik) - \favg(\pigii) \leq \left(1 - \frac{1}{k}\right)\left(\favg(\pik) - \favg(\pigi)\right)\\
     \Leftrightarrow&\ \favg(\pik) - \favg(\pigi) \leq \left(1 - \frac{1}{k}\right)^{i}\left(\favg(\pik) - \favg(\pigo)\right)\\
-    \Leftrightarrow&\ \favg(\pigi) \geq \left(1 - \left(1 - \frac{1}{k}\right)^{i}\right)\favg(\pik)\tag*{(by non-negativity)}\\
+    \Leftrightarrow&\ \favg(\pigi) \geq \left(1 - \left(1 - \frac{1}{k}\right)^{i}\right)\favg(\pik)\tag*{(by \asref{as:nonneg})}\\
     \Leftrightarrow&\ \favg(\pigi) \geq \left(1 - e^{-i/k}\right)\favg(\pik)\tag*{($1 - x \leq e^{-x},\ \forall x \geq 0$)}
   \end{align*}
 \end{proof}
