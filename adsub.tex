@@ -60,6 +60,7 @@
 \renewcommand{\left}{\mathopen{}\mathclose\bgroup\originalleft}
 \renewcommand{\right}{\aftergroup\egroup\originalright}
 
+% Math definitions
 \newcommand{\smid}{\ \middle\vert\ }
 \newcommand{\mmid}{\,\vert\,}
 
@@ -106,7 +107,14 @@
 
 \newcommand{\uitem}[1]{\item[#1]}
 
+% Allow page breaks in align
+\allowdisplaybreaks
+
+
 \begin{document}
+\title{Random Greedy Policy for Adaptive Submodular Maximization}
+\author{Alkis Gotovos}
+\maketitle
 
 \input{proofs.tex}
 

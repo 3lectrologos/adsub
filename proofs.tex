@@ -38,7 +38,7 @@ We consider the problem of adaptive maximization, i.e., of finding a policy $\pi
 \todo{Need to assume non-negativity of $f$ (in expectation or for every $\phi$?)}
 \end{assumption}
 
-\section{Adaptive monotone submodular}
+\section{Adaptive monotone case}
 
 \begin{lemma}\label{lem:mon_subm}
   For any partial realization $\psi$, let $\mathcal{M}_k(\psi)$ be a set containing the $k$ elements with the largest expected marginal gains.
@@ -103,7 +103,7 @@ We consider the problem of adaptive maximization, i.e., of finding a policy $\pi
   \begin{align}\label{eq:ui}
     \P[\Pi]{U_{i+1} = e} = \twopartdefo{1/k}{e \in \mathcal{M}_k(\psi)}{0}.
   \end{align}
-
+  
   Then, for the expected marginal gain at the $i$-th step we have
   \begin{align*}
      &\ \favg(\pigii) - \favg(\pigi)\\
@@ -143,7 +143,7 @@ See Lemma A.8 of \citet{golovin11}.
 \end{proof}
 
 \begin{cor}
-If $f$ is adaptive monotone submodular, then for any policy $\pi$ and any non-negative integer $k$ it holds that
+If $f$ is adaptive monotone submodular, then for any policy $\pi$ and any integer $k \geq 0$ it holds that
   \begin{align*}
     \favg(\pigk) \geq (1 - \frac{1}{e})\favg(\pik).
   \end{align*}
