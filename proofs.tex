@@ -15,12 +15,12 @@
   \uitem{Policy} $\pi \subseteq 2^{E \times O} \times \mathcal{P}(E)$ with $\pi(e\mid\psi) \defeq p(e),\ \forall (\psi, p) \in \pi$
   \uitem{Policy domain} $\dom(\pi) \defeq \sdef{\psi \in 2^{E \times O}}{\exists p \in \mathcal{P}(E) : (\psi, p) \in \pi}$
   \uitem{Truncated policy} $\pik \subseteq 2^{E \times O} \times \mathcal{P}(E)$ such that $\dom(\pik) = \sdef{\psi \in \dom(\pi)}{|\psi| < k}$ and $\pik(\psi) = \pi(\psi),\ \forall \psi \in \dom(\pik)$
-  \uitem{Policy concatenation} $\pi_1 @ \pi_2$
   \uitem{Selected items} $E(\pi, \phi) \subseteq E$
   \uitem{Function} $f : 2^E \times O^E \to \mathbb{R}_{\geq 0}$
   \uitem{Exp. value of policy} $\favg(\pi) \defeq \E[\Phi,\Pi]{f(E(\pi, \Phi), \Phi)}$
   \uitem{Expected gain of element} $\D{e}{\psi} \defeq \E[\Phi]{f(\dom(\psi) \cup \{e\}, \Phi) - f(\dom(\psi), \Phi)}[\Phi \sim \psi]$
   \uitem{Expected gain of policy} $\D{\pi}{\psi} \defeq \E[\Phi,\Pi]{f(\dom(\psi) \cup E(\pi, \Phi), \Phi) - f(\dom(\psi), \Phi)}[\Phi \sim \psi]$
+  \uitem{Policy concatenation} $\pi_1 @ \pi_2$ (note that $\favg(\pi_1 @ \pi_2) = \favg(\pi_2 @ \pi_1)$)
   \uitem{Random greedy policy} $\pig$
   \uitem{Random greedy set} $\mathcal{M}_k(\psi) \in \displaystyle\argmax_{S \subseteq E, |S| \leq k}\left\{\sum_{e \in S} \D{e}{\psi} \right\}$
 \end{description}
@@ -33,12 +33,6 @@ We consider the problem of adaptive maximization, i.e., of finding a policy $\pi
   \textrm{maximize}&\quad  \favg(\pi)\\
   \textrm{subject to}&\quad  |E(\pi, \phi)| \leq k,\ \forall \phi \in O^E.
 \end{align*}
-
-\subsection{Assumptions}
-
-\begin{assumption}\label{as:nonneg}
-\todo{Need to assume non-negativity of $f$ (in expectation or for every $\phi$?)}
-\end{assumption}
 
 \section{Adaptive monotone case}
 
@@ -139,14 +133,73 @@ See Lemma A.8 of \citet{golovin11}.
     \Leftrightarrow&\ \favg(\pigii) \geq \frac{1}{k}\favg(\pik) + \left(1 - \frac{1}{k}\right) \favg(\pigi)\\
     \Leftrightarrow&\ \favg(\pik) - \favg(\pigii) \leq \left(1 - \frac{1}{k}\right)\left(\favg(\pik) - \favg(\pigi)\right)\\
     \Leftrightarrow&\ \favg(\pik) - \favg(\pigi) \leq \left(1 - \frac{1}{k}\right)^{i}\left(\favg(\pik) - \favg(\pigo)\right)\\
-    \Leftrightarrow&\ \favg(\pigi) \geq \left(1 - \left(1 - \frac{1}{k}\right)^{i}\right)\favg(\pik)\tag*{(by \asref{as:nonneg})}\\
+    \Leftrightarrow&\ \favg(\pigi) \geq \left(1 - \left(1 - \frac{1}{k}\right)^{i}\right)\favg(\pik)\tag*{(by non-negativity of $f$)}\\
     \Leftrightarrow&\ \favg(\pigi) \geq \left(1 - e^{-i/k}\right)\favg(\pik)\tag*{($1 - x \leq e^{-x},\ \forall x \geq 0$)}
   \end{align*}
 \end{proof}
 
 \begin{cor}
-If $f$ is adaptive monotone submodular, then for any policy $\pi$ and any integer $k \geq 0$ it holds that
+  If $f$ is adaptive monotone submodular, then for any policy $\pi$ and any integer $k \geq 0$ it holds that
   \begin{align*}
-    \favg(\pigk) \geq (1 - \frac{1}{e})\favg(\pik).
+    \favg(\pigk) \geq (1 - e^{-1})\favg(\pik).
+  \end{align*}
+\end{cor}
+
+\section{Non-monotone case}
+\begin{lemma}
+  For any policy $\pi$ such that each element of the ground set is selected by it with probability at most $p$, that is, $\P[\Pi]{e \in E(\pi, \phi)} \leq p,\ \forall \phi \in O^E,\ \forall e \in E$, if $f(\cdot\,, \phi)$ is submodular for all $\phi \in O^E$, then the expected value of running $\pi$ can be bounded as follows:
+\begin{align*}
+  \favg(\pi) \geq (1-p)\,\favg(\pio)
+\end{align*}
+\end{lemma}
+\begin{proof}
+  If $|E| = n$ let $(e_1, e_2, \dots, e_n)$ be an ordering such that $p \geq p_1 \geq p_2 \geq \dots \geq p_n$, where $p_i \defeq \P[\Pi]{e_i \in E(\pi, \phi)},\ \forall \phi \in O^E,\ \forall i \in [n]$. We also define $E_i \defeq \{e_1, \ldots, e_i\}, \forall i \in [n]$ with $E_0 \defeq \varnothing$ and a random variable $X_i$ that indicates whether an element is or is not selected by the policy:
+\begin{align*}
+  X_i = \twopartdefo{1}{e_i \in E(\pi, \Phi)}{0}.
+\end{align*}
+Then,
+  \begin{align*}
+    \favg(\pi) &= \E[\Phi,\Pi]{f(E(\pi, \Phi), \Phi)}\\
+               &= \E[\Phi,\Pi]{f(\varnothing, \Phi) + \sum_{i=1}^{|E(\pi, \Phi)|}\left(f(E_i \cap E(\pi, \Phi), \Phi) - f(E_{i-1} \cap E(\pi, \Phi), \Phi)\right)}\\
+               &= \E[\Phi,\Pi]{f(\varnothing, \Phi) + \sum_{i=1}^{n}X_i\left(f(E_i \cap E(\pi, \Phi), \Phi) - f(E_{i-1} \cap E(\pi, \Phi), \Phi)\right)}\\
+               &\geq \E[\Phi,\Pi]{f(\varnothing, \Phi) + \sum_{i=1}^{n}X_i\left(f(E_i, \Phi) - f(E_{i-1}, \Phi)\right)} \tag*{(by submodularity)}\\
+               &= \E[\Phi]{f(\varnothing, \Phi) + \sum_{i=1}^{n}\E[\Pi]{X_i}\left(f(E_i, \Phi) - f(E_{i-1}, \Phi)\right)}\\
+               &= \E[\Phi]{f(\varnothing, \Phi) + \sum_{i=1}^{n}p_i\left(f(E_i, \Phi) - f(E_{i-1}, \Phi)\right)}\\
+               &= \E[\Phi]{(1-p_1)f(\varnothing, \Phi) + \sum_{i=1}^{n}(p_i - p_{i+1})f(E_i, \Phi) + p_nf(E_n, \Phi)}\\
+               &\geq \E[\Phi]{(1-p_1)f(\varnothing, \Phi)}\tag*{(by ordering of $e_i$ and non-negativity of $f$)}\\
+               &= (1-p_1)\favg(\pio)\\
+               &\geq (1-p)\favg(\pio)
+  \end{align*}
+\end{proof}
+
+\begin{cor}
+  For any policy $\pi$ such that each element of the ground set is selected with probability at most $p$, that is, $\P[\Phi]{e \in E(\pi, \Phi)} \leq p,\ \forall e \in E$, if $f(\cdot\,, \phi)$ is submodular for all $\phi \in O^E$, then the gain of running $\pi$ after any policy $\pi'$ can be bounded as follows:
+\begin{align*}
+  \favg(\pi' @ \pi) \geq (1-p)\favg(\pi').
+\end{align*}
+\end{cor}
+
+\begin{lemma}
+  After running the random greedy policy for $i$ steps, the probability of any element $e \in E$ having been selected can be bounded for every $\phi \in O^E$ as follows:
+\begin{align*}
+  \P[\Pi]{e \in E(\pigi, \phi)} \leq \left(1 - \frac{1}{k}\right)^i
+\end{align*}
+\end{lemma}
+\begin{proof}
+\end{proof}
+
+\begin{theorem}
+  If $f(\cdot\,, \phi)$ is submodular for all $\phi \in O^E$, then for any policy $\pi$ and all integers $i, k \geq 0$ it holds that
+  \begin{align*}
+    \favg(\pigi) \geq \frac{i}{k}\left(1 - \frac{1}{k}\right)^{i-1}\favg(\pik).
+  \end{align*}
+\end{theorem}
+\begin{proof}
+\end{proof}
+
+\begin{cor}
+  If $f(\cdot\,, \phi)$ is submodular for all $\phi \in O^E$, then for any policy $\pi$ and any integer $k \geq 0$ it holds that
+  \begin{align*}
+    \favg(\pigk) \geq e^{-1}\favg(\pik).
   \end{align*}
 \end{cor}
