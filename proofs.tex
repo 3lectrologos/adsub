@@ -37,23 +37,25 @@ We consider the problem of adaptive maximization, i.e., of finding a policy $\pi
 \section{Adaptive monotone case}
 
 \begin{lemma}\label{lem:mon_subm}
-  For any partial realization $\psi$, let $\mathcal{M}_k(\psi)$ be a set containing the $k$ elements with the largest expected marginal gains.
-  If $f$ is adaptive submodular, then for any policy $\pi$ it holds that
+  If $f$ is adaptive submodular, then for any policy $\pi$ and any partial realization $\psi$ it holds that
   \begin{align*}
     \D{\pik}{\psi} \leq \sum_{e \in \mathcal{M}_k(\psi)} \D{e}{\psi}.
   \end{align*}
 \end{lemma}
 \begin{proof}
-  This is a more detailed version of the proof of Lemma A.9 of~\citet{golovin11}.
+  The proof is similar to that of Lemma A.9 by~\citet{golovin11}, but presented here in more detail.
   First note that by definition of $\pik$ it holds that $|E(\pik, \phi)| \leq k,$ for all $\phi$, which also implies that $\E[\Phi,\Pi]{|E(\pik, \Phi)|} \leq k$.
-  Let $p(e)$ denote the probability that element $e$ will be selected by the truncated policy $\pik$, that is, $p(e) \defeq \P[\Phi,\Pi]{e \in E(\pik, \Phi)}$.
-  Then, we have
+  Let $p(e\mmid\psi)$ be the probability that element $e$ will be selected by the truncated policy $\pik$, which is run after having observed partial realization $\psi$, that is,
+  \begin{align*}
+    p(e\mmid\psi) \defeq \P[\Phi,\Pi]{e \in E(\pik, \Phi)}[\Phi \sim \psi].
+  \end{align*}
+  It follows that
   \begin{align}
     \label{eq:pre}
     \begin{split}
       k &\geq \E[\Phi, \Pi]{|E(\pik, \Phi)|}\\
         &= \sum_{e \in E}\P[\Phi,\Pi]{e \in E(\pik, \Phi)}\\
-        &= \sum_{e \in E}p(e).
+        &= \sum_{e \in E}p(e\mmid\psi).
     \end{split}
   \end{align}
   Now, consider the following fractional knapsack problem:
@@ -62,8 +64,8 @@ We consider the problem of adaptive maximization, i.e., of finding a policy $\pi
     \textrm{subject to} & \quad \sum_{e \in E}w_e \leq k\\
                & \quad 0 \leq w_e \leq 1,\ \forall e \in E.
   \end{align*}
-  Note that by \eqref{eq:pre} and the fact that $p(e)$ are probabilities, it follows that $\*p \defeq \left(p(e),\ e \in E\right)$ is a feasible vector for the above problem.
-  Furthermore, the vector $\*m$ defined by
+  Note that by \eqref{eq:pre} and the fact that $p(e\mmid\psi)$ are probabilities, it follows that $\*p \defeq \left(p(e\mmid\psi),\ e \in E\right)$ is a feasible vector for the above problem.
+  Furthermore, the vector $\*m$ defined as
   \begin{align*}
     m_e = \twopartdefo{1}{e \in \mathcal{M}_k(\psi)}{0}
   \end{align*}
@@ -74,12 +76,12 @@ We consider the problem of adaptive maximization, i.e., of finding a policy $\pi
     \Leftrightarrow &\ \sum_{e \in E}\D{e}{\psi}w_e \leq \sum_{e \in \mathcal{M}_k(\psi)} \D{e}{\psi}
   \end{align}
   
-  If we define the probability that partial realization $\psi' \supseteq \psi$ will come up when running policy $\pik$ as $p(\psi'\mmid\psi) \defeq \P[\Phi,\Pi]{E(\pik, \Phi) \supseteq \dom(\psi')}[\Phi \sim \psi]$, then the gain $\D{\pik}{\psi}$ can be bounded as follows:
+  Let $p(\psi'\mmid\psi)$ be the probability that partial realization $\psi' \supseteq \psi$ will come up when running policy $\pik$. Then, the gain $\D{\pik}{\psi}$ can be bounded as follows:
   \begin{align*}
-    \D{\pik}{\psi} &= \sum_{\psi' \in \dom(\pik)}p(\psi'\mmid\psi)\sum_{e \in E}\pi(e\mmid\psi')\D{e}{\psi'}\\
-    &\leq \sum_{\psi' \in \dom(\pik)}p(\psi'\mmid\psi)\sum_{e \in E}\pi(e\mmid\psi')\D{e}{\psi} \tag*{(by AS)}\\
-    &= \sum_{e \in E}\D{e}{\psi} \sum_{\psi' \in \dom(\pik)}\pi(e\mmid\psi')p(\psi'\mmid\psi)\\
-    &= \sum_{e \in E}\D{e}{\psi} p(e)\\
+    \D{\pik}{\psi} &= \sum_{\psi' \in \dom(\pik)}p(\psi'\mmid\psi)\sum_{e \in E}\pik(e\mmid\psi')\D{e}{\psi'}\\
+    &\leq \sum_{\psi' \in \dom(\pik)}p(\psi'\mmid\psi)\sum_{e \in E}\pik(e\mmid\psi')\D{e}{\psi} \tag*{(by AS)}\\
+    &= \sum_{e \in E}\D{e}{\psi} \sum_{\psi' \in \dom(\pik)}\pik(e\mmid\psi')p(\psi'\mmid\psi)\\
+    &= \sum_{e \in E}\D{e}{\psi} p(e\mmid\psi)\\
     &\leq \sum_{e \in \mathcal{M}_k(\psi)} \D{e}{\psi} \tag*{(by \eqref{eq:knap})}.
   \end{align*}
 \end{proof}
@@ -149,23 +151,23 @@ See Lemma A.8 of \citet{golovin11}.
 \begin{lemma}
   For any policy $\pi$ such that each element of the ground set is selected by it with probability at most $p$, that is, $\P[\Pi]{e \in E(\pi, \phi)} \leq p,\ \forall \phi \in O^E,\ \forall e \in E$, if $f(\cdot\,, \phi)$ is submodular for all $\phi \in O^E$, then the expected value of running $\pi$ can be bounded as follows:
 \begin{align*}
-  \favg(\pi) \geq (1-p)\,\favg(\pio)
+  \favg(\pi) \geq (1-p)\,\favg(\pio).
 \end{align*}
 \end{lemma}
 \begin{proof}
-  If $|E| = n$ let $(e_1, e_2, \dots, e_n)$ be an ordering such that $p \geq p_1 \geq p_2 \geq \dots \geq p_n$, where $p_i \defeq \P[\Pi]{e_i \in E(\pi, \phi)},\ \forall \phi \in O^E,\ \forall i \in [n]$. We also define $E_i \defeq \{e_1, \ldots, e_i\}, \forall i \in [n]$ with $E_0 \defeq \varnothing$ and a random variable $X_i$ that indicates whether an element is or is not selected by the policy:
+  Let $|E| = n$. For any $\phi \in O^E$, let $(e_1(\phi), e_2(\phi), \dots, e_n(\phi))$ be an ordering such that $p \geq p_1(\phi) \geq p_2(\phi) \geq \dots \geq p_n(\phi)$, where $p_i(\phi) \defeq \P[\Pi]{e_i \in E(\pi, \phi)},\ \forall i \in [n]$. We also define $E_i(\phi) \defeq \{e_1(\phi), \ldots, e_i(\phi)\}, \forall i \in [n]$ with $E_0(\phi) \defeq \varnothing$. Furthermore, let $X_i$ be a random variable that indicates whether an element is or is not selected by policy $\pi$:
 \begin{align*}
-  X_i = \twopartdefo{1}{e_i \in E(\pi, \Phi)}{0}.
+  X_i(\phi) = \twopartdefo{1}{e_i \in E(\pi, \phi)}{0}.
 \end{align*}
 Then,
   \begin{align*}
     \favg(\pi) &= \E[\Phi,\Pi]{f(E(\pi, \Phi), \Phi)}\\
-               &= \E[\Phi,\Pi]{f(\varnothing, \Phi) + \sum_{i=1}^{|E(\pi, \Phi)|}\left(f(E_i \cap E(\pi, \Phi), \Phi) - f(E_{i-1} \cap E(\pi, \Phi), \Phi)\right)}\\
-               &= \E[\Phi,\Pi]{f(\varnothing, \Phi) + \sum_{i=1}^{n}X_i\left(f(E_i \cap E(\pi, \Phi), \Phi) - f(E_{i-1} \cap E(\pi, \Phi), \Phi)\right)}\\
-               &\geq \E[\Phi,\Pi]{f(\varnothing, \Phi) + \sum_{i=1}^{n}X_i\left(f(E_i, \Phi) - f(E_{i-1}, \Phi)\right)} \tag*{(by submodularity)}\\
-               &= \E[\Phi]{f(\varnothing, \Phi) + \sum_{i=1}^{n}\E[\Pi]{X_i}\left(f(E_i, \Phi) - f(E_{i-1}, \Phi)\right)}\\
-               &= \E[\Phi]{f(\varnothing, \Phi) + \sum_{i=1}^{n}p_i\left(f(E_i, \Phi) - f(E_{i-1}, \Phi)\right)}\\
-               &= \E[\Phi]{(1-p_1)f(\varnothing, \Phi) + \sum_{i=1}^{n}(p_i - p_{i+1})f(E_i, \Phi) + p_nf(E_n, \Phi)}\\
+               &= \E[\Phi,\Pi]{f(\varnothing, \Phi) + \sum_{i=1}^{|E(\pi, \Phi)|}\left(f(E_i(\Phi) \cap E(\pi, \Phi), \Phi) - f(E_{i-1}(\Phi) \cap E(\pi, \Phi), \Phi)\right)}\\
+               &= \E[\Phi,\Pi]{f(\varnothing, \Phi) + \sum_{i=1}^{n}X_i(\Phi)\left(f(E_i(\Phi) \cap E(\pi, \Phi), \Phi) - f(E_{i-1}(\Phi) \cap E(\pi, \Phi), \Phi)\right)}\\
+               &\geq \E[\Phi,\Pi]{f(\varnothing, \Phi) + \sum_{i=1}^{n}X_i(\Phi)\left(f(E_i(\Phi), \Phi) - f(E_{i-1}(\Phi), \Phi)\right)} \tag*{(by submodularity)}\\
+               &= \E[\Phi]{f(\varnothing, \Phi) + \sum_{i=1}^{n}\E[\Pi]{X_i(\Phi)}\left(f(E_i(\Phi), \Phi) - f(E_{i-1}(\Phi), \Phi)\right)}\\
+               &= \E[\Phi]{f(\varnothing, \Phi) + \sum_{i=1}^{n}p_i\left(f(E_i(\Phi), \Phi) - f(E_{i-1}(\Phi), \Phi)\right)}\\
+               &= \E[\Phi]{(1-p_1)f(\varnothing, \Phi) + \sum_{i=1}^{n}(p_i - p_{i+1})f(E_i(\Phi), \Phi) + p_nf(E_n(\Phi), \Phi)}\\
                &\geq \E[\Phi]{(1-p_1)f(\varnothing, \Phi)}\tag*{(by ordering of $e_i$ and non-negativity of $f$)}\\
                &= (1-p_1)\favg(\pio)\\
                &\geq (1-p)\favg(\pio)
@@ -173,7 +175,7 @@ Then,
 \end{proof}
 
 \begin{cor}
-  For any policy $\pi$ such that each element of the ground set is selected with probability at most $p$, that is, $\P[\Phi]{e \in E(\pi, \Phi)} \leq p,\ \forall e \in E$, if $f(\cdot\,, \phi)$ is submodular for all $\phi \in O^E$, then the gain of running $\pi$ after any policy $\pi'$ can be bounded as follows:
+  For any policy $\pi$ such that each element of the ground set is selected by it with probability at most $p$, that is, $\P[\Pi]{e \in E(\pi, \phi)} \leq p,\ \forall \phi \in O^E,\ \forall e \in E$, if $f(\cdot\,, \phi)$ is submodular for all $\phi \in O^E$, then the gain of running $\pi$ after any policy $\pi'$ can be bounded as follows:
 \begin{align*}
   \favg(\pi' @ \pi) \geq (1-p)\favg(\pi').
 \end{align*}
