@@ -189,16 +189,20 @@ See Lemma A.8 of \citet{golovin11}.
 \todo{Add proof?}
 
 \begin{lemma}
-  After running the random greedy policy for $i$ steps, the probability of any element $e \in E$ having been selected can be bounded for every $\phi \in O^E$ as follows:
+  For every $\phi \in O^E$, after running the random greedy policy for $i$ steps, the probability of any element $e \in E$ having been selected can be bounded  as follows:
 \begin{align*}
-  \P[\Pi]{e \in E(\pigi, \phi)} \leq \left(1 - \frac{1}{k}\right)^i
+  \P[\Pi]{e \in E(\pigi, \phi)} \leq 1 - \left(1 - \frac{1}{k}\right)^i
 \end{align*}
 \end{lemma}
 \begin{proof}
+  Similarly to Observation 3.2 by \citet{buchbinder14}, at each step of the random greedy policy, an element $e$ is \emph{not} selected by the policy with probability at least $1 - 1/k$. After $i$ steps we have
+  \begin{align*}
+    \P[\Pi]{e \not\in E(\pigi, \phi)} \geq \left(1 - \frac{1}{k}\right)^i \Rightarrow\ \P[\Pi]{e \in E(\pigi, \phi)} \leq 1 - \left(1 - \frac{1}{k}\right)^i
+  \end{align*}
 \end{proof}
 
 \begin{theorem}
-  If $f(\cdot\,, \phi)$ is submodular for all $\phi \in O^E$, then for any policy $\pi$ and all integers $i, k \geq 0$ it holds that
+  If $f(\cdot\,, \phi) : 2^E \to \mathbb{R}_{\geq 0}$ is submodular for all $\phi \in O^E$, then for any policy $\pi$ and all integers $i, k \geq 0$ it holds that
   \begin{align*}
     \favg(\pigi) \geq \frac{i}{k}\left(1 - \frac{1}{k}\right)^{i-1}\favg(\pik).
   \end{align*}
