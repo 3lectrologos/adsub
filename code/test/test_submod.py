@@ -22,25 +22,36 @@ def f_nonmon2(s):
     return f_mon(s) - 0.6*len(s)
 
 class TestRandomGreedy(unittest.TestCase):
-    def test_simple(self):
-        (sol, fsol) = submod.random_greedy(f_mon, [1, 2, 3], 1)
+    def test_simple_greedy(self):
+        sm = submod.AdaptiveMax([1, 2, 3], f_mon)
+        (sol, fsol) = sm.greedy(1)
+        self.assertEqual(sol, [1])
+        self.assertAlmostEqual(fsol, f_mon([1]))
+
+    def test_simple_random_greedy(self):
+        sm = submod.AdaptiveMax([1, 2, 3], f_mon)
+        (sol, fsol) = sm.random_greedy(1)
         self.assertEqual(sol, [1])
         self.assertAlmostEqual(fsol, f_mon([1]))
 
     def test_monotone(self):
-        (sol, fsol) = submod.random_greedy(f_mon, [1, 2, 3], 3)
+        sm = submod.AdaptiveMax([1, 2, 3], f_mon)
+        (sol, fsol) = sm.random_greedy(3)
         self.assertEqual(set(sol), set([1, 2, 3]))
         self.assertAlmostEqual(fsol, 2.5)
 
     def test_nonmonotone1(self):
-        (sol, fsol) = submod.random_greedy(f_nonmon1, [1, 2, 3], 3)
+        sm = submod.AdaptiveMax([1, 2, 3], f_nonmon1)
+        (sol, fsol) = sm.random_greedy(3)
         self.assertEqual(set(sol), set([1, 2, 3]))
         self.assertAlmostEqual(fsol, 1.3)
 
     def test_nonmonotone2(self):
-        (sol, fsol) = submod.random_greedy(f_nonmon2, [1, 2, 3], 3)
+        sm = submod.AdaptiveMax([1, 2, 3], f_nonmon2)
+        (sol, fsol) = sm.random_greedy(3)
         self.assertEqual(len(sol), 2)
 
     def test_nonmonotone_card(self):
-        (sol, fsol) = submod.random_greedy(f_nonmon1, [1, 2, 3], 2)
+        sm = submod.AdaptiveMax([1, 2, 3], f_nonmon1)
+        (sol, fsol) = sm.random_greedy(2)
         self.assertEqual(len(sol), 2)
