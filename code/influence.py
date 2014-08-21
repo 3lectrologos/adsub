@@ -1,3 +1,4 @@
+import os
 import sys
 import random
 import numpy as np
@@ -203,9 +204,9 @@ def compare():
     #g = test_graph()
     g = nx.barabasi_albert_graph(100, 2)
     P_EDGE = 0.4
-    NSIM_NONAD = 10000
-    NSIM_AD = 1000
-    NITER = 10
+    NSIM_NONAD = 100
+    NSIM_AD = 100
+    NITER = 4
     # Init
     f_nonad = []
     f_ad = []
@@ -234,12 +235,26 @@ def compare():
     print 'Adaptive     | favg =', np.mean([r['f_ad'] for r in res]),
     print ', avg #nodes =', np.mean([r['v_ad'] for r in res])
     pos = nx.spring_layout(g)
+    # Plotting
     _, (ax1, ax2) = plt.subplots(1, 2)
+    plt.gcf().set_size_inches(16, 9)
     plt.sca(ax1)
+    ax1.set_aspect('equal')
     draw_alpha(g, st_nonad, pos=pos, maxval=NITER)
     plt.sca(ax2)
+    ax2.set_aspect('equal')
     draw_alpha(g, st_ad, pos=pos, maxval=NITER)
+    figname = 'INF'
+    figname += '_p_edge_' + str(P_EDGE*100)
+    figname += '_nsim_nonad_' + str(NSIM_NONAD)
+    figname += '_NSIM_AD_' + str(NSIM_AD)
+    figname += '_NITER_' + str(NITER)
+    plt.savefig(os.path.abspath('../results/' + figname + '.pdf'),
+                orientation='landscape',
+                papertype='letter',
+                bbox_inches='tight',
+                format='pdf')
     plt.show()
-    
+
 if __name__ == "__main__":
     compare()
