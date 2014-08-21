@@ -5,17 +5,18 @@ import Queue
 
 DEBUG = False
 
-class AdaptiveMax:
-    def __init__(self, E, f=None, data=None):
+class AdaptiveMax(object):
+    def __init__(self, E, f=None):
         self.E = E
         if f: self.f = f
-        if data: self.data = data
+        self.sol = []
+        self.fsol = 0
 
     def init_f_hook(self):
         return
 
     def update_f_hook(self):
-        return
+        self.fsol = self.f(self.sol)
 
     def greedy(self, k):
         q = Queue.PriorityQueue()
@@ -43,14 +44,13 @@ class AdaptiveMax:
             q.put((-self.f([v]), v, 1))
         i = 1
         sk = []
-        self.sol = []
-        self.fsol = 0
         while i <= k:
             if len(sk) == k or (len(sk) > 0 and q.empty()):
+#                print 'sk =', sk
                 j = random.randint(0, len(sk)-1)
                 fv, v, iv = sk.pop(j)
                 self.sol.append(v)
-                self.fsol = self.fsol - fv
+                self.update_f_hook()
                 i = i + 1
                 for e in sk:
                     q.put(e)
