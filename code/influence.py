@@ -204,9 +204,9 @@ def compare():
     #g = test_graph()
     g = nx.barabasi_albert_graph(100, 2)
     P_EDGE = 0.4
-    NSIM_NONAD = 100
-    NSIM_AD = 100
-    NITER = 4
+    NSIM_NONAD = 10000
+    NSIM_AD = 1000
+    NITER = 500
     # Init
     f_nonad = []
     f_ad = []
