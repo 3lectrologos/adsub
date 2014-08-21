@@ -3,6 +3,7 @@ import random
 import numpy as np
 import matplotlib.pyplot as plt
 import networkx as nx
+import joblib
 import submod
 
 
@@ -185,16 +186,27 @@ def run_adaptive():
 #        nx.draw_networkx(h)
 #        plt.show()
 
+def compare_worker(i, g, p_edge, nsim_ad, vrg_nonad):
+    print 'worker', i, 'started.'
+    h = random_instance(g, p_edge)
+    solver_ad = AdaptiveInfluence(g, h, p_edge, nsim_ad)
+    (vrg_ad, _) = solver_ad.random_greedy(len(g.nodes()))
+    active_nonad = independent_cascade(h, vrg_nonad)
+    active_ad = independent_cascade(h, vrg_ad)
+    return {'active_nonad': active_nonad,
+            'active_ad': active_ad,
+            'v_ad': len(vrg_ad),
+            'f_nonad': finf_base(h, vrg_nonad),
+            'f_ad': finf_base(h, vrg_ad)}
+
 def compare():
+    #g = test_graph()
     g = nx.barabasi_albert_graph(100, 2)
     P_EDGE = 0.4
-    NSIM_NONAD = 1000
+    NSIM_NONAD = 10000
     NSIM_AD = 1000
     NITER = 10
-
-    solver_nonad = NonAdaptiveInfluence(g, P_EDGE, NSIM_NONAD)
-    (vrg_nonad, _) = solver_nonad.random_greedy(len(g.nodes()))
-    
+    # Init
     f_nonad = []
     f_ad = []
     v_ad = []
@@ -203,25 +215,24 @@ def compare():
     for v in g.nodes():
         st_nonad[v] = 0
         st_ad[v] = 0
-    for i in range(NITER):
-        print 'i =', i
-        h = random_instance(g, P_EDGE)
-        solver_ad = AdaptiveInfluence(g, h, P_EDGE, NSIM_AD)
-        (vrg_ad, _) = solver_ad.random_greedy(len(g.nodes()))
-        v_ad.append(len(vrg_ad))
-        f_nonad.append(finf_base(h, vrg_nonad))
-        f_ad.append(finf_base(h, vrg_ad))
-        # Adjust strengths of active nodes
-        active_nonad = independent_cascade(h, vrg_nonad)
-        for v in active_nonad:
+    # Non-adaptive simulation
+    solver_nonad = NonAdaptiveInfluence(g, P_EDGE, NSIM_NONAD)
+    (vrg_nonad, _) = solver_nonad.random_greedy(len(g.nodes()))
+    # Adaptive simulation
+    res = joblib.Parallel(n_jobs=4)((compare_worker,
+                                     [i, g, P_EDGE, NSIM_AD, vrg_nonad],
+                                     {}) for i in range(NITER))
+    # Adjust strengths of active nodes
+    for r in res:
+        for v in r['active_nonad']:
             st_nonad[v] += 1
-        active_ad = independent_cascade(h, vrg_ad)
-        for v in active_ad:
+        for v in r['active_ad']:
             st_ad[v] += 1
-    print 'Non-adaptive | favg =', np.mean(f_nonad),
-          ',     #nodes =', len(vrg_nonad)
-    print 'Adaptive     | favg =', np.mean(f_ad),
-          ', avg #nodes =', np.mean(v_ad)
+    # Print results
+    print 'Non-adaptive | favg =', np.mean([r['f_nonad'] for r in res]),
+    print ',     #nodes =', len(vrg_nonad)
+    print 'Adaptive     | favg =', np.mean([r['f_ad'] for r in res]),
+    print ', avg #nodes =', np.mean([r['v_ad'] for r in res])
     pos = nx.spring_layout(g)
     _, (ax1, ax2) = plt.subplots(1, 2)
     plt.sca(ax1)
