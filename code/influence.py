@@ -5,11 +5,16 @@ import numpy as np
 import matplotlib.pyplot as plt
 import networkx as nx
 import joblib
+import bitarray as ba
+import progressbar
 import submod
 
 
-def random_instance(g, p, prz=(set(), set()), seed=None):
-    h = g.copy()
+def random_instance(g, p, prz=(set(), set()), seed=None, copy=True):
+    if copy:
+        h = g.copy()
+    else:
+        h = g
     to_remove = []
     if seed: random.seed(seed)
     elive, edead = prz
@@ -30,32 +35,33 @@ def independent_cascade(h, a):
         active = active | set(p[v].keys())
     return active
 
-def cascade_sim(g, p, niter, prz=None):
+def cascade_sim(g, p, niter, prz=None, pbar=False):
+    if pbar:
+        pb = progressbar.ProgressBar(maxval=niter).start()
     csim = []
+    gnodes = g.nodes()
+    gedges = g.edges()
     for i in range(niter):
         if prz:
-            h = random_instance(g, p, prz)
+            h = random_instance(g, p, prz, copy=False)
         else:
-            h = random_instance(g, p)
+            h = random_instance(g, p, copy=False)
         sp = nx.all_pairs_shortest_path_length(h)
         tmp = {}
         for v in h.nodes():
-            tmp[v] = set(sp[v].keys())
+            b = h.number_of_nodes()*ba.bitarray('0')
+            for u in sp[v]:
+                b[u] = True
+            tmp[v] = b
         csim.append(tmp)
+        h.clear()
+        h.add_nodes_from(gnodes)
+        h.add_edges_from(gedges)
+        if pbar:
+            pb.update(i)
+    if pbar:
+        pb.finish()
     return csim
-
-def count_activations(a, csim):
-    vact = {}
-    for d in csim:
-        tmp = set()
-        for v in a:
-            tmp = tmp | d[v]
-        for u in tmp:
-            try:
-                vact[u] += 1
-            except KeyError:
-                vact[u] = 1
-    return vact
 
 def finf_base(h, a):
     active = independent_cascade(h, a)
@@ -64,13 +70,17 @@ def finf_base(h, a):
 # TODO: Refactor to use finf_base
 def finf(a, csim):
     a = set(a)
-    nact = []
+    nact = 0
     for d in csim:
-        tmp = set()
+        tmp = None
         for v in a:
-            tmp = tmp | d[v]
-        nact.append(len(tmp))
-    return np.mean(nact) - 1*len(a)
+            if not tmp:
+                tmp = d[v]
+            else:
+                tmp = tmp | d[v]
+        if tmp:
+            nact += tmp.count(True)
+    return (1.0*nact)/len(csim) - 1.0*len(a)
 
 # vals is a dictionary from nodes (not necessarily all of them) to "strengths"
 def draw_alpha(g, vals, pos=None, maxval=None):
@@ -107,14 +117,9 @@ class NonAdaptiveInfluence(BaseInfluence):
     def init_f_hook(self):
 #        print 'Running cascade simulation...',
         sys.stdout.flush()
-        self.csim = cascade_sim(self.g, self.p, self.nsim)
+        self.csim = cascade_sim(self.g, self.p, self.nsim, pbar=True)
 #        print 'completed'
         self.f = lambda a: finf(a, self.csim)
-
-    def draw_influence(self, a):
-        dact = count_activations(a, self.csim)
-        draw_alpha(self.g, dact, maxval=self.nsim)
-        plt.show()
 
 class AdaptiveInfluence(BaseInfluence):
     def __init__(self, g, h, p, nsim):
@@ -153,40 +158,6 @@ def test_graph():
     g.add_edge(6, 7)
     return g.to_directed()
 
-def run_non_adaptive(draw=True):
-    #g = nx.watts_strogatz_graph(100, 4, 0.5)
-    g = nx.barabasi_albert_graph(100, 2)
-    #g = test_graph()
-    P_EDGE = 0.3
-    NSIM = 1000
-
-    solver = NonAdaptiveInfluence(g, P_EDGE, NSIM)
-    (vrg, frg) = solver.random_greedy(len(g.nodes()))
-    print 'RG =', frg, vrg
-
-    if draw:
-        solver.draw_influence(vrg)
-    
-# TODO: Make it run on same instances as non-adaptive
-def run_adaptive():
-    g = nx.barabasi_albert_graph(100, 2)
-    #g = test_graph()
-    P_EDGE = 0.3
-    NSIM = 1000
-
-    vals = []
-    for i in range(100):
-        print '------> i =', i
-        h = random_instance(g, P_EDGE)
-        solver = AdaptiveInfluence(g, h, P_EDGE, NSIM)
-        (vrg, frg) = solver.random_greedy(len(g.nodes()))
-        print 'frg =', frg
-        print (vrg, finf_base(h, vrg))
-        vals.append(finf_base(h, vrg))
-    print 'favg =', np.mean(vals)
-#        nx.draw_networkx(h)
-#        plt.show()
-
 def compare_worker(i, g, p_edge, nsim_ad, vrg_nonad):
     print 'worker', i, 'started.'
     h = random_instance(g, p_edge)
@@ -203,10 +174,11 @@ def compare_worker(i, g, p_edge, nsim_ad, vrg_nonad):
 def compare():
     #g = test_graph()
     g = nx.barabasi_albert_graph(50, 2)
+    g = nx.convert_node_labels_to_integers(g, first_label=0)
     P_EDGE = 0.4
     NSIM_NONAD = 10000
     NSIM_AD = 1000
-    NITER = 1
+    NITER = 10
     PARALLEL = False
     PLOT = False
     # Init
