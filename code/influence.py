@@ -3,71 +3,80 @@ import sys
 import random
 import numpy as np
 import matplotlib.pyplot as plt
-import networkx as nx
+import graph_tool.all as gt
 import joblib
 import bitarray as ba
 import progressbar
 import submod
+import util
 
 
-def random_instance(g, p, prz=(set(), set()), seed=None, copy=True):
-    if copy:
-        h = g.copy()
-    else:
-        h = g
-    to_remove = []
+MAX_DIST = np.iinfo('i').max
+
+def random_instance(g, p, prz=(set(), set()), seed=None):
     if seed: random.seed(seed)
+    pm = g.new_edge_property('bool')
     elive, edead = prz
-    for e in h.edges_iter():
-        if e in elive:
-            continue
-        elif e in edead:
-            to_remove.append(e)
+    for e in g.edges():
+        ne = util.e(e)
+        if ne in elive:
+            pm[e] = True
+        elif ne in edead:
+            pm[e] = False
         elif random.random() > p:
-            to_remove.append(e)
-    h.remove_edges_from(to_remove)
+            pm[e] = False
+        else:
+            pm[e] = True
+    h = gt.GraphView(g, efilt=pm)
     return h
 
 def independent_cascade(h, a):
-    p = nx.all_pairs_shortest_path_length(h)
+    sp = gt.shortest_distance(h)
     active = set()
-    for v in a:
-        active = active | set(p[v].keys())
+    for vn in a:
+        v = h.vertex(vn)
+        new = set(np.arange(h.num_vertices())[np.array(sp[v]) < MAX_DIST])
+        active = active | new
     return active
 
 def cascade_sim(g, p, niter, prz=None, pbar=False):
     if pbar:
         pb = progressbar.ProgressBar(maxval=niter).start()
     csim = []
-    gnodes = g.nodes()
-    gedges = g.edges()
     for i in range(niter):
         if prz:
-            h = random_instance(g, p, prz, copy=False)
+            h = random_instance(g, p, prz)
         else:
-            h = random_instance(g, p, copy=False)
-        sp = nx.all_pairs_shortest_path_length(h)
+            h = random_instance(g, p)
+        sp = gt.shortest_distance(h)
         tmp = {}
-        for v in h.nodes():
-            b = h.number_of_nodes()*ba.bitarray('0')
-            for u in sp[v]:
-                b[u] = True
-            tmp[v] = b
+        for v in h.vertices():
+            tmp[g.vertex_index[v]] = ba.bitarray(
+                list(np.array(sp[v]) < MAX_DIST))
         csim.append(tmp)
-        h.clear()
-        h.add_nodes_from(gnodes)
-        h.add_edges_from(gedges)
         if pbar:
             pb.update(i)
     if pbar:
         pb.finish()
     return csim
 
+def get_live_dead(g, h, active):
+    active = set(active)
+    elive = set()
+    edead = set()
+    for v in active:
+        for e in g.vertex(v).out_edges():
+            ne = util.e(e)
+            if h.edge(*ne):
+                elive.add(ne)
+            else:
+                edead.add(ne)
+    return (elive, edead)
+
 def finf_base(h, a):
     active = independent_cascade(h, a)
-    return len(active) - 1*len(a)
+    return len(active) - 1.0*len(a)
 
-# TODO: Refactor to use finf_base
 def finf(a, csim):
     a = set(a)
     nact = 0
@@ -85,30 +94,29 @@ def finf(a, csim):
 # vals is a dictionary from nodes (not necessarily all of them) to "strengths"
 def draw_alpha(g, vals, pos=None, maxval=None):
     if not maxval: maxval = max(a.values())
-    if not pos: pos = nx.spring_layout(g)
-    nx.draw_networkx_edges(g, pos,
-                           edge_color='#cccccc',
-                           alpha=0.5,
-                           arrows=False)
-    for v in g.nodes():
+    if not pos: pos = gt.fruchterman_reingold_layout(g, n_iter=1000)
+#    nx.draw_networkx_edges(g, pos,
+#                           edge_color='#cccccc',
+#                           alpha=0.5,
+#                           arrows=False)
+    vcol = g.new_vertex_property('vector<float>')
+    for v in g.vertices():
         if v not in vals or vals[v] == 0:
-            nx.draw_networkx_nodes(g, pos, nodelist=[v],
-                                   node_color='#555555',
-                                   alpha=0.5)
+            vcol[v] = [0.3, 0.3, 0.3, 1]
         else:
-            nx.draw_networkx_nodes(g, pos, nodelist=[v],
-                                   node_color='b',
-                                   alpha=(1.0*vals[v])/maxval)
-    nx.draw_networkx_labels(g, pos, nodelist=[v],
-                            font_size=10,
-                            font_color='#eeeeee')
+            vcol[v] = [0, 0, 1, (1.0*vals[v])/maxval]
+            #alpha=(1.0*vals[v])/maxval
+    gt.graph_draw(g, pos, vertex_fill_color=vcol)
+#                            font_size=10,
+#                            font_color='#eeeeee')
 
 class BaseInfluence(submod.AdaptiveMax):
     pass
 
 class NonAdaptiveInfluence(BaseInfluence):
     def __init__(self, g, p, nsim):
-        super(NonAdaptiveInfluence, self).__init__(g.nodes())
+        vlabels = [g.vertex_index[v] for v in g.vertices()]
+        super(NonAdaptiveInfluence, self).__init__(vlabels)
         self.g = g
         self.p = p
         self.nsim = nsim
@@ -123,7 +131,8 @@ class NonAdaptiveInfluence(BaseInfluence):
 
 class AdaptiveInfluence(BaseInfluence):
     def __init__(self, g, h, p, nsim):
-        super(AdaptiveInfluence, self).__init__(g.nodes())
+        vlabels = [g.vertex_index[v] for v in g.vertices()]
+        super(AdaptiveInfluence, self).__init__(vlabels)
         self.g = g
         self.p = p
         self.nsim = nsim
@@ -133,9 +142,10 @@ class AdaptiveInfluence(BaseInfluence):
         self.update_f_hook()
 
     def update_f_hook(self):
+        #print 'sol =', self.sol
         active = independent_cascade(self.h, self.sol)
-        elive = set(self.h.edges(active))
-        edead = set(self.g.edges(active)) - elive
+        #print 'active =', active
+        elive, edead = get_live_dead(self.g, self.h, active)
 #        print 'Running cascade simulation', str(len(self.sol)) + '...',
         sys.stdout.flush()
         csim = cascade_sim(self.g, self.p, self.nsim, prz=(elive, edead))
@@ -147,24 +157,22 @@ class AdaptiveInfluence(BaseInfluence):
         self.fsol = self.f(self.sol)
 
 def test_graph():
-    g = nx.Graph()
-    g.add_nodes_from([1, 2, 3, 4, 5, 6, 7])
-    g.add_edge(1, 2)
-    g.add_edge(1, 3)
-    g.add_edge(1, 4)
-    g.add_edge(5, 2)
-    g.add_edge(5, 3)
-    g.add_edge(5, 4)
-    g.add_edge(6, 7)
-    return g.to_directed()
+    g = gt.Graph()
+    es = [(0, 1), (0, 2), (0, 3), (4, 1), (4, 2), (4, 3), (5, 6),
+          (1, 0), (2, 0), (3, 0), (1, 4), (2, 4), (3, 4), (6, 5)]
+    g.add_edge_list(es)
+    g.set_fast_edge_removal(True)
+    return g
 
 def compare_worker(i, g, p_edge, nsim_ad, vrg_nonad):
     print 'worker', i, 'started.'
     h = random_instance(g, p_edge)
     solver_ad = AdaptiveInfluence(g, h, p_edge, nsim_ad)
-    (vrg_ad, _) = solver_ad.random_greedy(len(g.nodes()))
+    (vrg_ad, _) = solver_ad.random_greedy(g.num_vertices())
     active_nonad = independent_cascade(h, vrg_nonad)
     active_ad = independent_cascade(h, vrg_ad)
+    print 'eval1:', finf_base(h, vrg_ad)
+    print 'eval2:', solver_ad.fsol
     return {'active_nonad': active_nonad,
             'active_ad': active_ad,
             'v_ad': len(vrg_ad),
@@ -173,11 +181,15 @@ def compare_worker(i, g, p_edge, nsim_ad, vrg_nonad):
 
 def compare():
     #g = test_graph()
-    g = nx.barabasi_albert_graph(50, 2)
-    g = nx.convert_node_labels_to_integers(g, first_label=0)
+    g = gt.price_network(50, 2, directed=False)
+    for e in g.edges():
+        g.add_edge(e.target(), e.source())
+    g.set_directed(True)
+    g.set_fast_edge_removal(True)
+
     P_EDGE = 0.4
-    NSIM_NONAD = 10000
-    NSIM_AD = 1000
+    NSIM_NONAD = 1000
+    NSIM_AD = 100
     NITER = 10
     PARALLEL = False
     PLOT = False
@@ -187,12 +199,12 @@ def compare():
     v_ad = []
     st_nonad = {}
     st_ad = {}
-    for v in g.nodes():
+    for v in g.vertices():
         st_nonad[v] = 0
         st_ad[v] = 0
     # Non-adaptive simulation
     solver_nonad = NonAdaptiveInfluence(g, P_EDGE, NSIM_NONAD)
-    (vrg_nonad, _) = solver_nonad.random_greedy(len(g.nodes()))
+    (vrg_nonad, _) = solver_nonad.random_greedy(g.num_vertices())
     # Adaptive simulation
     arg = [g, P_EDGE, NSIM_AD, vrg_nonad]
     if PARALLEL:
@@ -203,17 +215,17 @@ def compare():
     # Adjust strengths of active nodes
     for r in res:
         for v in r['active_nonad']:
-            st_nonad[v] += 1
+            st_nonad[g.vertex(v)] += 1
         for v in r['active_ad']:
-            st_ad[v] += 1
+            st_ad[g.vertex(v)] += 1
     # Print results
     print 'Non-adaptive | favg =', np.mean([r['f_nonad'] for r in res]),
     print ',     #nodes =', len(vrg_nonad)
     print 'Adaptive     | favg =', np.mean([r['f_ad'] for r in res]),
     print ', avg #nodes =', np.mean([r['v_ad'] for r in res])
-    pos = nx.spring_layout(g)
     # Plotting
     if PLOT:
+        pos = gt.fruchterman_reingold_layout(g, n_iter=1000)
         _, (ax1, ax2) = plt.subplots(1, 2)
         plt.gcf().set_size_inches(16, 9)
         plt.sca(ax1)
