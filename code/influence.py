@@ -10,23 +10,13 @@ import progressbar
 import submod
 
 
-def random_instance(g, p, prz=(set(), set()), seed=None, copy=True):
-    if copy:
-        h = g.copy()
-    else:
-        h = g
-    to_remove = []
-    if seed: random.seed(seed)
-    elive, edead = prz
-    for e in h.edges_iter():
-        if e in elive:
-            continue
-        elif e in edead:
-            to_remove.append(e)
-        elif random.random() > p:
-            to_remove.append(e)
-    h.remove_edges_from(to_remove)
-    return h
+def random_instance(g, p, rem=None, copy=False):
+    if copy: g = g.copy()
+    if rem == None: rem = g.edges()
+    for e in rem:
+        if random.random() > p:
+            g.remove_edge(*e)
+    return g
 
 def independent_cascade(h, a):
     p = nx.all_pairs_shortest_path_length(h)
@@ -35,39 +25,45 @@ def independent_cascade(h, a):
         active = active | set(p[v].keys())
     return active
 
-def cascade_sim(g, p, niter, prz=None, pbar=False):
+def cascade_sim(g, p, niter, rem=None, pbar=False):
     if pbar:
         pb = progressbar.ProgressBar(maxval=niter).start()
     csim = []
     gnodes = g.nodes()
     gedges = g.edges()
     for i in range(niter):
-        if prz:
-            h = random_instance(g, p, prz, copy=False)
-        else:
-            h = random_instance(g, p, copy=False)
-        sp = nx.all_pairs_shortest_path_length(h)
+        g = random_instance(g, p, rem, copy=False)
+        sp = nx.all_pairs_shortest_path_length(g)
         tmp = {}
-        for v in h.nodes():
-            b = h.number_of_nodes()*ba.bitarray('0')
+        for v in g.nodes():
+            b = g.number_of_nodes()*ba.bitarray('0')
             for u in sp[v]:
                 b[u] = True
             tmp[v] = b
         csim.append(tmp)
-        h.clear()
-        h.add_nodes_from(gnodes)
-        h.add_edges_from(gedges)
+        g.clear()
+        g.add_nodes_from(gnodes)
+        g.add_edges_from(gedges)
         if pbar:
             pb.update(i)
     if pbar:
         pb.finish()
     return csim
 
+def get_live_dead(g, h, active):
+    elive = set(h.edges(active))
+    edead = set(g.edges(active)) - elive
+    return (elive, edead)
+
+def copy_without_edges(g, elist):
+    h = g.copy()
+    h.remove_edges_from(elist)
+    return h
+
 def finf_base(h, a):
     active = independent_cascade(h, a)
-    return len(active) - 1*len(a)
+    return len(active) - 1.0*len(a)
 
-# TODO: Refactor to use finf_base
 def finf(a, csim):
     a = set(a)
     nact = 0
@@ -114,11 +110,10 @@ class NonAdaptiveInfluence(BaseInfluence):
         self.nsim = nsim
         self.csim = []
 
+    # TODO: Remove 'self' from csim
     def init_f_hook(self):
-#        print 'Running cascade simulation...',
         sys.stdout.flush()
         self.csim = cascade_sim(self.g, self.p, self.nsim, pbar=True)
-#        print 'completed'
         self.f = lambda a: finf(a, self.csim)
 
 class AdaptiveInfluence(BaseInfluence):
@@ -134,37 +129,37 @@ class AdaptiveInfluence(BaseInfluence):
 
     def update_f_hook(self):
         active = independent_cascade(self.h, self.sol)
-        elive = set(self.h.edges(active))
-        edead = set(self.g.edges(active)) - elive
-#        print 'Running cascade simulation', str(len(self.sol)) + '...',
-        sys.stdout.flush()
-        csim = cascade_sim(self.g, self.p, self.nsim, prz=(elive, edead))
-#        print '-------------'
-#        print csim
-#        print '-------------'
-#        print 'completed'
+        (elive, edead) = get_live_dead(self.g, self.h, active)
+        r = copy_without_edges(self.g, edead)
+        rem = set(r.edges()) - elive
+        csim = cascade_sim(r, self.p, self.nsim, rem=rem)
         self.f = lambda a: finf(a, csim)
         self.fsol = self.f(self.sol)
 
 def test_graph():
     g = nx.Graph()
-    g.add_nodes_from([1, 2, 3, 4, 5, 6, 7])
-    g.add_edge(1, 2)
-    g.add_edge(1, 3)
-    g.add_edge(1, 4)
-    g.add_edge(5, 2)
-    g.add_edge(5, 3)
-    g.add_edge(5, 4)
-    g.add_edge(6, 7)
+    g.add_nodes_from([0, 1, 2, 3, 4, 5, 6])
+    g.add_edge(0, 1)
+    g.add_edge(0, 2)
+    g.add_edge(0, 3)
+    g.add_edge(4, 1)
+    g.add_edge(4, 2)
+    g.add_edge(4, 3)
+    g.add_edge(5, 6)
     return g.to_directed()
 
 def compare_worker(i, g, p_edge, nsim_ad, vrg_nonad):
-    print 'worker', i, 'started.'
-    h = random_instance(g, p_edge)
+    print '-> worker', i, 'started.'
+    h = random_instance(g, p_edge, copy=True)
     solver_ad = AdaptiveInfluence(g, h, p_edge, nsim_ad)
     (vrg_ad, _) = solver_ad.random_greedy(len(g.nodes()))
     active_nonad = independent_cascade(h, vrg_nonad)
     active_ad = independent_cascade(h, vrg_ad)
+    eval1 = finf_base(h, vrg_ad)
+    eval2 = solver_ad.fsol
+    print 'eval1:', eval1
+    print 'eval2:', eval2
+    if eval1 != eval2: raise 'Inconsistent adaptive function values'
     return {'active_nonad': active_nonad,
             'active_ad': active_ad,
             'v_ad': len(vrg_ad),
@@ -173,14 +168,14 @@ def compare_worker(i, g, p_edge, nsim_ad, vrg_nonad):
 
 def compare():
     #g = test_graph()
-    g = nx.barabasi_albert_graph(50, 2)
+    g = nx.barabasi_albert_graph(100, 2)
     g = nx.convert_node_labels_to_integers(g, first_label=0)
     P_EDGE = 0.4
     NSIM_NONAD = 10000
     NSIM_AD = 1000
-    NITER = 10
-    PARALLEL = False
-    PLOT = False
+    NITER = 100
+    PARALLEL = True
+    PLOT = True
     # Init
     f_nonad = []
     f_ad = []
