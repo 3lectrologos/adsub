@@ -214,7 +214,7 @@ def compare(g, pedge, nsim_nonad, nsim_ad, niter, parallel=True, plot=False):
     # Adaptive simulation
     arg = [g, pedge, nsim_ad, vrg_nonad]
     if parallel:
-        res = joblib.Parallel(n_jobs=4)((compare_worker, [i] + arg, {})
+        res = joblib.Parallel(n_jobs=8)((compare_worker, [i] + arg, {})
                                         for i in range(niter))
     else:
         res = [compare_worker(*([i] + arg)) for i in range(niter)]
@@ -266,15 +266,13 @@ def profile():
     prof.run('influence.profile_aux()', sort='time')
 
 if __name__ == "__main__":
-    #g = test_graph()
-    np.random.seed(0)
     random.seed(0)
+    np.random.seed(0)
     g = nx.barabasi_albert_graph(100, 2)
-    g = nx.convert_node_labels_to_integers(g, first_label=0)
     P_EDGE = 0.4
-    NSIM_NONAD = 1000
-    NSIM_AD = 100
-    NITER = 5
-    PARALLEL = False
-    PLOT = False
+    NSIM_NONAD = 10000
+    NSIM_AD = 1000
+    NITER = 10
+    PARALLEL = True
+    PLOT = True
     compare(g, P_EDGE, NSIM_NONAD, NSIM_AD, NITER, PARALLEL, PLOT)
