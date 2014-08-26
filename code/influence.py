@@ -19,14 +19,14 @@ def random_instance(g, p, rem=None, copy=False):
             g.remove_edge(*e)
     return g
 
-def independent_cascade(h, a):
+def ic(h, a):
     p = nx.all_pairs_shortest_path_length(h)
     active = set()
     for v in a:
         active = active | set(p[v].keys())
     return active
 
-def cascade_sim(g, p, niter, rem, pbar=False):
+def ic_sim(g, p, niter, rem, pbar=False):
     if pbar:
         pb = progressbar.ProgressBar(maxval=niter).start()
     csim = []
@@ -59,7 +59,7 @@ def copy_without_edges(g, elist):
     return h
 
 def f_ic_base(h, a):
-    active = independent_cascade(h, a)
+    active = ic(h, a)
     return len(active) - 1.0*len(a)
 
 def f_ic(a, csim):
@@ -108,9 +108,7 @@ class NonAdaptiveInfluence(BaseInfluence):
         self.nsim = nsim
 
     def init_f_hook(self):
-        sys.stdout.flush()
-        csim = cascade_sim(self.g, self.p, self.nsim, rem=self.g.edges(),
-                           pbar=True)
+        csim = ic_sim(self.g, self.p, self.nsim, rem=self.g.edges(), pbar=True)
         self.f = lambda a: f_ic(a, csim)
 
 class AdaptiveInfluence(BaseInfluence):
@@ -125,11 +123,11 @@ class AdaptiveInfluence(BaseInfluence):
         self.update_f_hook()
 
     def update_f_hook(self):
-        active = independent_cascade(self.h, self.sol)
+        active = ic(self.h, self.sol)
         (elive, edead) = get_live_dead(self.g, self.h, active)
         r = copy_without_edges(self.g, edead)
         rem = set(r.edges()) - elive
-        csim = cascade_sim(r, self.p, self.nsim, rem=rem)
+        csim = ic_sim(r, self.p, self.nsim, rem=rem)
         self.f = lambda a: f_ic(a, csim)
         self.fsol = self.f(self.sol)
 
@@ -150,8 +148,8 @@ def compare_worker(i, g, pedge, nsim_ad, vrg_nonad):
     h = random_instance(g, pedge, copy=True)
     solver_ad = AdaptiveInfluence(g, h, pedge, nsim_ad)
     (vrg_ad, _) = solver_ad.random_greedy(len(g.nodes()))
-    active_nonad = independent_cascade(h, vrg_nonad)
-    active_ad = independent_cascade(h, vrg_ad)
+    active_nonad = ic(h, vrg_nonad)
+    active_ad = ic(h, vrg_ad)
     eval1 = f_ic_base(h, vrg_ad)
     eval2 = solver_ad.fsol
     print 'eval1:', eval1

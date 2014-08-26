@@ -59,32 +59,32 @@ class TestInfluence(unittest2.TestCase):
 
     def test_independent_cascade_empty(self):
         h = nx.create_empty_copy(self.g)
-        active = influence.independent_cascade(h, [0])
+        active = influence.ic(h, [0])
         self.assertEqual(active, set([0]))
 
     def test_independent_cascade_1(self):
         h = influence.copy_without_edges(self.g, [(0, 2), (1, 4), (3, 4)])
-        active = influence.independent_cascade(h, [0])
+        active = influence.ic(h, [0])
         self.assertEqual(active, set([0, 1, 3]))
 
     def test_independent_cascade_1_half(self):
-        active = influence.independent_cascade(self.g, [0])
+        active = influence.ic(self.g, [0])
         self.assertEqual(active, set([0, 1, 2, 3, 4]))
 
     def test_independent_cascade_2_half(self):
-        active = influence.independent_cascade(self.g, [0, 4])
+        active = influence.ic(self.g, [0, 4])
         self.assertEqual(active, set([0, 1, 2, 3, 4]))
 
     def test_independent_cascade_2_full(self):
-        active = influence.independent_cascade(self.g, [0, 6])
+        active = influence.ic(self.g, [0, 6])
         self.assertEqual(active, set([0, 1, 2, 3, 4, 5, 6]))
 
     def test_independent_cascade_full_full(self):
-        active = influence.independent_cascade(self.g, [0, 1, 2, 3, 4, 5, 6])
+        active = influence.ic(self.g, [0, 1, 2, 3, 4, 5, 6])
         self.assertEqual(active, set([0, 1, 2, 3, 4, 5, 6]))
 
     def test_cascade_sim_1_iter_full(self):
-        csim = influence.cascade_sim(self.g, 1, 1, rem=self.g.edges())
+        csim = influence.ic_sim(self.g, 1, 1, rem=self.g.edges())
         correct = {}
         correct[0] = ba.bitarray('1111100')
         correct[1] = ba.bitarray('1111100')
@@ -96,7 +96,7 @@ class TestInfluence(unittest2.TestCase):
         self.assertEqual(csim, [correct])
 
     def test_cascade_sim_2_iter_full(self):
-        csim = influence.cascade_sim(self.g, 1, 2, rem=self.g.edges())
+        csim = influence.ic_sim(self.g, 1, 2, rem=self.g.edges())
         correct = {}
         correct[0] = ba.bitarray('1111100')
         correct[1] = ba.bitarray('1111100')
@@ -108,7 +108,7 @@ class TestInfluence(unittest2.TestCase):
         self.assertEqual(csim, [correct, correct])
 
     def test_cascade_sim_2_iter_empty(self):
-        csim = influence.cascade_sim(self.g, 0, 2, rem=self.g.edges())
+        csim = influence.ic_sim(self.g, 0, 2, rem=self.g.edges())
         correct = {}
         correct[0] = ba.bitarray('1000000')
         correct[1] = ba.bitarray('0100000')
@@ -122,7 +122,7 @@ class TestInfluence(unittest2.TestCase):
     def test_cascade_sim_2_iter_contrained(self):
         h = influence.copy_without_edges(self.g,
                                          [(0, 2), (0, 3), (2, 4), (4, 3)])
-        csim = influence.cascade_sim(h, 1, 2, rem=h.edges())
+        csim = influence.ic_sim(h, 1, 2, rem=h.edges())
         correct = {}
         correct[0] = ba.bitarray('1110100')
         correct[1] = ba.bitarray('1110100')
@@ -136,11 +136,11 @@ class TestInfluence(unittest2.TestCase):
     def test_conditional_pipeline(self):
         h = influence.copy_without_edges(self.g,
                                          [(0, 2), (0, 3), (2, 4), (4, 3)])
-        active = influence.independent_cascade(h, [2])
+        active = influence.ic(h, [2])
         elive, edead = influence.get_live_dead(self.g, h, active)
         h.remove_edges_from(edead)
         rem = set(h.edges()) - elive - edead
-        csim = influence.cascade_sim(h, 0.5, 10, rem=rem)
+        csim = influence.ic_sim(h, 0.5, 10, rem=rem)
         correct = {}
         correct[0] = ba.bitarray('1110100')
         correct[1] = ba.bitarray('1110100')
