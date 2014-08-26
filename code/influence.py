@@ -48,6 +48,28 @@ def ic_sim(g, p, niter, rem, pbar=False):
         pb.finish()
     return csim
 
+def ic_sim_cond(g, p, niter, rem, active, pbar=False):
+    if pbar:
+        pb = progressbar.ProgressBar(maxval=niter).start()
+    csim = []
+    gedges = g.edges()
+    for i in range(niter):
+        g = random_instance(g, p, rem, copy=False)
+        tmp = {}
+        for v in (set(g.nodes()) - set(active)):
+            sp = nx.shortest_path_length(g, source=v)
+            b = g.number_of_nodes()*ba.bitarray('0')
+            for u in sp:
+                b[u] = True
+            tmp[v] = b
+        csim.append(tmp)
+        g.add_edges_from(rem)
+        if pbar:
+            pb.update(i)
+    if pbar:
+        pb.finish()
+    return csim
+
 def get_live_dead(g, h, active):
     elive = set(h.edges(active))
     edead = set(g.edges(active)) - elive
@@ -75,6 +97,21 @@ def f_ic(a, csim):
         if tmp:
             nact += tmp.count(True)
     return (1.0*nact)/len(csim) - 1.0*len(a)
+
+def f_ic_ad(v, a, csim, active, fprev):
+    a = set(a)
+    active = set(active)
+    if v in active:
+        return fprev
+    nact = 0
+    for d in csim:
+        # Elements in `active` union with anything that can be reached by `v`
+        tmp = d[v]
+        fs = np.zeros(len(tmp), dtype='bool')
+        fs[list(active)] = True
+        tmp = tmp | ba.bitarray(list(fs))
+        nact += tmp.count(True)
+    return (1.0*nact)/len(csim) - 1.0*(len(a) + 1)
 
 # vals is a dictionary from nodes (not necessarily all of them) to "strengths"
 def draw_alpha(g, vals, pos=None, maxval=None):
@@ -109,7 +146,7 @@ class NonAdaptiveInfluence(BaseInfluence):
 
     def init_f_hook(self):
         csim = ic_sim(self.g, self.p, self.nsim, rem=self.g.edges(), pbar=True)
-        self.f = lambda a: f_ic(a, csim)
+        self.f = lambda v, a: f_ic(a + [v], csim)
 
 class AdaptiveInfluence(BaseInfluence):
     def __init__(self, g, h, p, nsim):
@@ -127,9 +164,9 @@ class AdaptiveInfluence(BaseInfluence):
         (elive, edead) = get_live_dead(self.g, self.h, active)
         r = copy_without_edges(self.g, edead)
         rem = set(r.edges()) - elive
-        csim = ic_sim(r, self.p, self.nsim, rem=rem)
-        self.f = lambda a: f_ic(a, csim)
-        self.fsol = self.f(self.sol)
+        csim = ic_sim_cond(r, self.p, self.nsim, rem=rem, active=active)
+        self.f = lambda v, a: f_ic_ad(v, a, csim, active, self.fsol)
+        self.fsol = len(active) - len(self.sol)
 
 def test_graph():
     g = nx.Graph()
@@ -152,6 +189,7 @@ def compare_worker(i, g, pedge, nsim_ad, vrg_nonad):
     active_ad = ic(h, vrg_ad)
     eval1 = f_ic_base(h, vrg_ad)
     eval2 = solver_ad.fsol
+    print 'vrg_ad:', vrg_ad
     print 'eval1:', eval1
     print 'eval2:', eval2
     if eval1 != eval2: raise 'Inconsistent adaptive function values'
@@ -229,12 +267,14 @@ def profile():
 
 if __name__ == "__main__":
     #g = test_graph()
+    np.random.seed(0)
+    random.seed(0)
     g = nx.barabasi_albert_graph(100, 2)
     g = nx.convert_node_labels_to_integers(g, first_label=0)
     P_EDGE = 0.4
     NSIM_NONAD = 1000
     NSIM_AD = 100
-    NITER = 20
-    PARALLEL = True
+    NITER = 5
+    PARALLEL = False
     PLOT = False
     compare(g, P_EDGE, NSIM_NONAD, NSIM_AD, NITER, PARALLEL, PLOT)

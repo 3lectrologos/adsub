@@ -8,7 +8,7 @@ DEBUG = False
 class AdaptiveMax(object):
     def __init__(self, E, f=None):
         self.E = E
-        if f: self.f = f
+        if f: self.f = lambda v, a: f(a + [v])
         self.sol = []
         self.fsol = 0
 
@@ -16,21 +16,21 @@ class AdaptiveMax(object):
         return
 
     def update_f_hook(self):
-        self.fsol = self.f(self.sol)
+        self.fsol = self.f(self.sol[-1], self.sol[:-1])
 
     def greedy(self, k):
         q = Queue.PriorityQueue()
         for v in self.E:
-            q.put((-self.f([v]), v, 1))
+            df = self.f(v, [])
+            q.put((-df, v, 1))
         i = 1
-        self.sol = []
-        self.fsol = 0
         while i <= k:
             e = q.get()
             fv, v, iv = e
             assert fv <= 0, 'non-monotone function: negative marginal gain'
             if iv < i:
-                q.put((-self.f(self.sol + [v]) + self.fsol, v, i))
+                df = self.f(v, self.sol) - self.fsol
+                q.put((-df, v, i))
             else:
                 self.sol.append(v)
                 self.fsol = self.fsol - fv
@@ -41,12 +41,12 @@ class AdaptiveMax(object):
         self.init_f_hook()
         q = Queue.PriorityQueue()
         for v in self.E:
-            q.put((-self.f([v]), v, 1))
+            df = self.f(v, [])
+            q.put((-df, v, 1))
         i = 1
         sk = []
         while i <= k:
             if len(sk) == k or (len(sk) > 0 and q.empty()):
-#                print 'sk =', sk
                 j = random.randint(0, len(sk)-1)
                 fv, v, iv = sk.pop(j)
                 self.sol.append(v)
@@ -62,7 +62,8 @@ class AdaptiveMax(object):
             if -fv <= 0:
                 continue
             if iv < i:
-                q.put((-self.f(self.sol + [v]) + self.fsol, v, i))
+                df = self.f(v, self.sol) - self.fsol
+                q.put((-df, v, i))
             else:
                 sk.append(e)
         return (self.sol, self.fsol)
