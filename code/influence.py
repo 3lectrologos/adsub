@@ -58,11 +58,11 @@ def copy_without_edges(g, elist):
     h.remove_edges_from(elist)
     return h
 
-def finf_base(h, a):
+def f_ic_base(h, a):
     active = independent_cascade(h, a)
     return len(active) - 1.0*len(a)
 
-def finf(a, csim):
+def f_ic(a, csim):
     a = set(a)
     nact = 0
     for d in csim:
@@ -111,7 +111,7 @@ class NonAdaptiveInfluence(BaseInfluence):
         sys.stdout.flush()
         csim = cascade_sim(self.g, self.p, self.nsim, rem=self.g.edges(),
                            pbar=True)
-        self.f = lambda a: finf(a, csim)
+        self.f = lambda a: f_ic(a, csim)
 
 class AdaptiveInfluence(BaseInfluence):
     def __init__(self, g, h, p, nsim):
@@ -130,7 +130,7 @@ class AdaptiveInfluence(BaseInfluence):
         r = copy_without_edges(self.g, edead)
         rem = set(r.edges()) - elive
         csim = cascade_sim(r, self.p, self.nsim, rem=rem)
-        self.f = lambda a: finf(a, csim)
+        self.f = lambda a: f_ic(a, csim)
         self.fsol = self.f(self.sol)
 
 def test_graph():
@@ -152,7 +152,7 @@ def compare_worker(i, g, pedge, nsim_ad, vrg_nonad):
     (vrg_ad, _) = solver_ad.random_greedy(len(g.nodes()))
     active_nonad = independent_cascade(h, vrg_nonad)
     active_ad = independent_cascade(h, vrg_ad)
-    eval1 = finf_base(h, vrg_ad)
+    eval1 = f_ic_base(h, vrg_ad)
     eval2 = solver_ad.fsol
     print 'eval1:', eval1
     print 'eval2:', eval2
@@ -160,8 +160,8 @@ def compare_worker(i, g, pedge, nsim_ad, vrg_nonad):
     return {'active_nonad': active_nonad,
             'active_ad': active_ad,
             'v_ad': len(vrg_ad),
-            'f_nonad': finf_base(h, vrg_nonad),
-            'f_ad': finf_base(h, vrg_ad)}
+            'f_nonad': f_ic_base(h, vrg_nonad),
+            'f_ad': f_ic_base(h, vrg_ad)}
 
 def compare(g, pedge, nsim_nonad, nsim_ad, niter, parallel=True, plot=False):
     f_nonad = []
