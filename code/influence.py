@@ -1,6 +1,7 @@
 import os
 import sys
 import random
+import cProfile as prof
 import numpy as np
 import matplotlib.pyplot as plt
 import networkx as nx
@@ -25,11 +26,10 @@ def independent_cascade(h, a):
         active = active | set(p[v].keys())
     return active
 
-def cascade_sim(g, p, niter, rem=None, pbar=False):
+def cascade_sim(g, p, niter, rem, pbar=False):
     if pbar:
         pb = progressbar.ProgressBar(maxval=niter).start()
     csim = []
-    gnodes = g.nodes()
     gedges = g.edges()
     for i in range(niter):
         g = random_instance(g, p, rem, copy=False)
@@ -41,9 +41,7 @@ def cascade_sim(g, p, niter, rem=None, pbar=False):
                 b[u] = True
             tmp[v] = b
         csim.append(tmp)
-        g.clear()
-        g.add_nodes_from(gnodes)
-        g.add_edges_from(gedges)
+        g.add_edges_from(rem)
         if pbar:
             pb.update(i)
     if pbar:
@@ -108,13 +106,12 @@ class NonAdaptiveInfluence(BaseInfluence):
         self.g = g
         self.p = p
         self.nsim = nsim
-        self.csim = []
 
-    # TODO: Remove 'self' from csim
     def init_f_hook(self):
         sys.stdout.flush()
-        self.csim = cascade_sim(self.g, self.p, self.nsim, pbar=True)
-        self.f = lambda a: finf(a, self.csim)
+        csim = cascade_sim(self.g, self.p, self.nsim, rem=self.g.edges(),
+                           pbar=True)
+        self.f = lambda a: finf(a, csim)
 
 class AdaptiveInfluence(BaseInfluence):
     def __init__(self, g, h, p, nsim):
@@ -148,10 +145,10 @@ def test_graph():
     g.add_edge(5, 6)
     return g.to_directed()
 
-def compare_worker(i, g, p_edge, nsim_ad, vrg_nonad):
+def compare_worker(i, g, pedge, nsim_ad, vrg_nonad):
     print '-> worker', i, 'started.'
-    h = random_instance(g, p_edge, copy=True)
-    solver_ad = AdaptiveInfluence(g, h, p_edge, nsim_ad)
+    h = random_instance(g, pedge, copy=True)
+    solver_ad = AdaptiveInfluence(g, h, pedge, nsim_ad)
     (vrg_ad, _) = solver_ad.random_greedy(len(g.nodes()))
     active_nonad = independent_cascade(h, vrg_nonad)
     active_ad = independent_cascade(h, vrg_ad)
@@ -166,17 +163,7 @@ def compare_worker(i, g, p_edge, nsim_ad, vrg_nonad):
             'f_nonad': finf_base(h, vrg_nonad),
             'f_ad': finf_base(h, vrg_ad)}
 
-def compare():
-    #g = test_graph()
-    g = nx.barabasi_albert_graph(100, 2)
-    g = nx.convert_node_labels_to_integers(g, first_label=0)
-    P_EDGE = 0.4
-    NSIM_NONAD = 10000
-    NSIM_AD = 1000
-    NITER = 100
-    PARALLEL = True
-    PLOT = True
-    # Init
+def compare(g, pedge, nsim_nonad, nsim_ad, niter, parallel=True, plot=False):
     f_nonad = []
     f_ad = []
     v_ad = []
@@ -186,15 +173,15 @@ def compare():
         st_nonad[v] = 0
         st_ad[v] = 0
     # Non-adaptive simulation
-    solver_nonad = NonAdaptiveInfluence(g, P_EDGE, NSIM_NONAD)
+    solver_nonad = NonAdaptiveInfluence(g, pedge, nsim_nonad)
     (vrg_nonad, _) = solver_nonad.random_greedy(len(g.nodes()))
     # Adaptive simulation
-    arg = [g, P_EDGE, NSIM_AD, vrg_nonad]
-    if PARALLEL:
+    arg = [g, pedge, nsim_ad, vrg_nonad]
+    if parallel:
         res = joblib.Parallel(n_jobs=4)((compare_worker, [i] + arg, {})
-                                        for i in range(NITER))
+                                        for i in range(niter))
     else:
-        res = [compare_worker(*([i] + arg)) for i in range(NITER)]
+        res = [compare_worker(*([i] + arg)) for i in range(niter)]
     # Adjust strengths of active nodes
     for r in res:
         for v in r['active_nonad']:
@@ -208,20 +195,20 @@ def compare():
     print ', avg #nodes =', np.mean([r['v_ad'] for r in res])
     pos = nx.spring_layout(g)
     # Plotting
-    if PLOT:
+    if plot:
         _, (ax1, ax2) = plt.subplots(1, 2)
         plt.gcf().set_size_inches(16, 9)
         plt.sca(ax1)
         ax1.set_aspect('equal')
-        draw_alpha(g, st_nonad, pos=pos, maxval=NITER)
+        draw_alpha(g, st_nonad, pos=pos, maxval=niter)
         plt.sca(ax2)
         ax2.set_aspect('equal')
-        draw_alpha(g, st_ad, pos=pos, maxval=NITER)
+        draw_alpha(g, st_ad, pos=pos, maxval=niter)
         figname = 'INF'
-        figname += '_p_edge_' + str(P_EDGE*100)
-        figname += '_nsim_nonad_' + str(NSIM_NONAD)
-        figname += '_NSIM_AD_' + str(NSIM_AD)
-        figname += '_NITER_' + str(NITER)
+        figname += '_P_EDGE_' + str(pedge*100)
+        figname += '_NSIM_NONAD_' + str(nsim_nonad)
+        figname += '_NSIM_AD_' + str(nsim_ad)
+        figname += '_NITER_' + str(niter)
         plt.savefig(os.path.abspath('../results/' + figname + '.pdf'),
                     orientation='landscape',
                     papertype='letter',
@@ -229,5 +216,27 @@ def compare():
                     format='pdf')
         plt.show()
 
+def profile_aux():
+    g = nx.barabasi_albert_graph(50, 2)
+    P_EDGE = 0.4
+    NSIM_NONAD = 1000
+    NSIM_AD = 1000
+    NITER = 10
+    PARALLEL = False
+    PLOT = False
+    compare(g, P_EDGE, NSIM_NONAD, NSIM_AD, NITER, PARALLEL, PLOT)
+
+def profile():
+    prof.run('influence.profile_aux()', sort='time')
+
 if __name__ == "__main__":
-    compare()
+    #g = test_graph()
+    g = nx.barabasi_albert_graph(100, 2)
+    g = nx.convert_node_labels_to_integers(g, first_label=0)
+    P_EDGE = 0.4
+    NSIM_NONAD = 1000
+    NSIM_AD = 100
+    NITER = 20
+    PARALLEL = True
+    PLOT = False
+    compare(g, P_EDGE, NSIM_NONAD, NSIM_AD, NITER, PARALLEL, PLOT)

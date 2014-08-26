@@ -1,3 +1,4 @@
-#!/usr/bin/env bash
+#!/usr/bin/env python
+import influence
 
-python -m cProfile -s cumulative influence.py
+influence.profile()
