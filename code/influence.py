@@ -160,6 +160,24 @@ class AdaptiveInfluence(BaseInfluence):
         self.f = lambda v, a: f_ic_ad(v, a, csim, active, self.fsol)
         self.fsol = len(active) - LAMBDA*len(self.sol)
 
+class ApproxAdaptiveInfluence(BaseInfluence):
+    def __init__(self, g, p, nsim):
+        super(ApproxAdaptiveInfluence, self).__init__(g.nodes())
+        self.csim = ic_sim(g, p, nsim, rem=g.edges(), pbar=True)
+
+    def random_greedy(self, h, k):
+        self.h = h
+        return super(ApproxAdaptiveInfluence, self).random_greedy(k)
+
+    def init_f_hook(self):
+        super(ApproxAdaptiveInfluence, self).init_f_hook()
+        self.update_f_hook()
+
+    def update_f_hook(self):
+        active = ic(self.h, self.sol)
+        self.f = lambda v, a: f_ic_ad(v, a, self.csim, active, self.fsol)
+        self.fsol = len(active) - LAMBDA*len(self.sol)
+
 def test_graph():
     g = nx.Graph()
     g.add_nodes_from([0, 1, 2, 3, 4, 5, 6])
@@ -174,37 +192,48 @@ def test_graph():
 
 # Ratio of random greedy cardinality constraint
 K_RATIO = 1
-
-def compare_worker(i, g, pedge, nsim_ad, vrg_nonad):    
+    
+def compare_worker(i, g, pedge, nsim_ad, vrg_nonad, solver_ap_ad):
     print '-> worker', i, 'started.'
     h = random_instance(g, pedge, copy=True)
     solver_ad = AdaptiveInfluence(g, h, pedge, nsim_ad)
     (vrg_ad, _) = solver_ad.random_greedy(g.number_of_nodes()/K_RATIO)
+    (vrg_ap_ad, _) = solver_ap_ad.random_greedy(h, g.number_of_nodes()/K_RATIO)
     active_nonad = ic(h, vrg_nonad)
     active_ad = ic(h, vrg_ad)
+    active_ap_ad = ic(h, vrg_ap_ad)
     eval1 = f_ic_base(h, vrg_ad)
     eval2 = solver_ad.fsol
     if eval1 != eval2: raise 'Inconsistent adaptive function values'
     return {'active_nonad': active_nonad,
             'active_ad': active_ad,
+            'active_ap_ad': active_ad,
             'v_ad': len(vrg_ad),
+            'v_ap_ad': len(vrg_ap_ad),
             'f_nonad': f_ic_base(h, vrg_nonad),
-            'f_ad': f_ic_base(h, vrg_ad)}
+            'f_ad': f_ic_base(h, vrg_ad),
+            'f_ap_ad': f_ic_base(h, vrg_ap_ad)}
 
-def compare(g, pedge, nsim_nonad, nsim_ad, niter, parallel=True, plot=False):
+def compare(g, pedge, nsim_nonad, nsim_ad, nsim_ap_ad, niter, parallel=True,
+            plot=False):
     f_nonad = []
     f_ad = []
+    f_ap_ad = []
     v_ad = []
+    v_ap_ad = []
     st_nonad = {}
     st_ad = {}
+    st_ap_ad = {}
     for v in g.nodes():
         st_nonad[v] = 0
         st_ad[v] = 0
+        st_ap_ad[v] = 0
     # Non-adaptive simulation
+    solver_ap_ad = ApproxAdaptiveInfluence(g, pedge, nsim_ap_ad)
     solver_nonad = NonAdaptiveInfluence(g, pedge, nsim_nonad)
     (vrg_nonad, _) = solver_nonad.random_greedy(g.number_of_nodes()/K_RATIO)
     # Adaptive simulation
-    arg = [g, pedge, nsim_ad, vrg_nonad]
+    arg = [g, pedge, nsim_ad, vrg_nonad, solver_ap_ad]
     if parallel:
         res = joblib.Parallel(n_jobs=4)((compare_worker, [i] + arg, {})
                                         for i in range(niter))
@@ -216,11 +245,15 @@ def compare(g, pedge, nsim_nonad, nsim_ad, niter, parallel=True, plot=False):
             st_nonad[v] += 1
         for v in r['active_ad']:
             st_ad[v] += 1
+        for v in r['active_ap_ad']:
+            st_ap_ad[v] += 1
     # Print results
-    print 'Non-adaptive | favg =', np.mean([r['f_nonad'] for r in res]),
+    print 'Non-adaptive     | favg =', np.mean([r['f_nonad'] for r in res]),
     print ',     #nodes =', len(vrg_nonad)
-    print 'Adaptive     | favg =', np.mean([r['f_ad'] for r in res]),
+    print 'Adaptive         | favg =', np.mean([r['f_ad'] for r in res]),
     print ', avg #nodes =', np.mean([r['v_ad'] for r in res])
+    print 'Approx. adaptive | favg =', np.mean([r['f_ap_ad'] for r in res]),
+    print ', avg #nodes =', np.mean([r['v_ap_ad'] for r in res])
     pos = nx.spring_layout(g)
     # Plotting
     if plot:
@@ -236,6 +269,7 @@ def compare(g, pedge, nsim_nonad, nsim_ad, niter, parallel=True, plot=False):
         figname += '_P_EDGE_' + str(pedge*100)
         figname += '_NSIM_NONAD_' + str(nsim_nonad)
         figname += '_NSIM_AD_' + str(nsim_ad)
+        figname += '_NSIM_AP_AD_' + str(nsim_ap_ad)
         figname += '_NITER_' + str(niter)
         plt.savefig(os.path.abspath('../results/' + figname + '.pdf'),
                     orientation='landscape',
@@ -265,7 +299,8 @@ if __name__ == "__main__":
     P_EDGE = 0.4
     NSIM_NONAD = 1000
     NSIM_AD = 1000
+    NSIM_AP_AD = 1000
     NITER = 10
     PARALLEL = False
-    PLOT = False
-    compare(g, P_EDGE, NSIM_NONAD, NSIM_AD, NITER, PARALLEL, PLOT)
+    PLOT = True
+    compare(g, P_EDGE, NSIM_NONAD, NSIM_AD, NSIM_AP_AD, NITER, PARALLEL, PLOT)
