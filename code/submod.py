@@ -9,16 +9,16 @@ class AdaptiveMax(object):
     def __init__(self, E, f=None):
         self.E = E
         if f: self.f = lambda v, a: f(a + [v])
-        self.sol = []
-        self.fsol = 0
 
     def init_f_hook(self):
-        return
+        self.sol = []
+        self.fsol = 0
 
     def update_f_hook(self):
         self.fsol = self.f(self.sol[-1], self.sol[:-1])
 
     def greedy(self, k):
+        self.init_f_hook()
         q = Queue.PriorityQueue()
         for v in self.E:
             df = self.f(v, [])
@@ -33,7 +33,7 @@ class AdaptiveMax(object):
                 q.put((-df, v, i))
             else:
                 self.sol.append(v)
-                self.fsol = self.fsol - fv
+                self.update_f_hook()
                 i = i + 1
         return (self.sol, self.fsol)
 
