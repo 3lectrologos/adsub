@@ -2,13 +2,16 @@ import os
 import sys
 import random
 import cProfile as prof
+
 import numpy as np
 import matplotlib.pyplot as plt
 import networkx as nx
 import joblib
 import bitarray as ba
 import progressbar
+
 import submod
+import util
 
 
 def random_instance(g, p, rem=None, copy=False):
@@ -72,9 +75,12 @@ def copy_without_edges(g, elist):
     h.remove_edges_from(elist)
     return h
 
+# Global weighting factor of node cost
+LAMBDA = 1.0
+
 def f_ic_base(h, a):
     active = ic(h, a)
-    return len(active) - 1.0*len(a)
+    return len(active) - LAMBDA*len(a)
 
 def f_ic(a, csim):
     a = list(set(a))
@@ -82,7 +88,7 @@ def f_ic(a, csim):
     act = csim[a[0], :, :]
     for v in a[1:]:
         act = act | csim[v, :, :]
-    return (1.0*np.sum(act))/csim.shape[2] - 1.0*len(a)
+    return (1.0*np.sum(act))/csim.shape[2] - LAMBDA*len(a)
 
 def f_ic_ad(v, a, csim, active, fprev):
     a = set(a)
@@ -95,7 +101,7 @@ def f_ic_ad(v, a, csim, active, fprev):
     act = np.tile(act, (1, csim.shape[2]))
     # Elements in `active` union with anything that can be reached by `v`
     act = act | csim[v, :, :]
-    return (1.0*np.sum(act))/csim.shape[2] - 1.0*(len(a) + 1)
+    return (1.0*np.sum(act))/csim.shape[2] - LAMBDA*(len(a) + 1)
 
 # vals is a dictionary from nodes (not necessarily all of them) to "strengths"
 def draw_alpha(g, vals, pos=None, maxval=None):
@@ -129,6 +135,7 @@ class NonAdaptiveInfluence(BaseInfluence):
         self.nsim = nsim
 
     def init_f_hook(self):
+        super(NonAdaptiveInfluence, self).init_f_hook()
         csim = ic_sim(self.g, self.p, self.nsim, rem=self.g.edges(), pbar=True)
         self.f = lambda v, a: f_ic(a + [v], csim)
 
@@ -141,6 +148,7 @@ class AdaptiveInfluence(BaseInfluence):
         self.h = h
 
     def init_f_hook(self):
+        super(AdaptiveInfluence, self).init_f_hook()
         self.update_f_hook()
 
     def update_f_hook(self):
@@ -150,7 +158,7 @@ class AdaptiveInfluence(BaseInfluence):
         rem = set(r.edges()) - elive
         csim = ic_sim_cond(r, self.p, self.nsim, rem=rem, active=active)
         self.f = lambda v, a: f_ic_ad(v, a, csim, active, self.fsol)
-        self.fsol = len(active) - len(self.sol)
+        self.fsol = len(active) - LAMBDA*len(self.sol)
 
 def test_graph():
     g = nx.Graph()
@@ -164,18 +172,16 @@ def test_graph():
     g.add_edge(5, 6)
     return g.to_directed()
 
-def compare_worker(i, g, pedge, nsim_ad, vrg_nonad):
+K_RATIO = 1
+    
     print '-> worker', i, 'started.'
     h = random_instance(g, pedge, copy=True)
     solver_ad = AdaptiveInfluence(g, h, pedge, nsim_ad)
-    (vrg_ad, _) = solver_ad.random_greedy(len(g.nodes()))
+    (vrg_ad, _) = solver_ad.random_greedy(g.number_of_nodes()/K_RATIO)
     active_nonad = ic(h, vrg_nonad)
     active_ad = ic(h, vrg_ad)
     eval1 = f_ic_base(h, vrg_ad)
     eval2 = solver_ad.fsol
-    print 'vrg_ad:', vrg_ad
-    print 'eval1:', eval1
-    print 'eval2:', eval2
     if eval1 != eval2: raise 'Inconsistent adaptive function values'
     return {'active_nonad': active_nonad,
             'active_ad': active_ad,
@@ -194,7 +200,7 @@ def compare(g, pedge, nsim_nonad, nsim_ad, niter, parallel=True, plot=False):
         st_ad[v] = 0
     # Non-adaptive simulation
     solver_nonad = NonAdaptiveInfluence(g, pedge, nsim_nonad)
-    (vrg_nonad, _) = solver_nonad.random_greedy(len(g.nodes()))
+    (vrg_nonad, _) = solver_nonad.random_greedy(g.number_of_nodes()/K_RATIO)
     # Adaptive simulation
     arg = [g, pedge, nsim_ad, vrg_nonad]
     if parallel:
@@ -241,6 +247,7 @@ def profile_aux():
     P_EDGE = 0.4
     NSIM_NONAD = 1000
     NSIM_AD = 1000
+    NSIM_AP_AD = 1000
     NITER = 10
     PARALLEL = False
     PLOT = False
@@ -254,7 +261,7 @@ if __name__ == "__main__":
     np.random.seed(0)
     g = nx.barabasi_albert_graph(100, 2)
     P_EDGE = 0.4
-    NSIM_NONAD = 10000
+    NSIM_NONAD = 1000
     NSIM_AD = 1000
     NITER = 10
     PARALLEL = False
