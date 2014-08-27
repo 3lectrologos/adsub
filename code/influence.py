@@ -29,18 +29,14 @@ def ic(h, a):
 def ic_sim(g, p, niter, rem, pbar=False):
     if pbar:
         pb = progressbar.ProgressBar(maxval=niter).start()
-    csim = []
+    n = g.number_of_nodes()
+    csim = np.zeros(shape=(n, n, niter), dtype='bool')
     gedges = g.edges()
     for i in range(niter):
         g = random_instance(g, p, rem, copy=False)
         sp = nx.all_pairs_shortest_path_length(g)
-        tmp = {}
         for v in g.nodes():
-            b = g.number_of_nodes()*ba.bitarray('0')
-            for u in sp[v]:
-                b[u] = True
-            tmp[v] = b
-        csim.append(tmp)
+            csim[v, sp[v].keys(), i] = True
         g.add_edges_from(rem)
         if pbar:
             pb.update(i)
@@ -51,18 +47,14 @@ def ic_sim(g, p, niter, rem, pbar=False):
 def ic_sim_cond(g, p, niter, rem, active, pbar=False):
     if pbar:
         pb = progressbar.ProgressBar(maxval=niter).start()
-    csim = []
+    n = g.number_of_nodes()
+    csim = np.zeros(shape=(n, n, niter), dtype='bool')
     gedges = g.edges()
     for i in range(niter):
         g = random_instance(g, p, rem, copy=False)
-        tmp = {}
         for v in (set(g.nodes()) - set(active)):
             sp = nx.shortest_path_length(g, source=v)
-            b = g.number_of_nodes()*ba.bitarray('0')
-            for u in sp:
-                b[u] = True
-            tmp[v] = b
-        csim.append(tmp)
+            csim[v, sp.keys(), i] = True
         g.add_edges_from(rem)
         if pbar:
             pb.update(i)
@@ -85,33 +77,25 @@ def f_ic_base(h, a):
     return len(active) - 1.0*len(a)
 
 def f_ic(a, csim):
-    a = set(a)
-    nact = 0
-    for d in csim:
-        tmp = None
-        for v in a:
-            if not tmp:
-                tmp = d[v]
-            else:
-                tmp = tmp | d[v]
-        if tmp:
-            nact += tmp.count(True)
-    return (1.0*nact)/len(csim) - 1.0*len(a)
+    a = list(set(a))
+    if a == []: return 0
+    act = csim[a[0], :, :]
+    for v in a[1:]:
+        act = act | csim[v, :, :]
+    return (1.0*np.sum(act))/csim.shape[2] - 1.0*len(a)
 
 def f_ic_ad(v, a, csim, active, fprev):
     a = set(a)
-    active = set(active)
+    active = list(set(active))
     if v in active:
         return fprev
-    nact = 0
-    for d in csim:
-        # Elements in `active` union with anything that can be reached by `v`
-        tmp = d[v]
-        fs = np.zeros(len(tmp), dtype='bool')
-        fs[list(active)] = True
-        tmp = tmp | ba.bitarray(list(fs))
-        nact += tmp.count(True)
-    return (1.0*nact)/len(csim) - 1.0*(len(a) + 1)
+    # Elements in `active` repeated for each iteration of csim
+    act = np.zeros(shape=(csim.shape[1], 1), dtype='bool')
+    act[active] = True
+    act = np.tile(act, (1, csim.shape[2]))
+    # Elements in `active` union with anything that can be reached by `v`
+    act = act | csim[v, :, :]
+    return (1.0*np.sum(act))/csim.shape[2] - 1.0*(len(a) + 1)
 
 # vals is a dictionary from nodes (not necessarily all of them) to "strengths"
 def draw_alpha(g, vals, pos=None, maxval=None):
@@ -273,6 +257,6 @@ if __name__ == "__main__":
     NSIM_NONAD = 10000
     NSIM_AD = 1000
     NITER = 10
-    PARALLEL = True
-    PLOT = True
+    PARALLEL = False
+    PLOT = False
     compare(g, P_EDGE, NSIM_NONAD, NSIM_AD, NITER, PARALLEL, PLOT)
