@@ -214,7 +214,7 @@ def compare(g, pedge, nsim_nonad, nsim_ad, niter, parallel=True, plot=False):
     # Adaptive simulation
     arg = [g, pedge, nsim_ad, vrg_nonad]
     if parallel:
-        res = joblib.Parallel(n_jobs=8)((compare_worker, [i] + arg, {})
+        res = joblib.Parallel(n_jobs=4)((compare_worker, [i] + arg, {})
                                         for i in range(niter))
     else:
         res = [compare_worker(*([i] + arg)) for i in range(niter)]
