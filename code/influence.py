@@ -51,16 +51,19 @@ def ic_sim_cond(g, p, niter, rem, active, pbar=False):
     if pbar:
         pb = progressbar.ProgressBar(maxval=niter).start()
     n = g.number_of_nodes()
-    csim = np.zeros(shape=(n, n, niter), dtype='bool')
+    rest = set(g.nodes()) - set(active)
+    csim = {v: 0 for v in rest}
     gedges = g.edges()
     for i in range(niter):
         g = random_instance(g, p, rem, copy=False)
-        for v in (set(g.nodes()) - set(active)):
+        for v in rest:
             sp = nx.shortest_path_length(g, source=v)
-            csim[v, sp.keys(), i] = True
+            csim[v] += len(set(sp.keys()) | active)
         g.add_edges_from(rem)
         if pbar:
             pb.update(i)
+    for v in csim:
+        csim[v] /= (1.0*niter)
     if pbar:
         pb.finish()
     return csim
@@ -95,13 +98,7 @@ def f_ic_ad(v, a, csim, active, fprev):
     active = list(set(active))
     if v in active:
         return fprev
-    # Elements in `active` repeated for each iteration of csim
-    act = np.zeros(shape=(csim.shape[1], 1), dtype='bool')
-    act[active] = True
-    act = np.tile(act, (1, csim.shape[2]))
-    # Elements in `active` union with anything that can be reached by `v`
-    act = act | csim[v, :, :]
-    return (1.0*np.sum(act))/csim.shape[2] - LAMBDA*(len(a) + 1)
+    return csim[v] - LAMBDA*(len(a) + 1)
 
 # vals is a dictionary from nodes (not necessarily all of them) to "strengths"
 def draw_alpha(g, vals, pos=None, maxval=None):
@@ -184,6 +181,8 @@ def compare_worker(i, g, pedge, nsim_ad, vrg_nonad):
     active_ad = ic(h, vrg_ad)
     eval1 = f_ic_base(h, vrg_ad)
     eval2 = solver_ad.fsol
+    print 'vs =', vrg_ad
+    print 'val =', eval1, ',', eval2
     if eval1 != eval2: raise 'Inconsistent adaptive function values'
     return {'active_nonad': active_nonad,
             'active_ad': active_ad,
