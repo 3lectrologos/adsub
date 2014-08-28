@@ -190,7 +190,8 @@ def compare_worker(i, g, pedge, nsim_ad, vrg_nonad):
             'f_nonad': f_ic_base(h, vrg_nonad),
             'f_ad': f_ic_base(h, vrg_ad)}
 
-def compare(g, pedge, nsim_nonad, nsim_ad, niter, parallel=True, plot=False):
+def compare(g, pedge, nsim_nonad, nsim_ad, niter, parallel=True, plot=False,
+            savefig=False):
     f_nonad = []
     f_ad = []
     v_ad = []
@@ -236,11 +237,12 @@ def compare(g, pedge, nsim_nonad, nsim_ad, niter, parallel=True, plot=False):
         figname += '_NSIM_NONAD_' + str(nsim_nonad)
         figname += '_NSIM_AD_' + str(nsim_ad)
         figname += '_NITER_' + str(niter)
-        plt.savefig(os.path.abspath('../results/' + figname + '.pdf'),
-                    orientation='landscape',
-                    papertype='letter',
-                    bbox_inches='tight',
-                    format='pdf')
+        if SAVEFIG:
+            plt.savefig(os.path.abspath('../results/' + figname + '.pdf'),
+                        orientation='landscape',
+                        papertype='letter',
+                        bbox_inches='tight',
+                        format='pdf')
         plt.show()
 
 def profile_aux():
@@ -252,7 +254,8 @@ def profile_aux():
     NITER = 10
     PARALLEL = False
     PLOT = False
-    compare(g, P_EDGE, NSIM_NONAD, NSIM_AD, NITER, PARALLEL, PLOT)
+    SAVEFIG = False
+    compare(g, P_EDGE, NSIM_NONAD, NSIM_AD, NITER, PARALLEL, PLOT, SAVEFIG)
 
 def profile():
     prof.run('influence.profile_aux()', sort='time')
@@ -267,4 +270,5 @@ if __name__ == "__main__":
     NITER = 10
     PARALLEL = False
     PLOT = False
-    compare(g, P_EDGE, NSIM_NONAD, NSIM_AD, NITER, PARALLEL, PLOT)
+    SAVEFIG = False
+    compare(g, P_EDGE, NSIM_NONAD, NSIM_AD, NITER, PARALLEL, PLOT, SAVEFIG)
