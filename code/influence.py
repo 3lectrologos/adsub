@@ -172,8 +172,10 @@ def test_graph():
     g.add_edge(5, 6)
     return g.to_directed()
 
+# Ratio of random greedy cardinality constraint
 K_RATIO = 1
-    
+
+def compare_worker(i, g, pedge, nsim_ad, vrg_nonad):    
     print '-> worker', i, 'started.'
     h = random_instance(g, pedge, copy=True)
     solver_ad = AdaptiveInfluence(g, h, pedge, nsim_ad)
