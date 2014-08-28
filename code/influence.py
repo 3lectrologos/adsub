@@ -14,75 +14,58 @@ import submod
 import util
 
 
-def random_instance(g, p, rem=None, copy=False):
+def random_instance(g, p, copy=False):
     if copy: g = g.copy()
-    if rem == None: rem = g.edges()
-    for e in rem:
+    for e in g.edges():
         if random.random() > p:
             g.remove_edge(*e)
     return g
 
-def ic(h, a):
-    p = nx.all_pairs_shortest_path_length(h)
-    active = set()
-    for v in a:
-        active = active | set(p[v].keys())
-    return active
+def random_ind(g, p):
+    h = {}
+    gedges = g.edges()
+    for v in g.nodes_iter():
+        random_instance(g, p)
+        h[v] = set(ic_one(g, v))
+        g.add_edges_from(gedges)
+    return h
 
-def ic_sim(g, p, niter, rem, pbar=False):
+def ic_one(g, v):
+    return nx.shortest_path_length(g, v).keys()
+
+def ic_sim(g, p, niter, pbar=False):
     if pbar:
         pb = progressbar.ProgressBar(maxval=niter).start()
     n = g.number_of_nodes()
     csim = np.zeros(shape=(n, n, niter), dtype='bool')
     gedges = g.edges()
+    rp = {}
+    for v in g.nodes_iter():
+        rp[v] = np.random.permutation(niter)
     for i in range(niter):
-        g = random_instance(g, p, rem, copy=False)
+        random_instance(g, p, copy=False)
         sp = nx.all_pairs_shortest_path_length(g)
-        for v in g.nodes():
-            csim[v, sp[v].keys(), i] = True
-        g.add_edges_from(rem)
+        for v in g.nodes_iter():
+            # Put in random position
+            csim[v, sp[v].keys(), rp[v][i]] = True
+        g.add_edges_from(gedges)
         if pbar:
             pb.update(i)
     if pbar:
         pb.finish()
     return csim
 
-def ic_sim_cond(g, p, niter, rem, active, pbar=False):
-    if pbar:
-        pb = progressbar.ProgressBar(maxval=niter).start()
-    n = g.number_of_nodes()
-    rest = set(g.nodes()) - set(active)
-    csim = {v: 0 for v in rest}
-    gedges = g.edges()
-    for i in range(niter):
-        g = random_instance(g, p, rem, copy=False)
-        for v in rest:
-            sp = nx.shortest_path_length(g, source=v)
-            csim[v] += len(set(sp.keys()) | active)
-        g.add_edges_from(rem)
-        if pbar:
-            pb.update(i)
-    for v in csim:
-        csim[v] /= (1.0*niter)
-    if pbar:
-        pb.finish()
-    return csim
-
-def get_live_dead(g, h, active):
-    elive = set(h.edges(active))
-    edead = set(g.edges(active)) - elive
-    return (elive, edead)
-
-def copy_without_edges(g, elist):
-    h = g.copy()
-    h.remove_edges_from(elist)
-    return h
+def ic_base(h, a):
+    active = set()
+    for v in a:
+        active |= h[v]
+    return active
 
 # Global weighting factor of node cost
-LAMBDA = 1.0
+LAMBDA = 3.0
 
 def f_ic_base(h, a):
-    active = ic(h, a)
+    active = ic_base(h, a)
     return len(active) - LAMBDA*len(a)
 
 def f_ic(a, csim):
@@ -93,12 +76,16 @@ def f_ic(a, csim):
         act = act | csim[v, :, :]
     return (1.0*np.sum(act))/csim.shape[2] - LAMBDA*len(a)
 
-def f_ic_ad(v, a, csim, active, fprev):
+def f_ic_ad(v, a, csim, active):
     a = set(a)
     active = list(set(active))
-    if v in active:
-        return fprev
-    return csim[v] - LAMBDA*(len(a) + 1)
+    # Elements in `active` repeated for each iteration of csim
+    act = np.zeros(shape=(csim.shape[1], 1), dtype='bool')
+    act[active] = True
+    act = np.tile(act, (1, csim.shape[2]))
+    # Elements in `active` union with anything that can be reached by `v`
+    act = act | csim[v, :, :]
+    return (1.0*np.sum(act))/csim.shape[2] - LAMBDA*(len(a) + 1)
 
 # vals is a dictionary from nodes (not necessarily all of them) to "strengths"
 def draw_alpha(g, vals, pos=None, maxval=None):
@@ -108,7 +95,7 @@ def draw_alpha(g, vals, pos=None, maxval=None):
                            edge_color='#cccccc',
                            alpha=0.5,
                            arrows=False)
-    for v in g.nodes():
+    for v in g.nodes_iter():
         if v not in vals or vals[v] == 0:
             nx.draw_networkx_nodes(g, pos, nodelist=[v],
                                    node_color='#555555',
@@ -125,36 +112,30 @@ class BaseInfluence(submod.AdaptiveMax):
     pass
 
 class NonAdaptiveInfluence(BaseInfluence):
-    def __init__(self, g, p, nsim):
+    def __init__(self, csim):
         super(NonAdaptiveInfluence, self).__init__(g.nodes())
-        self.g = g
-        self.p = p
-        self.nsim = nsim
+        self.csim = csim
 
     def init_f_hook(self):
         super(NonAdaptiveInfluence, self).init_f_hook()
-        csim = ic_sim(self.g, self.p, self.nsim, rem=self.g.edges(), pbar=True)
-        self.f = lambda v, a: f_ic(a + [v], csim)
+        self.f = lambda v, a: f_ic(a + [v], self.csim)
 
 class AdaptiveInfluence(BaseInfluence):
-    def __init__(self, g, h, p, nsim):
+    def __init__(self, csim):
         super(AdaptiveInfluence, self).__init__(g.nodes())
-        self.g = g
-        self.p = p
-        self.nsim = nsim
+        self.csim = csim
+
+    def random_greedy(self, h, k):
         self.h = h
+        return super(AdaptiveInfluence, self).random_greedy(k)
 
     def init_f_hook(self):
         super(AdaptiveInfluence, self).init_f_hook()
         self.update_f_hook()
 
     def update_f_hook(self):
-        active = ic(self.h, self.sol)
-        (elive, edead) = get_live_dead(self.g, self.h, active)
-        r = copy_without_edges(self.g, edead)
-        rem = set(r.edges()) - elive
-        csim = ic_sim_cond(r, self.p, self.nsim, rem=rem, active=active)
-        self.f = lambda v, a: f_ic_ad(v, a, csim, active, self.fsol)
+        active = ic_base(self.h, self.sol)
+        self.f = lambda v, a: f_ic_ad(v, a, self.csim, active)
         self.fsol = len(active) - LAMBDA*len(self.sol)
 
 def test_graph():
@@ -172,13 +153,12 @@ def test_graph():
 # Ratio of random greedy cardinality constraint
 K_RATIO = 1
 
-def compare_worker(i, g, pedge, nsim_ad, vrg_nonad):    
+def compare_worker(i, g, pedge, vrg_nonad, solver_ad):    
     print '-> worker', i, 'started.'
-    h = random_instance(g, pedge, copy=True)
-    solver_ad = AdaptiveInfluence(g, h, pedge, nsim_ad)
-    (vrg_ad, _) = solver_ad.random_greedy(g.number_of_nodes()/K_RATIO)
-    active_nonad = ic(h, vrg_nonad)
-    active_ad = ic(h, vrg_ad)
+    h = random_ind(g, pedge)
+    (vrg_ad, _) = solver_ad.random_greedy(h, g.number_of_nodes()/K_RATIO)
+    active_nonad = ic_base(h, vrg_nonad)
+    active_ad = ic_base(h, vrg_ad)
     eval1 = f_ic_base(h, vrg_ad)
     eval2 = solver_ad.fsol
     print 'vs =', vrg_ad
@@ -190,21 +170,22 @@ def compare_worker(i, g, pedge, nsim_ad, vrg_nonad):
             'f_nonad': f_ic_base(h, vrg_nonad),
             'f_ad': f_ic_base(h, vrg_ad)}
 
-def compare(g, pedge, nsim_nonad, nsim_ad, niter, parallel=True, plot=False,
-            savefig=False):
+def compare(g, pedge, nsim, niter, parallel=True, plot=False, savefig=False):
     f_nonad = []
     f_ad = []
     v_ad = []
     st_nonad = {}
     st_ad = {}
-    for v in g.nodes():
+    for v in g.nodes_iter():
         st_nonad[v] = 0
         st_ad[v] = 0
     # Non-adaptive simulation
-    solver_nonad = NonAdaptiveInfluence(g, pedge, nsim_nonad)
+    csim = ic_sim(g, pedge, nsim, pbar=True)
+    solver_nonad = NonAdaptiveInfluence(csim)
     (vrg_nonad, _) = solver_nonad.random_greedy(g.number_of_nodes()/K_RATIO)
+    solver_ad = AdaptiveInfluence(csim)
     # Adaptive simulation
-    arg = [g, pedge, nsim_ad, vrg_nonad]
+    arg = [g, pedge, vrg_nonad, solver_ad]
     if parallel:
         res = joblib.Parallel(n_jobs=4)((compare_worker, [i] + arg, {})
                                         for i in range(niter))
@@ -234,8 +215,7 @@ def compare(g, pedge, nsim_nonad, nsim_ad, niter, parallel=True, plot=False,
         draw_alpha(g, st_ad, pos=pos, maxval=niter)
         figname = 'INF'
         figname += '_P_EDGE_' + str(pedge*100)
-        figname += '_NSIM_NONAD_' + str(nsim_nonad)
-        figname += '_NSIM_AD_' + str(nsim_ad)
+        figname += '_NSIM_' + str(nsim)
         figname += '_NITER_' + str(niter)
         if SAVEFIG:
             plt.savefig(os.path.abspath('../results/' + figname + '.pdf'),
@@ -248,14 +228,12 @@ def compare(g, pedge, nsim_nonad, nsim_ad, niter, parallel=True, plot=False,
 def profile_aux():
     g = nx.barabasi_albert_graph(50, 2)
     P_EDGE = 0.4
-    NSIM_NONAD = 1000
-    NSIM_AD = 1000
-    NSIM_AP_AD = 1000
+    NSIM = 1000
     NITER = 10
     PARALLEL = False
     PLOT = False
     SAVEFIG = False
-    compare(g, P_EDGE, NSIM_NONAD, NSIM_AD, NITER, PARALLEL, PLOT, SAVEFIG)
+    compare(g, P_EDGE, NSIM, NITER, PARALLEL, PLOT, SAVEFIG)
 
 def profile():
     prof.run('influence.profile_aux()', sort='time')
@@ -263,12 +241,11 @@ def profile():
 if __name__ == "__main__":
     random.seed(0)
     np.random.seed(0)
-    g = nx.barabasi_albert_graph(100, 2)
-    P_EDGE = 0.4
-    NSIM_NONAD = 1000
-    NSIM_AD = 1000
-    NITER = 10
-    PARALLEL = False
+    g = nx.barabasi_albert_graph(500, 2)
+    P_EDGE = 0.3
+    NSIM = 1000
+    NITER = 50
+    PARALLEL = True
     PLOT = False
     SAVEFIG = False
-    compare(g, P_EDGE, NSIM_NONAD, NSIM_AD, NITER, PARALLEL, PLOT, SAVEFIG)
+    compare(g, P_EDGE, NSIM, NITER, PARALLEL, PLOT, SAVEFIG)
