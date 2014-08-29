@@ -88,13 +88,12 @@ def f_ic_base(h, a):
     active = ic(h, a)
     return len(active) - LAMBDA*len(a)
 
-def f_ic(a, csim):
-    a = list(set(a))
-    if a == []: return 0
-    act = csim[a[0], :, :]
-    for v in a[1:]:
-        act = act | csim[v, :, :]
-    return (1.0*np.sum(act))/csim.shape[2] - LAMBDA*len(a)
+def f_ic(v, a, csim, prev):
+    if prev == None:
+        act = csim[v, :, :]
+    else:
+        act = prev | csim[v, :, :]
+    return (1.0*np.sum(act))/csim.shape[2] - LAMBDA*(len(a) + 1)
 
 def f_ic_ad(v, a, csim, active, fprev):
     a = set(a)
@@ -136,8 +135,19 @@ class NonAdaptiveInfluence(BaseInfluence):
 
     def init_f_hook(self):
         super(NonAdaptiveInfluence, self).init_f_hook()
-        csim = ic_sim(self.g, self.p, self.nsim, rem=self.g.edges(), pbar=True)
-        self.f = lambda v, a: f_ic(a + [v], csim)
+        self.csim = ic_sim(self.g, self.p, self.nsim, rem=self.g.edges(), pbar=True)
+        self.prev = None
+        self.fsol = 0
+        self.f = lambda v, a: f_ic(v, a, self.csim, self.prev)
+
+    def update_f_hook(self):
+        self.fsol = self.f(self.sol[-1], self.sol[:-1])
+        if self.prev == None:
+            self.prev = self.csim[self.sol[-1], :, :]
+        else:
+            self.prev = self.prev | self.csim[self.sol[-1], :, :]
+        self.f = lambda v, a: f_ic(v, a, self.csim, self.prev)
+        
 
 class AdaptiveInfluence(BaseInfluence):
     def __init__(self, g, h, p, nsim):
@@ -274,8 +284,8 @@ if __name__ == "__main__":
     np.random.seed(0)
     g = nx.barabasi_albert_graph(100, 2)
     P_EDGE = 0.4
-    NSIM_NONAD = 1000
-    NSIM_AD = 1000
+    NSIM_NONAD = 10000
+    NSIM_AD = 100
     NITER = 10
     PARALLEL = False
     PLOT = False
