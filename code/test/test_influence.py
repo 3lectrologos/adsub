@@ -85,53 +85,68 @@ class TestInfluence(unittest2.TestCase):
 
     def test_cascade_sim_1_iter_full(self):
         csim = influence.ic_sim(self.g, 1, 1, rem=self.g.edges())
-        correct = {}
-        correct[0] = ba.bitarray('1111100')
-        correct[1] = ba.bitarray('1111100')
-        correct[2] = ba.bitarray('1111100')
-        correct[3] = ba.bitarray('1111100')
-        correct[4] = ba.bitarray('1111100')
-        correct[5] = ba.bitarray('0000011')
-        correct[6] = ba.bitarray('0000011')
-        self.assertEqual(csim, [correct])
+        correct = {
+            0: {0: True, 1: True, 2: True, 3: True, 4: True, 5: False, 6: False},
+            1: {0: True, 1: True, 2: True, 3: True, 4: True, 5: False, 6: False},
+            2: {0: True, 1: True, 2: True, 3: True, 4: True, 5: False, 6: False},
+            3: {0: True, 1: True, 2: True, 3: True, 4: True, 5: False, 6: False},
+            4: {0: True, 1: True, 2: True, 3: True, 4: True, 5: False, 6: False},
+            5: {0: False, 1: False, 2: False, 3: False, 4: False, 5: True, 6: True},
+            6: {0: False, 1: False, 2: False, 3: False, 4: False, 5: True, 6: True}
+            }
+        for v in self.g.nodes_iter():
+            for u in self.g.nodes_iter():
+                self.assertEqual(csim[v, u][0], correct[v][u])
 
     def test_cascade_sim_2_iter_full(self):
         csim = influence.ic_sim(self.g, 1, 2, rem=self.g.edges())
-        correct = {}
-        correct[0] = ba.bitarray('1111100')
-        correct[1] = ba.bitarray('1111100')
-        correct[2] = ba.bitarray('1111100')
-        correct[3] = ba.bitarray('1111100')
-        correct[4] = ba.bitarray('1111100')
-        correct[5] = ba.bitarray('0000011')
-        correct[6] = ba.bitarray('0000011')
-        self.assertEqual(csim, [correct, correct])
+        correct = {
+            0: {0: True, 1: True, 2: True, 3: True, 4: True, 5: False, 6: False},
+            1: {0: True, 1: True, 2: True, 3: True, 4: True, 5: False, 6: False},
+            2: {0: True, 1: True, 2: True, 3: True, 4: True, 5: False, 6: False},
+            3: {0: True, 1: True, 2: True, 3: True, 4: True, 5: False, 6: False},
+            4: {0: True, 1: True, 2: True, 3: True, 4: True, 5: False, 6: False},
+            5: {0: False, 1: False, 2: False, 3: False, 4: False, 5: True, 6: True},
+            6: {0: False, 1: False, 2: False, 3: False, 4: False, 5: True, 6: True}
+            }
+        for i in range(2):
+            for v in self.g.nodes_iter():
+                for u in self.g.nodes_iter():
+                    self.assertEqual(csim[v, u][i], correct[v][u])
 
     def test_cascade_sim_2_iter_empty(self):
         csim = influence.ic_sim(self.g, 0, 2, rem=self.g.edges())
-        correct = {}
-        correct[0] = ba.bitarray('1000000')
-        correct[1] = ba.bitarray('0100000')
-        correct[2] = ba.bitarray('0010000')
-        correct[3] = ba.bitarray('0001000')
-        correct[4] = ba.bitarray('0000100')
-        correct[5] = ba.bitarray('0000010')
-        correct[6] = ba.bitarray('0000001')
-        self.assertEqual(csim, [correct, correct])
+        correct = {
+            0: {0: True, 1: False, 2: False, 3: False, 4: False, 5: False, 6: False},
+            1: {0: False, 1: True, 2: False, 3: False, 4: False, 5: False, 6: False},
+            2: {0: False, 1: False, 2: True, 3: False, 4: False, 5: False, 6: False},
+            3: {0: False, 1: False, 2: False, 3: True, 4: False, 5: False, 6: False},
+            4: {0: False, 1: False, 2: False, 3: False, 4: True, 5: False, 6: False},
+            5: {0: False, 1: False, 2: False, 3: False, 4: False, 5: True, 6: False},
+            6: {0: False, 1: False, 2: False, 3: False, 4: False, 5: False, 6: True}
+            }
+        for i in range(2):
+            for v in self.g.nodes_iter():
+                for u in self.g.nodes_iter():
+                    self.assertEqual(csim[v, u][i], correct[v][u])
 
     def test_cascade_sim_2_iter_contrained(self):
         h = influence.copy_without_edges(self.g,
                                          [(0, 2), (0, 3), (2, 4), (4, 3)])
         csim = influence.ic_sim(h, 1, 2, rem=h.edges())
-        correct = {}
-        correct[0] = ba.bitarray('1110100')
-        correct[1] = ba.bitarray('1110100')
-        correct[2] = ba.bitarray('1110100')
-        correct[3] = ba.bitarray('1111100')
-        correct[4] = ba.bitarray('1110100')
-        correct[5] = ba.bitarray('0000011')
-        correct[6] = ba.bitarray('0000011')
-        self.assertEqual(csim, [correct, correct])
+        correct = {
+            0: {0: True, 1: True, 2: True, 3: False, 4: True, 5: False, 6: False},
+            1: {0: True, 1: True, 2: True, 3: False, 4: True, 5: False, 6: False},
+            2: {0: True, 1: True, 2: True, 3: False, 4: True, 5: False, 6: False},
+            3: {0: True, 1: True, 2: True, 3: True, 4: True, 5: False, 6: False},
+            4: {0: True, 1: True, 2: True, 3: False, 4: True, 5: False, 6: False},
+            5: {0: False, 1: False, 2: False, 3: False, 4: False, 5: True, 6: True},
+            6: {0: False, 1: False, 2: False, 3: False, 4: False, 5: True, 6: True}
+            }
+        for i in range(2):
+            for v in self.g.nodes_iter():
+                for u in self.g.nodes_iter():
+                    self.assertEqual(csim[v, u][i], correct[v][u])
 
     def test_conditional_pipeline(self):
         h = influence.copy_without_edges(self.g,
@@ -141,7 +156,15 @@ class TestInfluence(unittest2.TestCase):
         h.remove_edges_from(edead)
         rem = set(h.edges()) - elive - edead
         csim = influence.ic_sim(h, 0.5, 10, rem=rem)
-        correct = {}
+        correct = {
+            0: {0: True, 1: True, 2: True, 3: False, 4: True, 5: False, 6: False},
+            1: {0: True, 1: True, 2: True, 3: False, 4: True, 5: False, 6: False},
+            2: {0: True, 1: True, 2: True, 3: False, 4: True, 5: False, 6: False},
+            3: {0: False, 1: False, 2: False, 3: True, 4: False, 5: False, 6: False},
+            4: {0: True, 1: True, 2: True, 3: False, 4: True, 5: False, 6: False},
+            5: {0: False, 1: False, 2: False, 3: False, 4: False, 5: False, 6: False},
+            6: {0: False, 1: False, 2: False, 3: False, 4: False, 5: False, 6: False}
+            }
         correct[0] = ba.bitarray('1110100')
         correct[1] = ba.bitarray('1110100')
         correct[2] = ba.bitarray('1110100')
@@ -149,6 +172,8 @@ class TestInfluence(unittest2.TestCase):
         correct[4] = ba.bitarray('1110100')
         correct[5] = ba.bitarray('0000000')
         correct[6] = ba.bitarray('0000000')
-        for cs in csim:
-            for i in range(7):
-                self.assertEqual(cs[i] & correct[i], correct[i])
+        for i in range(2):
+            for v in self.g.nodes_iter():
+                for u in self.g.nodes_iter():
+                    self.assertEqual(csim[v, u][i] and correct[v][u],
+                                     correct[v][u])
