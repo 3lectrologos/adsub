@@ -1,3 +1,4 @@
+import argparse
 import os
 import sys
 import random
@@ -12,6 +13,8 @@ import progressbar
 
 import submod
 import util
+
+DEBUG = False
 
 
 def random_instance(g, p, rem=None, copy=False):
@@ -179,11 +182,13 @@ def compare_worker(i, g, pedge, nsim_ad, vrg_nonad):
     (vrg_ad, _) = solver_ad.random_greedy(g.number_of_nodes()/K_RATIO)
     active_nonad = ic(h, vrg_nonad)
     active_ad = ic(h, vrg_ad)
-    eval1 = f_ic_base(h, vrg_ad)
-    eval2 = solver_ad.fsol
-    print 'vs =', vrg_ad
-    print 'val =', eval1, ',', eval2
-    if eval1 != eval2: raise 'Inconsistent adaptive function values'
+    if DEBUG:
+        print 'Non-adaptive: vs  =', vrg_nonad
+        print '              val =', f_ic_base(h, vrg_nonad)
+        print 'Adaptive:     vs  =', vrg_ad
+        print '              val =', f_ic_base(h, vrg_ad)
+    if f_ic_base(h, vrg_ad) != solver_ad.fsol:
+        raise 'Inconsistent adaptive function values'
     return {'active_nonad': active_nonad,
             'active_ad': active_ad,
             'v_ad': len(vrg_ad),
@@ -261,6 +266,11 @@ def profile():
     prof.run('influence.profile_aux()', sort='time')
 
 if __name__ == "__main__":
+    parser = argparse.ArgumentParser(description='Influence maximization')
+    parser.add_argument('-d', '--debug', action='store_true', dest='debug')
+    args = parser.parse_args()
+    DEBUG = args.debug
+
     random.seed(0)
     np.random.seed(0)
     g = nx.barabasi_albert_graph(100, 2)
