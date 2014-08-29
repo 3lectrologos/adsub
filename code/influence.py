@@ -255,7 +255,6 @@ def profile_aux():
     P_EDGE = 0.4
     NSIM_NONAD = 1000
     NSIM_AD = 1000
-    NSIM_AP_AD = 1000
     NITER = 10
     PARALLEL = False
     PLOT = False
