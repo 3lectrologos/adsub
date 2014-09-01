@@ -31,6 +31,18 @@ def run_igraph(n, niter):
     end = time.time()
     return (start, end)
 
+def run_igraph_comp(n, niter):
+    pb = progressbar.ProgressBar(maxval=niter).start()
+    g = ig.Graph.Barabasi(n, 2)
+    start = time.time()
+    for i in range(niter):
+        for v in g.vs:
+            g.subcomponent(v, mode=ig.OUT)
+        pb.update(i)
+    pb.finish()
+    end = time.time()
+    return (start, end)
+
 def run_graph_tool(n, niter):
     pb = progressbar.ProgressBar(maxval=niter).start()
     g = gt.price_network(n, 2, directed=False)
@@ -46,8 +58,9 @@ def run_graph_tool(n, niter):
     return (start, end)
 
 if __name__ == "__main__":
-    N = 1000
-    NITER = 50
+    N = 5000
+    NITER = 1
     measure_time('networkx', run_nx, N, NITER)
-    measure_time('networkx', run_igraph, N, NITER)
-    measure_time('networkx', run_graph_tool, N, NITER)
+    measure_time('igraph', run_igraph, N, NITER)
+    measure_time('igraph_comp', run_igraph_comp, N, NITER)
+    measure_time('graph_tool', run_graph_tool, N, NITER)

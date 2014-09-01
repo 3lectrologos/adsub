@@ -32,11 +32,12 @@ def random_instance(g, p, active=None, copy=False, ret=False):
         return g
 
 def ic(g, a):
-    a = list(set(a))
-    if a == []: return set()
-    b = np.array(g.shortest_paths()) != float('inf')
-    idx = np.any(b[a, :], 0)
-    return set(np.arange(g.vcount())[idx])
+    r = list(set(a))
+    for v in a:
+        r.extend(g.subcomponent(v, mode=ig.OUT))
+        # Just to avoid the list getting too long
+        r = list(set(r))
+    return set(r)
 
 def ic_sim(g, p, niter, active=None, pbar=False):
     if pbar:
@@ -45,8 +46,9 @@ def ic_sim(g, p, niter, active=None, pbar=False):
     csim = np.zeros(shape=(n, n, niter), dtype='bool')
     for i in range(niter):
         (g, rem) = random_instance(g, p, active=active, copy=False, ret=True)
-        sp = g.shortest_paths()
-        csim[:, :, i] = (np.array(sp) != float('inf'))
+        for v in g.vs:
+            # XXX: This assignment is the bottleneck here!
+            csim[v.index, g.subcomponent(v, mode=ig.OUT), i] = True
         g.add_edges(rem)
         if pbar:
             pb.update(i)
@@ -60,13 +62,11 @@ def ic_sim_cond(g, p, niter, active, pbar=False):
     n = g.vcount()
     rest = [v.index for v in g.vs if v.index not in active]
     csim = {v: 0 for v in rest}
-    bact = np.zeros(shape=g.vcount(), dtype='bool')
-    bact[list(active)] = True
     for i in range(niter):
         (g, rem) = random_instance(g, p, active=active, copy=False, ret=True)
         for v in rest:
-            sp = np.array(g.shortest_paths(source=v)[0]) != float('inf')
-            csim[v] += np.sum(sp | bact)
+            # XXX: This assignment is the bottleneck here!
+            csim[v] += len(set(g.subcomponent(v, mode=ig.OUT)) | active)
         g.add_edges(rem)
         if pbar:
             pb.update(i)
@@ -229,7 +229,7 @@ def compare(g, pedge, nsim_nonad, nsim_ad, niter, parallel=True, plot=False,
     print ',     #nodes =', len(vrg_nonad)
     print 'Adaptive     | favg =', np.mean([r['f_ad'] for r in res]),
     print ', avg #nodes =', np.mean([r['v_ad'] for r in res])
-    pos = nx.spring_layout(g)
+#    pos = nx.spring_layout(g)
     # Plotting
     if plot:
         _, (ax1, ax2) = plt.subplots(1, 2)
@@ -254,7 +254,14 @@ def compare(g, pedge, nsim_nonad, nsim_ad, niter, parallel=True, plot=False,
         plt.show()
 
 def profile_aux():
-    g = ig.Graph.Barabasi(100, 2)
+#    g = ig.Graph.Barabasi(50, 2)
+    NODES = 100
+    tmp = nx.barabasi_albert_graph(NODES, 2)
+    g = ig.Graph(directed=True)
+    g.add_vertices(NODES)
+    for u, v in tmp.edges_iter():
+        g.add_edge(u, v)
+        g.add_edge(v, u)
     P_EDGE = 0.4
     NSIM_NONAD = 1000
     NSIM_AD = 1000
@@ -265,7 +272,7 @@ def profile_aux():
     compare(g, P_EDGE, NSIM_NONAD, NSIM_AD, NITER, PARALLEL, PLOT, SAVEFIG)
 
 def profile():
-    prof.run('influence.profile_aux()', sort='time')
+    prof.run('influence.profile_aux()', sort='cumulative')
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description='Influence maximization')
@@ -273,17 +280,18 @@ if __name__ == "__main__":
     args = parser.parse_args()
     DEBUG = args.debug
 
+    NODES = 100
     random.seed(0)
     np.random.seed(0)
-    tmp = nx.barabasi_albert_graph(200, 2)
+    tmp = nx.barabasi_albert_graph(NODES, 2)
     g = ig.Graph(directed=True)
-    g.add_vertices(200)
+    g.add_vertices(NODES)
     for u, v in tmp.edges_iter():
         g.add_edge(u, v)
         g.add_edge(v, u)
     P_EDGE = 0.4
-    NSIM_NONAD = 10000
-    NSIM_AD = 1
+    NSIM_NONAD = 1000
+    NSIM_AD = 1000
     NITER = 10
     PARALLEL = False
     PLOT = False
