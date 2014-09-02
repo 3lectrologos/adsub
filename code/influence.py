@@ -2,7 +2,11 @@ import argparse
 import os
 import sys
 import random
+import time
 import cProfile as prof
+import uuid
+import subprocess as sub
+import pickle
 
 import networkx as nx
 import igraph as ig
@@ -77,7 +81,7 @@ def ic_sim_cond(g, p, niter, active, pbar=False):
     return csim
 
 # Global weighting factor of node cost
-LAMBDA = 1.0
+LAMBDA = 1.1
 
 def f_ic_base(h, a):
     active = ic(h, a)
@@ -96,27 +100,6 @@ def f_ic_ad(v, a, csim, active, fprev):
     if v in active:
         return fprev
     return csim[v] - LAMBDA*(len(a) + 1)
-
-# vals is a dictionary from nodes (not necessarily all of them) to "strengths"
-# def draw_alpha(g, vals, pos=None, maxval=None):
-#     if not maxval: maxval = max(a.values())
-#     if not pos: pos = nx.spring_layout(g)
-#     nx.draw_networkx_edges(g, pos,
-#                            edge_color='#cccccc',
-#                            alpha=0.5,
-#                            arrows=False)
-#     for v in g.nodes():
-#         if v not in vals or vals[v] == 0:
-#             nx.draw_networkx_nodes(g, pos, nodelist=[v],
-#                                    node_color='#555555',
-#                                    alpha=0.5)
-#         else:
-#             nx.draw_networkx_nodes(g, pos, nodelist=[v],
-#                                    node_color='b',
-#                                    alpha=(1.0*vals[v])/maxval)
-#     nx.draw_networkx_labels(g, pos, nodelist=[v],
-#                             font_size=10,
-#                             font_color='#eeeeee')
 
 class BaseInfluence(submod.AdaptiveMax):
     pass
@@ -158,48 +141,32 @@ class AdaptiveInfluence(BaseInfluence):
 
     def update_f_hook(self):
         active = ic(self.h, self.sol)
+        #print 'sol =', len(self.sol), ', active =', len(active)
         csim = ic_sim_cond(self.h, self.p, self.nsim, active=active)
         self.f = lambda v, a: f_ic_ad(v, a, csim, active, self.fsol)
         self.fsol = len(active) - LAMBDA*len(self.sol)
 
-def test_graph():
-    g = ig.Graph()
-    g.add_vertices(7)
-    g.add_edge(0, 1)
-    g.add_edge(0, 2)
-    g.add_edge(0, 3)
-    g.add_edge(4, 1)
-    g.add_edge(4, 2)
-    g.add_edge(4, 3)
-    g.add_edge(5, 6)
-    g.to_directed()
-    return g
-
-# Ratio of random greedy cardinality constraint
-K_RATIO = 1
-
-def compare_worker(i, g, pedge, nsim_ad, vrg_nonad):    
+def compare_worker(i, g, pedge, nsim_ad, v_nonad, k_ratio):
     print '-> worker', i, 'started.'
     h = random_instance(g, pedge, copy=True)
     solver_ad = AdaptiveInfluence(g, h, pedge, nsim_ad)
-    (vrg_ad, _) = solver_ad.random_greedy(g.vcount()/K_RATIO)
-    active_nonad = ic(h, vrg_nonad)
-    active_ad = ic(h, vrg_ad)
+    (v_ad, _) = solver_ad.random_greedy(g.vcount()/k_ratio)
+    active_nonad = ic(h, v_nonad)
+    active_ad = ic(h, v_ad)
     if DEBUG:
-        print 'Non-adaptive: vs  =', vrg_nonad
-        print '              val =', f_ic_base(h, vrg_nonad)
-        print 'Adaptive:     vs  =', vrg_ad
-        print '              val =', f_ic_base(h, vrg_ad)
-    if f_ic_base(h, vrg_ad) != solver_ad.fsol:
+        print 'Non-adaptive: vs  =', v_nonad
+        print '              val =', f_ic_base(h, v_nonad)
+        print 'Adaptive:     vs  =', v_ad
+        print '              val =', f_ic_base(h, v_ad)
+    if f_ic_base(h, v_ad) != solver_ad.fsol:
         raise 'Inconsistent adaptive function values'
     return {'active_nonad': active_nonad,
             'active_ad': active_ad,
-            'v_ad': len(vrg_ad),
-            'f_nonad': f_ic_base(h, vrg_nonad),
-            'f_ad': f_ic_base(h, vrg_ad)}
+            'v_ad': v_ad,
+            'f_nonad': f_ic_base(h, v_nonad),
+            'f_ad': f_ic_base(h, v_ad)}
 
-def compare(g, pedge, nsim_nonad, nsim_ad, niter, parallel=True, plot=False,
-            savefig=False):
+def compare(g, pedge, nsim_nonad, nsim_ad, niter, k_ratio, parallel=True):
     f_nonad = []
     f_ad = []
     v_ad = []
@@ -210,48 +177,24 @@ def compare(g, pedge, nsim_nonad, nsim_ad, niter, parallel=True, plot=False,
         st_ad[v.index] = 0
     # Non-adaptive simulation
     solver_nonad = NonAdaptiveInfluence(g, pedge, nsim_nonad)
-    (vrg_nonad, _) = solver_nonad.random_greedy(g.vcount()/K_RATIO)
+    (v_nonad, _) = solver_nonad.random_greedy(g.vcount()/k_ratio)
     # Adaptive simulation
-    arg = [g, pedge, nsim_ad, vrg_nonad]
+    arg = [g, pedge, nsim_ad, v_nonad, k_ratio]
     if parallel:
         res = joblib.Parallel(n_jobs=4)((compare_worker, [i] + arg, {})
                                         for i in range(niter))
     else:
         res = [compare_worker(*([i] + arg)) for i in range(niter)]
-    # Adjust strengths of active nodes
-    for r in res:
-        for v in r['active_nonad']:
-            st_nonad[v] += 1
-        for v in r['active_ad']:
-            st_ad[v] += 1
     # Print results
-    print 'Non-adaptive | favg =', np.mean([r['f_nonad'] for r in res]),
-    print ',     #nodes =', len(vrg_nonad)
-    print 'Adaptive     | favg =', np.mean([r['f_ad'] for r in res]),
-    print ', avg #nodes =', np.mean([r['v_ad'] for r in res])
-#    pos = nx.spring_layout(g)
-    # Plotting
-    if plot:
-        _, (ax1, ax2) = plt.subplots(1, 2)
-        plt.gcf().set_size_inches(16, 9)
-        plt.sca(ax1)
-        ax1.set_aspect('equal')
-        draw_alpha(g, st_nonad, pos=pos, maxval=niter)
-        plt.sca(ax2)
-        ax2.set_aspect('equal')
-        draw_alpha(g, st_ad, pos=pos, maxval=niter)
-        figname = 'INF'
-        figname += '_P_EDGE_' + str(pedge*100)
-        figname += '_NSIM_NONAD_' + str(nsim_nonad)
-        figname += '_NSIM_AD_' + str(nsim_ad)
-        figname += '_NITER_' + str(niter)
-        if SAVEFIG:
-            plt.savefig(os.path.abspath('../results/' + figname + '.pdf'),
-                        orientation='landscape',
-                        papertype='letter',
-                        bbox_inches='tight',
-                        format='pdf')
-        plt.show()
+    r_nonad = [r['f_nonad'] for r in res]
+    r_ad = [r['f_ad'] for r in res]
+    v_ad = [len(r['v_ad']) for r in res]
+    return {
+        'r_nonad': r_nonad,
+        'v_nonad': v_nonad,
+        'r_ad': r_ad,
+        'v_ad': v_ad
+        }
 
 def profile_aux():
 #    g = ig.Graph.Barabasi(50, 2)
@@ -266,34 +209,119 @@ def profile_aux():
     NSIM_NONAD = 1000
     NSIM_AD = 1000
     NITER = 10
+    K_RATIO = 5
     PARALLEL = False
-    PLOT = False
-    SAVEFIG = False
-    compare(g, P_EDGE, NSIM_NONAD, NSIM_AD, NITER, PARALLEL, PLOT, SAVEFIG)
+    compare(g, P_EDGE, NSIM_NONAD, NSIM_AD, NITER, K_RATIO, PARALLEL)
 
 def profile():
     prof.run('influence.profile_aux()', sort='cumulative')
 
+def test_graph():
+    name = 'TEST_GRAPH'
+    g = ig.Graph()
+    g.add_vertices(7)
+    g.add_edge(0, 1)
+    g.add_edge(0, 2)
+    g.add_edge(0, 3)
+    g.add_edge(4, 1)
+    g.add_edge(4, 2)
+    g.add_edge(4, 3)
+    g.add_edge(5, 6)
+    g.to_directed()
+    return (name, g)
+
+def ba_graph(n, m):
+    name = 'B_A_{0}_{1}'.format(n, m)
+    g = ig.Graph.Barabasi(n, m)
+    g.to_directed()
+    return (name, g)
+
+def format_result(r):
+    sqn = np.sqrt(r['niter'])
+
+    lon = 'Adaptive     |       favg = {0:.4g} '.format(np.mean(r['r_ad']))
+    lon +=  '+/- {0:.3g}\n'.format(np.std(r['r_ad'])/sqn)
+    bar = '-'*len(lon) + '\n'
+
+    s = ''
+    s += '{0} ({1})\n'.format(r['name'], r['git'])
+    s += bar
+    s += 'Nodes             : {0}\n'.format(r['vcount'])
+    s += 'Edges             : {0}\n'.format(r['ecount'])
+    s += 'Transitivity      : {0:.3g}\n'.format(r['trans'])
+    s += 'Edge prob.        : {0:.3g}\n'.format(r['pedge'])
+    s += 'Sims non-adaptive : {0}\n'.format(r['nsim_nonad'])
+    s += 'Sims adaptive     : {0}\n'.format(r['nsim_ad'])
+    s += 'Iterations        : {0}\n'.format(r['niter'])
+    s += 'Lambda            : {0}\n'.format(r['lambda'])
+    s += 'k-ratio           : {0}\n'.format(r['kratio'])
+    s += 'Parallel          : {0}\n'.format(r['parallel'])
+    s += 'Time taken        : {0}h{1}m{2}s\n'.format(r['t_h'],
+                                                     r['t_m'],
+                                                     r['t_s'])
+    s += bar
+    s += 'Non-adaptive |       favg = {0:.4g} '.format(np.mean(r['r_nonad']))
+    s +=  '+/- {0:.3g}\n'.format(np.std(r['r_nonad'])/sqn)
+    s += '             |     #nodes = {0:.3g}\n'.format(len(r['v_nonad']))
+    s += bar
+    s += lon
+    s += '             | avg #nodes = {0:.3g}\n'.format(np.mean(r['v_ad']))
+    s += bar
+    return s
+
+RESULT_DIR = os.path.abspath('../results/')
+
+# TODO: Adjust drawn samples in adaptive case according to "remaining"
+#       nodes or edges
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description='Influence maximization')
     parser.add_argument('-d', '--debug', action='store_true', dest='debug')
     args = parser.parse_args()
     DEBUG = args.debug
 
-    NODES = 100
     random.seed(0)
     np.random.seed(0)
-    tmp = nx.barabasi_albert_graph(NODES, 2)
-    g = ig.Graph(directed=True)
-    g.add_vertices(NODES)
-    for u, v in tmp.edges_iter():
-        g.add_edge(u, v)
-        g.add_edge(v, u)
-    P_EDGE = 0.4
-    NSIM_NONAD = 1000
-    NSIM_AD = 1000
+    P_EDGE = 0.25
+    NSIM_NONAD = 200
+    NSIM_AD = 100
     NITER = 10
-    PARALLEL = False
-    PLOT = False
-    SAVEFIG = False
-    compare(g, P_EDGE, NSIM_NONAD, NSIM_AD, NITER, PARALLEL, PLOT, SAVEFIG)
+    K_RATIO = 5
+    PARALLEL = True
+
+    (name, g) = ba_graph(100, 2)
+    print 'Running {0}'.format(name)
+    print '#nodes =', g.vcount()
+    print '#edges =', g.ecount()
+    print 'transitivity =', g.transitivity_undirected()
+
+    stime = time.time()
+    r = compare(g, P_EDGE, NSIM_NONAD, NSIM_AD, NITER, K_RATIO, PARALLEL)
+    etime = time.time()
+    dt = int(etime - stime)
+    hours = dt / 3600
+    mins = (dt % 3600) / 60
+    secs = (dt % 3600) % 60
+
+    r['name'] = name
+    r['vcount'] = g.vcount()
+    r['ecount'] = g.ecount()
+    r['trans'] = g.transitivity_undirected()
+    r['pedge'] = P_EDGE
+    r['nsim_nonad'] = NSIM_NONAD
+    r['nsim_ad'] = NSIM_AD
+    r['niter'] = NITER
+    r['lambda'] = LAMBDA
+    r['kratio'] = K_RATIO
+    r['parallel'] = PARALLEL
+    r['t_h'] = hours
+    r['t_m'] = mins
+    r['t_s'] = secs
+    r['git'] = sub.check_output(['git', 'rev-parse', '--short', 'HEAD']).strip()
+    
+    s = format_result(r)
+    print s
+    fname = name + '_' + str(uuid.uuid1())
+    with open(os.path.join(RESULT_DIR, fname + '.txt'), 'w') as f:
+        f.write(s)
+    with open(os.path.join(RESULT_DIR, fname + '.pickle'), 'w') as f:
+        pickle.dump(r, f)
