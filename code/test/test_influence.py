@@ -9,6 +9,8 @@ class TestInfluence(unittest2.TestCase):
         self.g = influence.test_graph()
         self.pruned = ig.Graph(directed=True)
         self.pruned.add_vertices(7)
+        for v in self.pruned.vs:
+            v['i'] = v.index
         self.pruned.add_edge(0, 1)
         self.pruned.add_edge(1, 4)
         self.pruned.add_edge(4, 2)
@@ -36,26 +38,6 @@ class TestInfluence(unittest2.TestCase):
         (_, removed) = influence.random_instance(self.g, 0.5, ret=True)
         self.assertNotEqual(set(self.g.get_edgelist()), orig)
         self.assertEqual(set(self.g.get_edgelist()) | set(removed), set(orig))
-
-    def test_conditional_instance_p_0(self):
-        active = [0, 1, 2, 4]
-        influence.random_instance(self.pruned, 0, active=active)
-        live = set([(0, 1), (1, 4), (4, 2)])
-        self.assertEqual(set(self.pruned.get_edgelist()), live)
-
-    def test_conditional_instance_p_1(self):
-        active = [0, 1, 2, 4]
-        correct = set(self.pruned.get_edgelist())
-        influence.random_instance(self.pruned, 1, active=active)
-        self.assertEqual(set(self.pruned.get_edgelist()), correct)
-
-    def test_conditional_instance_random(self):
-        active = [0, 1, 2, 4]
-        live = set([(0, 1), (1, 4), (4, 2)])
-        dead = set([(1, 0), (4, 1), (2, 4), (4, 3), (0, 3), (0, 2), (2, 0)])
-        influence.random_instance(self.pruned, 0.5, active=active)
-        self.assertGreaterEqual(set(self.pruned.get_edgelist()), live)
-        self.assertEqual(set(self.pruned.get_edgelist()) & dead, set())
 
     def test_independent_cascade_empty(self):
         h = ig.Graph(directed=True)
@@ -91,7 +73,7 @@ class TestInfluence(unittest2.TestCase):
         self.assertEqual(active, set([0, 1, 2, 3, 4, 5, 6]))
 
     def test_cascade_sim_1_iter_full(self):
-        csim = influence.ic_sim(self.g, 1, 1, active=None)
+        csim = influence.ic_sim(self.g, 1, 1)
         correct = {
             0: {0: True, 1: True, 2: True, 3: True, 4: True, 5: False, 6: False},
             1: {0: True, 1: True, 2: True, 3: True, 4: True, 5: False, 6: False},
@@ -107,7 +89,7 @@ class TestInfluence(unittest2.TestCase):
                                  correct[v.index][u.index])
 
     def test_cascade_sim_2_iter_full(self):
-        csim = influence.ic_sim(self.g, 1, 2, active=None)
+        csim = influence.ic_sim(self.g, 1, 2)
         correct = {
             0: {0: True, 1: True, 2: True, 3: True, 4: True, 5: False, 6: False},
             1: {0: True, 1: True, 2: True, 3: True, 4: True, 5: False, 6: False},
@@ -124,7 +106,7 @@ class TestInfluence(unittest2.TestCase):
                                      correct[v.index][u.index])
 
     def test_cascade_sim_2_iter_empty(self):
-        csim = influence.ic_sim(self.g, 0, 2, active=None)
+        csim = influence.ic_sim(self.g, 0, 2)
         correct = {
             0: {0: True, 1: False, 2: False, 3: False, 4: False, 5: False, 6: False},
             1: {0: False, 1: True, 2: False, 3: False, 4: False, 5: False, 6: False},
@@ -142,7 +124,7 @@ class TestInfluence(unittest2.TestCase):
 
     def test_cascade_sim_2_iter_contrained(self):
         self.g.delete_edges([(0, 2), (0, 3), (2, 4), (4, 3)])
-        csim = influence.ic_sim(self.g, 1, 2, active=None)
+        csim = influence.ic_sim(self.g, 1, 2)
         correct = {
             0: {0: True, 1: True, 2: True, 3: False, 4: True, 5: False, 6: False},
             1: {0: True, 1: True, 2: True, 3: False, 4: True, 5: False, 6: False},
@@ -158,28 +140,10 @@ class TestInfluence(unittest2.TestCase):
                     self.assertEqual(csim[v.index, u.index, i],
                                      correct[v.index][u.index])
 
-    def test_conditional_pipeline_orig(self):
-        self.g.delete_edges([(0, 2), (0, 3), (2, 4), (4, 3)])
-        active = influence.ic(self.g, [2])
-        csim = influence.ic_sim(self.g, 0.5, 10, active=active)
-        correct = {
-            0: {0: True, 1: True, 2: True, 3: False, 4: True, 5: False, 6: False},
-            1: {0: True, 1: True, 2: True, 3: False, 4: True, 5: False, 6: False},
-            2: {0: True, 1: True, 2: True, 3: False, 4: True, 5: False, 6: False},
-            3: {0: False, 1: False, 2: False, 3: True, 4: False, 5: False, 6: False},
-            4: {0: True, 1: True, 2: True, 3: False, 4: True, 5: False, 6: False},
-            5: {0: False, 1: False, 2: False, 3: False, 4: False, 5: False, 6: False},
-            6: {0: False, 1: False, 2: False, 3: False, 4: False, 5: False, 6: False}
-            }
-        for i in range(10):
-            for v in self.g.vs:
-                for u in self.g.vs:
-                    t = csim[v.index, u.index, i] and correct[v.index][u.index]
-                    self.assertEqual(t, correct[v.index][u.index])
-
     def test_conditional_pipeline_new_p_0(self):
         self.pruned.delete_edges([(1, 4)])
         active = influence.ic(self.pruned, [0])
+        influence.delete_active(self.pruned, active)
         csim = influence.ic_sim_cond(self.pruned, 0, 1, active=active)
         all_correct = {0: 2, 1: 2, 2: 3, 3: 3, 4: 3, 5: 3, 6: 3}
         correct = {v: all_correct[v] for v in all_correct if v not in active}
@@ -188,6 +152,7 @@ class TestInfluence(unittest2.TestCase):
     def test_conditional_pipeline_new_p_1(self):
         self.pruned.delete_edges([(1, 4)])
         active = influence.ic(self.pruned, [0])
+        influence.delete_active(self.pruned, active)
         csim = influence.ic_sim_cond(self.pruned, 1, 1, active=active)
         all_correct = {0: 2, 1: 2, 2: 3, 3: 5, 4: 4, 5: 3, 6: 4}
         correct = {v: all_correct[v] for v in all_correct if v not in active}
