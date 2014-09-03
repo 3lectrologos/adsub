@@ -258,15 +258,25 @@ def tc_ba(n, m):
         v['i'] = v.index
     return (name, g)
 
+def tc_snap_fb(n):
+    name = 'SNAP_FB_' + str(n)
+    fpath = os.path.join(DATA_DIR, 'facebook_combined.txt')
+    g = tc_snap_generic(fpath, n)
+    return (name, g)
+
 def tc_snap_gr(n):
     name = 'SNAP_GR_' + str(n)
     fpath = os.path.join(DATA_DIR, 'general_relativity.txt')
+    g = tc_snap_generic(fpath, n)
+    return (name, g)
+
+def tc_snap_generic(fpath, n):
     g = util.read_snap_graph(fpath)
     rem = [v for v in g.vs[n:]]
     g.delete_vertices(rem)
     for v in g.vs:
         v['i'] = v.index
-    return (name, g)
+    return g
 
 def format_result(r):
     sqn = np.sqrt(r['niter'])
@@ -328,7 +338,8 @@ if __name__ == "__main__":
     GAMMA = 3
     PARALLEL = True
 
-    (name, g) = tc_snap_gr(100)
+    (name, g) = tc_snap_fb(1000)
+    ig.plot(g)
 #    (name, g) = ba_graph(100, 2)
     print 'Running {0}'.format(name)
     print '#nodes =', g.vcount()

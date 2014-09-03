@@ -6,7 +6,7 @@ import igraph as ig
 def read_snap_graph(filename):
     g = nx.DiGraph()
     with open(filename, 'rb') as f:
-        reader = csv.reader(f, delimiter='\t')
+        reader = csv.reader(f, delimiter=' ')
         i = 0
         for row in reader:
             if row[0][0] == '#':
