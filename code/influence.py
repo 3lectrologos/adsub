@@ -185,7 +185,7 @@ def compare(g, pedge, nsim_nonad, nsim_ad, niter, k_ratio, gamma, parallel=True)
     # Adaptive simulation
     arg = [g, pedge, nsim_ad, v_nonad_rg, v_nonad_g, k_ratio, gamma]
     if parallel:
-        res = joblib.Parallel(n_jobs=4)((compare_worker, [i] + arg, {})
+        res = joblib.Parallel(n_jobs=8)((compare_worker, [i] + arg, {})
                                         for i in range(niter))
     else:
         res = [compare_worker(*([i] + arg)) for i in range(niter)]
@@ -211,9 +211,9 @@ def profile_aux():
     NSIM_AD = 1000
     NITER = 10
     K_RATIO = 10
-    GAMMA = 1
+    GAMMA = 3
     PARALLEL = False
-    (name, g) = tc_ba(100, 2)
+    (name, g) = tc_snap_gr(100)
     compare(g, P_EDGE, NSIM_NONAD, NSIM_AD, NITER, K_RATIO, GAMMA, PARALLEL)
 
 def profile():
@@ -309,14 +309,14 @@ if __name__ == "__main__":
     random.seed(0)
     np.random.seed(0)
     P_EDGE = 0.05
-    NSIM_NONAD = 10000
+    NSIM_NONAD = 1000
     NSIM_AD = 1000
     NITER = 100
     K_RATIO = 10
     GAMMA = 3
     PARALLEL = True
 
-    (name, g) = tc_snap_gr(10)
+    (name, g) = tc_snap_gr(100)
 #    (name, g) = ba_graph(100, 2)
     print 'Running {0}'.format(name)
     print '#nodes =', g.vcount()
