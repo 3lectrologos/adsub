@@ -61,18 +61,17 @@ def ic_sim(g, p, niter, pbar=False):
 
 def ic_sim_cond(g, p, niter, active):
     n = g.vcount()
-    rest = [v for v in g.vs if v['i'] not in active]
-    csim = {v['i']: 0 for v in rest}
+    csim = {v: 0 for v in g.vs} #np.zeros(shape=g.vcount(), dtype='int32')
     for i in range(niter):
         (g, rem) = random_instance(g, p, copy=False, ret=True)
-        for v in rest:
+        for v in g.vs:
             # XXX: This assignment is the bottleneck here!
-            a = set(g.vs[u]['i'] for u in g.subcomponent(v.index, mode=ig.OUT))
-            csim[v['i']] += len(a | active)
+            csim[v] += len(g.subcomponent(v.index, mode=ig.OUT))
         g.add_edges(rem)
-    for v in csim:
-        csim[v] /= (1.0*niter)
-    return csim
+    d = {}
+    for v in g.vs:
+        d[v['i']] = len(active) + csim[v]/(1.0*niter)
+    return d
 
 def delete_active(g, active):
     g.delete_vertices([v for v in g.vs if v['i'] in active])
