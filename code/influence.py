@@ -64,15 +64,15 @@ def ic_sim(g, p, niter, pbar=False):
 
 def ic_sim_cond(g, p, niter, active):
     n = g.vcount()
-    csim = {v: 0 for v in g.vs}
+    csim = {v.index: 0 for v in g.vs}
     for i in range(niter):
         (g, rem) = random_instance(g, p, copy=False, ret=True)
-        for v in g.vs:
-            csim[v] += len(g.subcomponent(v.index, mode=ig.OUT))
+        for v in csim:
+            csim[v] += len(g.subcomponent(v, mode=ig.OUT))
         g.add_edges(rem)
     d = {}
     for v in g.vs:
-        d[v['i']] = len(active) + csim[v]/(1.0*niter)
+        d[v['i']] = len(active) + csim[v.index]/(1.0*niter)
     return d
 
 def delete_active(g, active):
@@ -320,8 +320,6 @@ def format_result(r):
 DATA_DIR = os.path.abspath('../data/')
 RESULT_DIR = os.path.abspath('../results/')
 
-# TODO: Adjust drawn samples in adaptive case according to "remaining"
-#       nodes or edges
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description='Influence maximization')
     parser.add_argument('-d', '--debug', action='store_true', dest='debug')
