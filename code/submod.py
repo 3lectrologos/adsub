@@ -27,7 +27,10 @@ class AdaptiveMax(object):
         while i <= k:
             e = q.get()
             fv, v, iv = e
-            assert fv <= 0, 'non-monotone function: negative marginal gain'
+            # The following should never happen
+            if -fv < 0:
+                print 'Warning: Greedy terminated due to negative marginal gain.'
+                break
             if iv < i:
                 df = self.f(v, self.sol) - self.fsol
                 q.put((-df, v, i))

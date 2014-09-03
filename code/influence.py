@@ -108,10 +108,10 @@ class NonAdaptiveInfluence(BaseInfluence):
         self.p = p
         self.fc = fc
         self.nsim = nsim
+        self.csim = ic_sim(self.g, self.p, self.nsim, pbar=True)
 
     def init_f_hook(self):
         super(NonAdaptiveInfluence, self).init_f_hook()
-        self.csim = ic_sim(self.g, self.p, self.nsim, pbar=True)
         self.prev = None
         self.fsol = 0
         self.f = lambda v, a: f_ic(v, a, self.csim, self.prev, self.fc)
@@ -147,25 +147,26 @@ class AdaptiveInfluence(BaseInfluence):
         self.fsol = self.fc(len(active), len(self.sol))
         print 'fsol =', self.fsol
 
-def compare_worker(i, g, pedge, nsim_ad, v_nonad, k_ratio, fc):
+def compare_worker(i, g, pedge, nsim_ad, v_nonad_rg, v_nonad_g, k_ratio, gamma):
     print '-> worker', i, 'started.'
+    fc = lambda a, b: f_comb(a, b, gamma)
     h = random_instance(g, pedge, copy=True)
     solver_ad = AdaptiveInfluence(g, h, pedge, fc, nsim_ad)
     (v_ad, _) = solver_ad.random_greedy(g.vcount()/k_ratio)
-    active_nonad = ic(h, v_nonad)
+    active_nonad_rg = ic(h, v_nonad_rg)
+    active_nonad_g = ic(h, v_nonad_g)
     active_ad = ic(h, v_ad)
-    if DEBUG:
-        print 'Non-adaptive: vs  =', v_nonad
-        print '              val =', f_ic_base(h, v_nonad, fc)
-        print 'Adaptive:     vs  =', v_ad
-        print '              val =', f_ic_base(h, v_ad, fc)
     if f_ic_base(h, v_ad, fc) != solver_ad.fsol:
         raise 'Inconsistent adaptive function values'
-    return {'active_nonad': active_nonad,
-            'active_ad': active_ad,
-            'v_ad': v_ad,
-            'f_nonad': f_ic_base(h, v_nonad, fc),
-            'f_ad': f_ic_base(h, v_ad, fc)}
+    return {
+        'active_nonad_rg': active_nonad_rg,
+        'active_nonad_g': active_nonad_g,
+        'active_ad': active_ad,
+        'v_ad': v_ad,
+        'f_nonad_rg': f_ic_base(h, v_nonad_rg, fc),
+        'f_nonad_g': f_ic_base(h, v_nonad_g, fc),
+        'f_ad': f_ic_base(h, v_ad, fc)
+        }
 
 def compare(g, pedge, nsim_nonad, nsim_ad, niter, k_ratio, gamma, parallel=True):
     f_nonad = []
@@ -179,21 +180,25 @@ def compare(g, pedge, nsim_nonad, nsim_ad, niter, k_ratio, gamma, parallel=True)
     fc = lambda a, b: f_comb(a, b, gamma)
     # Non-adaptive simulation
     solver_nonad = NonAdaptiveInfluence(g, pedge, fc,  nsim_nonad)
-    (v_nonad, _) = solver_nonad.random_greedy(g.vcount()/k_ratio)
+    (v_nonad_rg, _) = solver_nonad.random_greedy(g.vcount()/k_ratio)
+    (v_nonad_g, _) = solver_nonad.greedy(g.vcount()/k_ratio)
     # Adaptive simulation
-    arg = [g, pedge, nsim_ad, v_nonad, k_ratio, fc]
+    arg = [g, pedge, nsim_ad, v_nonad_rg, v_nonad_g, k_ratio, gamma]
     if parallel:
         res = joblib.Parallel(n_jobs=4)((compare_worker, [i] + arg, {})
                                         for i in range(niter))
     else:
         res = [compare_worker(*([i] + arg)) for i in range(niter)]
-    # Print results
-    r_nonad = [r['f_nonad'] for r in res]
+    # Return results
+    r_nonad_rg = [r['f_nonad_rg'] for r in res]
+    r_nonad_g = [r['f_nonad_g'] for r in res]
     r_ad = [r['f_ad'] for r in res]
     v_ad = [len(r['v_ad']) for r in res]
     return {
-        'r_nonad': r_nonad,
-        'v_nonad': v_nonad,
+        'r_nonad_rg': r_nonad_rg,
+        'r_nonad_g': r_nonad_g,
+        'v_nonad_rg': v_nonad_rg,
+        'v_nonad_g': v_nonad_g,
         'r_ad': r_ad,
         'v_ad': v_ad
         }
@@ -275,10 +280,16 @@ def format_result(r):
                                                      r['t_m'],
                                                      r['t_s'])
     s += bar
-    s += 'Non-adaptive |       favg = {0:.4g} '.format(np.mean(r['r_nonad']))
-    s +=  '+/- {0:.3g}\n'.format(np.std(r['r_nonad'])/sqn)
-    s += '             |     #nodes = {0:.3g}\n'.format(len(r['v_nonad']))
+    s += 'Non-adaptive |       favg = {0:.4g} '.format(np.mean(r['r_nonad_g']))
+    s +=  '+/- {0:.3g}\n'.format(np.std(r['r_nonad_g'])/sqn)
+    s += '     (g)     |     #nodes = {0:.3g}\n'.format(len(r['v_nonad_g']))
     s += bar
+    s += bar
+    s += 'Non-adaptive |       favg = {0:.4g} '.format(np.mean(r['r_nonad_rg']))
+    s +=  '+/- {0:.3g}\n'.format(np.std(r['r_nonad_rg'])/sqn)
+    s += '    (rg)     |     #nodes = {0:.3g}\n'.format(len(r['v_nonad_rg']))
+    s += bar
+
     s += lon
     s += '             | avg #nodes = {0:.3g}\n'.format(np.mean(r['v_ad']))
     s += bar
@@ -342,7 +353,9 @@ if __name__ == "__main__":
     now = time.localtime()
     fname = name + '_'
     fname += '{0:02d}{1}_'.format(now.tm_mday, cal.month_name[now.tm_mon][:3])
-    fname += '{0}_{1}_{2}'.format(now.tm_hour, now.tm_min, now.tm_sec)
+    fname += '{0:02d}_{1:02d}_{2:02d}'.format(now.tm_hour,
+                                              now.tm_min,
+                                              now.tm_sec)
     with open(os.path.join(RESULT_DIR, fname + '.txt'), 'w') as f:
         f.write(s)
     with open(os.path.join(RESULT_DIR, fname + '.pickle'), 'w') as f:
