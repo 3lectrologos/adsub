@@ -46,12 +46,15 @@ def ic_sim(g, p, niter, pbar=False):
     if pbar:
         pb = progressbar.ProgressBar(maxval=niter).start()
     n = g.vcount()
-    csim = np.zeros(shape=(n, n, niter), dtype='bool')
+    csim = {v['i']: {} for v in g.vs}
     for i in range(niter):
         (g, rem) = random_instance(g, p, copy=False, ret=True)
         for v in g.vs:
             # XXX: This assignment is the bottleneck here!
-            csim[v['i'], g.subcomponent(v, mode=ig.OUT), i] = True
+            b = n*ba.bitarray('0')
+            for z in g.subcomponent(v, mode=ig.OUT):
+                b[z] = True
+            csim[v['i']][i] = b
         g.add_edges(rem)
         if pbar:
             pb.update(i)
@@ -61,11 +64,10 @@ def ic_sim(g, p, niter, pbar=False):
 
 def ic_sim_cond(g, p, niter, active):
     n = g.vcount()
-    csim = {v: 0 for v in g.vs} #np.zeros(shape=g.vcount(), dtype='int32')
+    csim = {v: 0 for v in g.vs}
     for i in range(niter):
         (g, rem) = random_instance(g, p, copy=False, ret=True)
         for v in g.vs:
-            # XXX: This assignment is the bottleneck here!
             csim[v] += len(g.subcomponent(v.index, mode=ig.OUT))
         g.add_edges(rem)
     d = {}
@@ -83,12 +85,28 @@ def f_ic_base(h, a, fc):
     active = ic(h, a)
     return fc(len(active), len(a))
 
-def f_ic(v, a, csim, prev, fc):
-    if prev == None:
-        act = csim[v, :, :]
+def f_ic(v, a, csim, prev, fc, ret=False):
+    s = 0
+    vcount = len(csim)
+    nsim = len(csim[v])
+    if prev != None:
+        for k, b in csim[v].iteritems():
+            if ret:
+                prev[k] |= b
+                s += prev[k].count(1)
+            else:
+                s += (prev[k] | b).count(1)
     else:
-        act = prev | csim[v, :, :]
-    return fc((1.0*np.sum(act))/csim.shape[2], len(a) + 1)
+        if ret:
+            prev = {i: vcount*ba.bitarray('0') for i in range(nsim)}
+        for k, b, in csim[v].iteritems():
+            s += b.count(1)
+            if ret:
+                prev[k] |= b
+    if ret:
+        return (fc((1.0*s)/nsim, len(a) + 1), prev)
+    else:
+        return fc((1.0*s)/nsim, len(a) + 1)
 
 def f_ic_ad(v, a, csim, active, fprev, fc):
     a = set(a)
@@ -112,18 +130,13 @@ class NonAdaptiveInfluence(BaseInfluence):
     def init_f_hook(self):
         super(NonAdaptiveInfluence, self).init_f_hook()
         self.prev = None
-        self.fsol = 0
         self.f = lambda v, a: f_ic(v, a, self.csim, self.prev, self.fc)
 
     def update_f_hook(self):
-        self.fsol = self.f(self.sol[-1], self.sol[:-1])
-        if self.prev == None:
-            self.prev = self.csim[self.sol[-1], :, :]
-        else:
-            self.prev = self.prev | self.csim[self.sol[-1], :, :]
+        (self.fsol, self.prev) = f_ic(self.sol[-1], self.sol[:-1], self.csim,
+                                      self.prev, self.fc, ret=True)
         self.f = lambda v, a: f_ic(v, a, self.csim, self.prev, self.fc)
         
-
 class AdaptiveInfluence(BaseInfluence):
     def __init__(self, g, h, p, fc, nsim):
         super(AdaptiveInfluence, self).__init__([v['i'] for v in g.vs])
