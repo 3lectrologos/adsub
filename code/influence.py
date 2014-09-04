@@ -50,7 +50,6 @@ def ic_sim(g, p, niter, pbar=False):
     for i in range(niter):
         (g, rem) = random_instance(g, p, copy=False, ret=True)
         for v in g.vs:
-            # XXX: This assignment is the bottleneck here!
             b = n*ba.bitarray('0')
             for z in g.subcomponent(v, mode=ig.OUT):
                 b[z] = True
