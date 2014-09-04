@@ -180,7 +180,7 @@ def compare_worker(i, g, pedge, nsim_ad, v_nonad_rg, v_nonad_g, k_ratio, gamma):
         'f_ad': f_ic_base(h, v_ad, fc)
         }
 
-def compare(g, pedge, nsim_nonad, nsim_ad, niter, k_ratio, gamma, parallel=True):
+def compare(g, pedge, nsim_nonad, nsim_ad, niter, k_ratio, gamma, workers=0):
     f_nonad = []
     f_ad = []
     v_ad = []
@@ -196,8 +196,8 @@ def compare(g, pedge, nsim_nonad, nsim_ad, niter, k_ratio, gamma, parallel=True)
     (v_nonad_g, _) = solver_nonad.greedy(g.vcount()/k_ratio)
     # Adaptive simulation
     arg = [g, pedge, nsim_ad, v_nonad_rg, v_nonad_g, k_ratio, gamma]
-    if parallel:
-        res = joblib.Parallel(n_jobs=8)((compare_worker, [i] + arg, {})
+    if workers > 1:
+        res = joblib.Parallel(n_jobs=workers)((compare_worker, [i] + arg, {})
                                         for i in range(niter))
     else:
         res = [compare_worker(*([i] + arg)) for i in range(niter)]
@@ -224,9 +224,8 @@ def profile_aux():
     NITER = 10
     K_RATIO = 10
     GAMMA = 3
-    PARALLEL = False
     (name, g) = tc_snap_gr(100)
-    compare(g, P_EDGE, NSIM_NONAD, NSIM_AD, NITER, K_RATIO, GAMMA, PARALLEL)
+    compare(g, P_EDGE, NSIM_NONAD, NSIM_AD, NITER, K_RATIO, GAMMA)
 
 def profile():
     prof.run('influence.profile_aux()', sort='cumulative')
@@ -297,7 +296,7 @@ def format_result(r):
     s += 'Iterations        : {0}\n'.format(r['niter'])
     s += 'Gamma             : {0}\n'.format(r['gamma'])
     s += 'k-ratio           : {0}\n'.format(r['kratio'])
-    s += 'Parallel          : {0}\n'.format(r['parallel'])
+    s += 'Workers           : {0}\n'.format(r['workers'])
     s += 'Time taken        : {0}h{1}m{2}s\n'.format(r['t_h'],
                                                      r['t_m'],
                                                      r['t_s'])
@@ -322,30 +321,79 @@ RESULT_DIR = os.path.abspath('../results/')
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description='Influence maximization')
-    parser.add_argument('-d', '--debug', action='store_true', dest='debug')
+    parser.add_argument('-m', '--model',
+                        dest='model',
+                        choices=['ba', 'gr', 'fb'],
+                        default='gr',
+                        help='Graph type')
+    parser.add_argument('-n', '--nodes',
+                        dest='nodes',
+                        default=100,
+                        type=int,
+                        help='Number of nodes')
+    parser.add_argument('-p', '--pedge',
+                        dest='p_edge',
+                        default=0.05,
+                        type=float,
+                        help='Probability of each edge being removed')
+    parser.add_argument('-nn', '--nnonadaptive',
+                        dest='nsim_nonad',
+                        default=1000,
+                        type=int,
+                        help='Number of non-adaptive instances drawn')
+    parser.add_argument('-na', '--nadaptive',
+                        dest='nsim_ad',
+                        default=1000,
+                        type=int,
+                        help='Number of instances drawn at each adaptive step')
+    parser.add_argument('-ni', '--niter',
+                        dest='niter',
+                        default=8,
+                        type=int,
+                        help='Number of evaluation instances')
+    parser.add_argument('-k', '--kratio',
+                        dest='k_ratio',
+                        default=10,
+                        type=int,
+                        help='Cardinality constraint as a % of #nodes')
+    parser.add_argument('-g', '--gamma',
+                        dest='gamma',
+                        default=2,
+                        type=float,
+                        help='Cost per node')
+    parser.add_argument('-w', '--workers',
+                        dest='workers',
+                        default=1,
+                        type=int,
+                        help='Number of parallel workers (1 = sequential)')
     args = parser.parse_args()
-    DEBUG = args.debug
+    P_EDGE = args.p_edge
+    NSIM_NONAD = args.nsim_nonad
+    NSIM_AD = args.nsim_ad
+    NITER = args.niter
+    K_RATIO = args.k_ratio
+    GAMMA = args.gamma
+    WORKERS = args.workers
+    MODEL = args.model
+    NODES = args.nodes
 
     random.seed(0)
     np.random.seed(0)
-    P_EDGE = 0.05
-    NSIM_NONAD = 1000
-    NSIM_AD = 1000
-    NITER = 100
-    K_RATIO = 10
-    GAMMA = 3
-    PARALLEL = True
 
-    (name, g) = tc_snap_fb(1000)
-    ig.plot(g)
-#    (name, g) = ba_graph(100, 2)
+    if MODEL == 'ba':
+        (name, g) = tc_ba(NODES, 2)
+    elif MODEL == 'gr':
+        (name, g) = tc_snap_gr(NODES)
+    elif MODEL == 'fb':
+        (name, g) = tc_snap_fb(NODES)
+
     print 'Running {0}'.format(name)
     print '#nodes =', g.vcount()
     print '#edges =', g.ecount()
     print 'transitivity =', g.transitivity_undirected()
 
     stime = time.time()
-    r = compare(g, P_EDGE, NSIM_NONAD, NSIM_AD, NITER, K_RATIO, GAMMA, PARALLEL)
+    r = compare(g, P_EDGE, NSIM_NONAD, NSIM_AD, NITER, K_RATIO, GAMMA, WORKERS)
     etime = time.time()
     dt = int(etime - stime)
     hours = dt / 3600
@@ -362,7 +410,7 @@ if __name__ == "__main__":
     r['niter'] = NITER
     r['gamma'] = GAMMA
     r['kratio'] = K_RATIO
-    r['parallel'] = PARALLEL
+    r['workers'] = WORKERS
     r['t_h'] = hours
     r['t_m'] = mins
     r['t_s'] = secs
