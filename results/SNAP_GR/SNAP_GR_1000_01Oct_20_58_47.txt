@@ -1,24 +1,24 @@
-SNAP_GR_1000 (47da460)
+SNAP_GR_1000 (674f73d)
 -------------------------------------------
 Nodes             : 1000
 Edges             : 13033
 Transitivity      : 0.805
-Edge prob.        : 0.3
+Edge prob.        : 0.2
 Sims non-adaptive : 10000
 Sims adaptive     : 1000
 Iterations        : 100
 Gamma             : 1.0
 k-ratio           : 10
-Workers           : 4
-Time taken        : 1h7m25s
+Workers           : 3
+Time taken        : 1h23m38s
 -------------------------------------------
-Non-adaptive |       favg = 784.1 +/- 1.55
-     (g)     |     #nodes = 44
+Non-adaptive |       favg = 636.9 +/- 1.86
+     (g)     |     #nodes = 100
 -------------------------------------------
 -------------------------------------------
-Non-adaptive |       favg = 782.6 +/- 1.48
-    (rg)     |     #nodes = 51
+Non-adaptive |       favg = 632.4 +/- 1.72
+    (rg)     |     #nodes = 100
 -------------------------------------------
-Adaptive     |       favg = 827.5 +/- 1.15
-             | avg #nodes = 74.9
+Adaptive     |       favg = 694.8 +/- 1.64
+             | avg #nodes = 100
 -------------------------------------------
