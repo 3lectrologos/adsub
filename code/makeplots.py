@@ -33,10 +33,8 @@ def maketex(datadir, fname):
     os.chdir(cwd)
 
 def clean(datadir):
-    print datadir
     cwd = os.getcwd()
     os.chdir(datadir)
-    print os.getcwd()
     subprocess.call('rm -f *.tex *.pdf', shell=True)
     os.chdir(cwd)
 
