@@ -248,33 +248,22 @@ def tc_test():
     name = 'TEST_GRAPH'
     return (name, test_graph())
 
-def tc_ba(n, m):
-    name = 'B_A_{0}_{1}'.format(n, m)
-    g = ig.Graph.Barabasi(n, m)
-    g.to_directed()
-    for v in g.vs:
-        v['i'] = v.index
+def get_tc(fname, n, m=None):
+    if fname == 'B_A':
+        if m == None: m = 2
+        name = 'B_A_{0}_{1}'.format(n, m)
+        g = ig.Graph.Barabasi(n, m)
+        g.to_directed()
+        for v in g.vs:
+            v['i'] = v.index
+    else:
+        name = fname + '_' + str(n)
+        g = util.read_graph(os.path.join(DATA_DIR, fname + '.txt'))
+        rem = [v for v in g.vs[n:]]
+        g.delete_vertices(rem)
+        for v in g.vs:
+            v['i'] = v.index
     return (name, g)
-
-def tc_snap_fb(n):
-    name = 'SNAP_FB_' + str(n)
-    fpath = os.path.join(DATA_DIR, 'facebook_combined.txt')
-    g = tc_snap_generic(fpath, n)
-    return (name, g)
-
-def tc_snap_gr(n):
-    name = 'SNAP_GR_' + str(n)
-    fpath = os.path.join(DATA_DIR, 'general_relativity.txt')
-    g = tc_snap_generic(fpath, n)
-    return (name, g)
-
-def tc_snap_generic(fpath, n):
-    g = util.read_snap_graph(fpath)
-    rem = [v for v in g.vs[n:]]
-    g.delete_vertices(rem)
-    for v in g.vs:
-        v['i'] = v.index
-    return g
 
 def format_result(r):
     sqn = np.sqrt(r['niter'])
@@ -322,8 +311,7 @@ if __name__ == "__main__":
     parser = argparse.ArgumentParser(description='Influence maximization')
     parser.add_argument('-m', '--model',
                         dest='model',
-                        choices=['ba', 'gr', 'fb'],
-                        default='gr',
+                        default='B_A',
                         help='Graph type')
     parser.add_argument('-n', '--nodes',
                         dest='nodes',
@@ -379,12 +367,7 @@ if __name__ == "__main__":
     random.seed(0)
     np.random.seed(0)
 
-    if MODEL == 'ba':
-        (name, g) = tc_ba(NODES, 2)
-    elif MODEL == 'gr':
-        (name, g) = tc_snap_gr(NODES)
-    elif MODEL == 'fb':
-        (name, g) = tc_snap_fb(NODES)
+    (name, g) = get_tc(MODEL, NODES)
 
     print 'Running {0}'.format(name)
     print '#nodes =', g.vcount()
