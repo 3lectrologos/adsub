@@ -36,6 +36,7 @@ def maketex(datadir, fname):
 def clean(datadir):
     cwd = os.getcwd()
     os.chdir(datadir)
+    subprocess.call(['latexmk', '-C'])
     subprocess.call('rm -f *.tex', shell=True)
     os.chdir(cwd)
 
