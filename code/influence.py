@@ -193,6 +193,7 @@ def compare(g, pedge, nsim_nonad, nsim_ad, niter, k_ratio, gamma, workers=0):
     solver_nonad = NonAdaptiveInfluence(g, pedge, fc,  nsim_nonad)
     (v_nonad_rg, _) = solver_nonad.random_greedy(g.vcount()/k_ratio)
     (v_nonad_g, _) = solver_nonad.greedy(g.vcount()/k_ratio)
+    del solver_nonad.csim
     # Adaptive simulation
     arg = [g, pedge, nsim_ad, v_nonad_rg, v_nonad_g, k_ratio, gamma]
     if workers > 1:
@@ -248,8 +249,9 @@ def tc_test():
     name = 'TEST_GRAPH'
     return (name, test_graph())
 
-def get_tc(fname, n, m=None):
+def get_tc(fname, n=None, m=None):
     if fname == 'B_A':
+        if n == None: n = 1000
         if m == None: m = 2
         name = 'B_A_{0}_{1}'.format(n, m)
         g = ig.Graph.Barabasi(n, m)
@@ -259,8 +261,9 @@ def get_tc(fname, n, m=None):
     else:
         name = fname + '_' + str(n)
         g = util.read_graph(os.path.join(DATA_DIR, fname + '.txt'))
-        rem = [v for v in g.vs[n:]]
-        g.delete_vertices(rem)
+        if n != None:
+            rem = [v for v in g.vs[n:]]
+            g.delete_vertices(rem)
         for v in g.vs:
             v['i'] = v.index
     return (name, g)
@@ -315,7 +318,7 @@ if __name__ == "__main__":
                         help='Graph type')
     parser.add_argument('-n', '--nodes',
                         dest='nodes',
-                        default=100,
+                        default=None,
                         type=int,
                         help='Number of nodes')
     parser.add_argument('-p', '--pedge',
