@@ -249,25 +249,6 @@ def tc_test():
     name = 'TEST_GRAPH'
     return (name, test_graph())
 
-def get_tc(fname, n=None, m=None):
-    if fname == 'B_A':
-        if n == None: n = 1000
-        if m == None: m = 2
-        name = 'B_A_{0}_{1}'.format(n, m)
-        g = ig.Graph.Barabasi(n, m)
-        g.to_directed()
-        for v in g.vs:
-            v['i'] = v.index
-    else:
-        name = fname + '_' + str(n)
-        g = util.read_graph(os.path.join(DATA_DIR, fname + '.txt'))
-        if n != None:
-            rem = [v for v in g.vs[n:]]
-            g.delete_vertices(rem)
-        for v in g.vs:
-            v['i'] = v.index
-    return (name, g)
-
 def format_result(r):
     sqn = np.sqrt(r['niter'])
 
@@ -307,7 +288,6 @@ def format_result(r):
     s += bar
     return s
 
-DATA_DIR = os.path.abspath('../data/')
 RESULT_DIR = os.path.abspath('../results/')
 
 if __name__ == "__main__":
@@ -370,7 +350,7 @@ if __name__ == "__main__":
     random.seed(0)
     np.random.seed(0)
 
-    (name, g) = get_tc(MODEL, NODES)
+    (name, g) = util.get_tc(MODEL, NODES)
 
     print 'Running {0}'.format(name)
     print '#nodes =', g.vcount()

@@ -47,6 +47,7 @@ class AdaptiveMax(object):
             q.put((-df, v, 1))
         i = 1
         sk = []
+        #foobar = 0
         while i <= k:
             if len(sk) == k or (len(sk) > 0 and q.empty()):
                 j = random.randint(0, len(sk)-1)
@@ -64,6 +65,8 @@ class AdaptiveMax(object):
             if -fv <= 0:
                 continue
             if iv < i:
+                #print 'computing', v, 'foobar =', foobar
+                #foobar += 1
                 df = self.f(v, self.sol) - self.fsol
                 q.put((-df, v, i))
             else:
