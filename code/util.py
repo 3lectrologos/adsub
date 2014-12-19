@@ -2,6 +2,7 @@ import os
 import csv
 import subprocess
 import numpy as np
+import matplotlib.pylab as plt
 import networkx as nx
 import igraph as ig
 import influence
@@ -59,23 +60,39 @@ def get_tc(fname, n=None, m=None, directed=True, nxgraph=False):
         name = fname + '_' + str(n)
         g = read_graph(os.path.join(DIR_DATA, fname + '.txt'), directed, nxgraph)
         if n != None:
-            #pr = np.array(g.pagerank(directed=directed), dtype=np.double)
-            pr = np.array(g.degree(g.vs), dtype=np.double)
-            print 'max = ', np.max(pr)
-            print 'min = ', np.min(pr)
-            print pr
-            pr /= np.sum(pr)
-            print 'max = ', np.max(pr)
-            print 'min = ', np.min(pr)
-            print 'sum =', np.sum(pr)
-            print pr
-            new_vs = np.random.choice(g.vs, size=n, replace=False, p=pr)
-#            rem = [v for v in g.vs[n:]]
-            g = g.subgraph(new_vs)
-        print len(g.vs)
+#            g = sample_RDN(g, n)
+            g = sample_RJ(g, n)
         for v in g.vs:
             v['i'] = v.index
     return (name, g)
+
+def sample_RDN(g, n):
+    pr = np.array(g.degree(g.vs), dtype=np.double)
+    pr /= np.sum(pr)
+    new_vs = np.random.choice(g.vs, size=n, replace=False, p=pr)
+    return g.subgraph(new_vs)
+
+def sample_RJ(g, n):
+    print n
+    JP = 0.15
+    v = np.random.choice(g.vs)
+    new_vs = set()
+    while len(new_vs) < n:
+        print len(new_vs)
+        new_vs.add(v)
+        nbs = g.neighbors(v)
+        if len(nbs) == 0 or np.random.random < JP:
+            v = np.random.choice(g.vs)
+        else:
+            v = np.random.choice(nbs)
+    print 'new_vs =', len(new_vs)
+    return g.subgraph(new_vs)
+
+def plot_degree_dist(g):
+    xs, ys = zip(*[(left, count) for left, _, count in 
+                   g.degree_distribution().bins()])
+    plt.loglog(xs, ys, 'o')
+    plt.show()
 
 def get_coords(x, y):
     s = ''

@@ -149,11 +149,6 @@ def run(g, reps, niter, nsim_nonad, n_available, k):
     res = {'f_nonad': [], 'f_ad': [], 'imp': []}
     for rep in range(reps):
         print 'Rep:', rep
-#        ig.plot(g)
-#        xs, ys = zip(*[(left, count) for left, _, count in 
-#                       g.degree_distribution().bins()])
-#        plt.loglog(xs, ys, 'o')
-#        plt.show()
         r = compare(g, k_csets(g, n_available), nsim_nonad, niter, k)
         res['f_nonad'].append(r['f_nonad'])
         res['f_ad'].append(r['f_ad'])

@@ -1,26 +1,29 @@
 import numpy as np
+import igraph as ig
 import util
 import maxcut
 
 FN_MC_IMP = 'mc_imp.tex'
 
-ks = [1, 3, 5, 10, 15, 20]
+ks = [5, 10, 15, 20, 25]
 xs = []
 imps = []
 means = []
 res = {}
-model = 'SNAP_ENRON'
+model = 'B_A'
 nodes = 1000
 (name, g) = util.get_tc(model, nodes, directed=False)
+ig.plot(g)
+util.plot_degree_dist(g)
 print 'Running {0}'.format(name)
 print '#nodes =', g.vcount()
 print '#edges =', g.ecount()
 print 'transitivity =', g.transitivity_undirected()
 for k in ks:
-    reps = 10
+    reps = 5
     niter = 1000
     nsim_nonad = 1000
-    n_available = 50
+    n_available = 100
     r = maxcut.run(g, reps, niter, nsim_nonad, n_available, k)
     imps += r['imp']
     means.append(np.mean(r['imp']))
