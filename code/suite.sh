@@ -1,9 +1,9 @@
 #!/usr/bin/env bash
 
-MODEL=SNAP_GR
+MODEL=SNAP_FB
 COST=1
-K=10
-WORKERS=4
+K=100
+WORKERS=7
 
 python influence.py -m $MODEL -n 1000 -nn 10000 -na 1000 -ni 100 -p 0.01 -k $K -g $COST -w $WORKERS
 python influence.py -m $MODEL -n 1000 -nn 10000 -na 1000 -ni 100 -p 0.05 -k $K -g $COST -w $WORKERS

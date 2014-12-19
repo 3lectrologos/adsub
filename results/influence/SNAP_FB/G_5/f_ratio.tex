@@ -13,36 +13,26 @@ view={0}{90},
 width=7in,
 height=5in,
 scale only axis,
-xmin=0, xmax=25,
-xtick={0, 5, 10, 15, 20, 25},
-xlabel={$k$},
-ymin=-5, ymax=20,
-ytick={0, 5, 10, 15, 20},
-ylabel={$\%$ improvement},
+xmin=0, xmax=0.7,
+xtick={0, 0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7},
+xlabel={$p$},
+ymin=0, ymax=10,
+ytick={0, 2, 4, 6, 8, 10},
+ylabel={\% nodes},
 major tick length=5pt,
 axis lines*=left,
 legend cell align=left,
 clip=false]
 
 \addplot [
-only marks,
 mark=*,
 mark size=3.5pt,
-color=orange!80!black,
-%solid,
-%line width=2pt,
-]
-coordinates{
-%imp%
-};
-
-\addplot [
-color=orange!60!black,
+color=blue,
 solid,
-line width=3pt
+line width=2pt,
 ]
 coordinates{
-%means%
+(0.01,-0.014)(0.05,0.838)(0.1,1.406)(0.15,1.278)(0.2,-0.655)(0.3,-0.258)(0.4,-0.19)(0.5,-0.764)(0.6,-1.416)
 };
 
 \end{axis}

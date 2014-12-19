@@ -10,8 +10,8 @@ xs = []
 imps = []
 means = []
 res = {}
-model = 'B_A'
-nodes = 1000
+model = 'PROTEIN'
+nodes = 1459
 (name, g) = util.get_tc(model, nodes, directed=False)
 ig.plot(g)
 util.plot_degree_dist(g)

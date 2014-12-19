@@ -1,0 +1,73 @@
+\documentclass{standalone}
+\usepackage{pgfplots}
+\pgfplotsset{compat=newest}
+
+\begin{document}
+\begin{tikzpicture}
+
+\begin{axis}[%
+tick label style={font=\Huge},
+label style={font=\Huge},
+legend style={font=\Huge},
+view={0}{90},
+width=7in,
+height=5in,
+scale only axis,
+xmin=0, xmax=0.7,
+xtick={0, 0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7},
+xlabel={$p$},
+ymin=0, ymax=1000,
+ytick={0, 200, 400, 600, 800, 1000},
+ylabel={$f_{\mathrm{avg}}$},
+major tick length=5pt,
+axis lines*=left,
+legend cell align=left,
+clip=false]
+
+%% \addplot [
+%% draw=none,
+%% fill=orange!80!black,
+%% opacity=0.5,
+%% solid,
+%% line width=2pt
+%% ]
+%% coordinates{
+%% %std_nonad%
+%% };
+
+%% \addplot [
+%% draw=none,
+%% fill=blue,
+%% opacity=0.5,
+%% solid,
+%% line width=2pt
+%% ]
+%% coordinates{
+%% %std_ad%
+%% };
+
+\addplot [
+mark=*,
+mark size=3.5pt,
+color=orange!80!black,
+solid,
+line width=2pt,
+]
+coordinates{
+(0.01,134.83)(0.05,583.36)(0.1,753.04)(0.1,753.86)(0.15,824.59)(0.15,825.27)(0.2,865.58)(0.2,866.38)(0.3,904.62)(0.4,922.75)(0.5,938.86)(0.6,942.32)
+};
+
+\addplot [
+mark=*,
+mark size=3.5pt,
+color=blue,
+solid,
+line width=2pt,
+]
+coordinates{
+(0.01,145.99)(0.05,601.49)(0.1,770.53)(0.1,771.52)(0.15,837.66)(0.15,837.82)(0.2,874.31)(0.2,875.32)(0.3,910.37)(0.4,928.43)(0.5,940.29)(0.6,946.61)
+};
+
+\end{axis}
+\end{tikzpicture}
+\end{document}
