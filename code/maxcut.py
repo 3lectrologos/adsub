@@ -112,7 +112,7 @@ def compare(g, csets, nsim_nonad, niter, k):
     imp = 100.0 * (fm_ad - fm_nonad) / fm_nonad
     print 'f_nonad =', fm_nonad
     print 'f_ad =', fm_ad
-    print 'improvement = {0:.1}'.format(imp)
+    print 'improvement = {0:.1f}%'.format(imp)
     return {
         'f_nonad': fm_nonad,
         'f_ad': fm_ad,
@@ -159,7 +159,7 @@ def run(g, reps, niter, nsim_nonad, n_available, k):
 RESULT_DIR = os.path.abspath('../results/')
 
 if __name__ == "__main__":
-    parser = argparse.ArgumentParser(description='Influence maximization')
+    parser = argparse.ArgumentParser(description='Adaptive Max Cut')
     parser.add_argument('-m', '--model',
                         dest='model',
                         default='B_A',

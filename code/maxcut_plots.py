@@ -10,8 +10,8 @@ xs = []
 imps = []
 means = []
 res = {}
-model = 'PROTEIN'
-nodes = 1459
+model = 'EGO_FB'
+nodes = None
 (name, g) = util.get_tc(model, nodes, directed=False)
 ig.plot(g)
 util.plot_degree_dist(g)
@@ -20,10 +20,10 @@ print '#nodes =', g.vcount()
 print '#edges =', g.ecount()
 print 'transitivity =', g.transitivity_undirected()
 for k in ks:
-    reps = 5
+    reps = 3
     niter = 1000
     nsim_nonad = 1000
-    n_available = 100
+    n_available = len(g.vs) / 10
     r = maxcut.run(g, reps, niter, nsim_nonad, n_available, k)
     imps += r['imp']
     means.append(np.mean(r['imp']))

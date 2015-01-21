@@ -19,21 +19,32 @@ def read_graph(filename, directed=True, nxgraph=False):
         g = nx.Graph()
     with open(filename, 'rb') as f:
         reader = csv.reader(f, delimiter=' ')
-        i = 0
         for row in reader:
             if row[0][0] == '#':
                 continue
             else:
-                v = int(row[0])
-                u = int(row[1])
+                u = int(row[0])
+                v = int(row[1])
                 g.add_edge(u, v)
     g = nx.convert_node_labels_to_integers(g, ordering='decreasing degree')
     if nxgraph:
         return g
-    if directed:
-        h = ig.Graph(directed=True)
-    else:
-        h = ig.Graph(directed=False)
+    h = ig.Graph(directed=directed)
+    h.add_vertices(g.number_of_nodes())
+    h.add_edges(g.edges())
+    return h
+
+def read_sig_graph(filename):
+    g = nx.Graph()
+    with open(filename, 'rb') as f:
+        reader = csv.reader(f, delimiter=' ')
+        i = 0
+        for row in reader:
+            u = str(row[0])
+            v = str(row[5])
+            g.add_edge(u, v)
+    g = nx.convert_node_labels_to_integers(g, ordering='decreasing degree')
+    h = ig.Graph(directed=False)
     h.add_vertices(g.number_of_nodes())
     h.add_edges(g.edges())
     return h
@@ -53,26 +64,34 @@ def get_tc(fname, n=None, m=None, directed=True, nxgraph=False):
         if m == None: m = 2
         name = 'B_A_{0}_{1}'.format(n, m)
         g = ig.Graph.Barabasi(n, m)
-        g.to_directed()
+        if directed:
+            g.to_directed()
+        else:
+            g.to_undirected()
         for v in g.vs:
             v['i'] = v.index
     else:
-        name = fname + '_' + str(n)
         g = read_graph(os.path.join(DIR_DATA, fname + '.txt'), directed, nxgraph)
+        g.simplify()
         if n != None:
 #            g = sample_RDN(g, n)
             g = sample_RJ(g, n)
         for v in g.vs:
             v['i'] = v.index
+        name = fname + '_' + str(len(g.vs))
     return (name, g)
 
 def sample_RDN(g, n):
+    if n == None:
+        return g
     pr = np.array(g.degree(g.vs), dtype=np.double)
     pr /= np.sum(pr)
     new_vs = np.random.choice(g.vs, size=n, replace=False, p=pr)
     return g.subgraph(new_vs)
 
 def sample_RJ(g, n):
+    if n == None:
+        return g
     print n
     JP = 0.15
     v = np.random.choice(g.vs)
