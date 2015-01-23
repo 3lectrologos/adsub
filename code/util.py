@@ -49,15 +49,6 @@ def read_sig_graph(filename):
     h.add_edges(g.edges())
     return h
 
-def save_graph(g, fout):
-    with open(fout, 'wb') as f:
-        for e in g.es:
-            f.write(str(e.source) + ' ' + str(e.target) + '\n')
-
-def save_subgraph(model, n):
-    (name, g) = influence.get_tc(model, n)
-    save_graph(g, name + '.txt')
-
 def get_tc(fname, n=None, m=None, directed=True, nxgraph=False):
     if fname == 'B_A':
         if n == None: n = 1000
@@ -76,8 +67,10 @@ def get_tc(fname, n=None, m=None, directed=True, nxgraph=False):
         if n != None:
 #            g = sample_RDN(g, n)
             g = sample_RJ(g, n)
+        print 'check:', g.vcount()
         for v in g.vs:
             v['i'] = v.index
+            print v.index
         name = fname + '_' + str(len(g.vs))
     return (name, g)
 
@@ -94,18 +87,17 @@ def sample_RJ(g, n):
         return g
     print n
     JP = 0.15
-    v = np.random.choice(g.vs)
+    v = np.random.choice(g.vs).index
     new_vs = set()
     while len(new_vs) < n:
-        print len(new_vs)
         new_vs.add(v)
         nbs = g.neighbors(v)
         if len(nbs) == 0 or np.random.random < JP:
             v = np.random.choice(g.vs)
         else:
             v = np.random.choice(nbs)
-    print 'new_vs =', len(new_vs)
-    return g.subgraph(new_vs)
+    print 'vcount =', len(new_vs)
+    return g.induced_subgraph(new_vs)
 
 def plot_degree_dist(g):
     xs, ys = zip(*[(left, count) for left, _, count in 
@@ -120,12 +112,14 @@ def get_coords(x, y):
         s += '(' + str(e[0]) + ',' + str(e[1]) + ')'
     return s
     
-def replace(datadir, fname, d):
+def replace(datadir, fname, d, outname=None):
+    if outname is None:
+        outname = fname.lower()
     with open(os.path.join(DIR_TEMPLATE, fname), 'r') as fin:
         s = fin.read()
         for k in d:
             s = s.replace('%' + k + '%', d[k])
-            with open(os.path.join(datadir, fname), 'w') as fout:
+            with open(os.path.join(datadir, outname), 'w') as fout:
                 fout.write(s)
 
 def maketex(datadir, fname):
