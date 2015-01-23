@@ -38,6 +38,6 @@ for k in ks:
 
 ms = util.get_coords(ks, means)
 cs = util.get_coords(xs, imps)
-texname = model + '.tex'
+texname = model.lower() + '.tex'
 util.replace(outdir, FN_MC_IMP, {'imp': cs, 'means': ms}, outname=texname)
 util.maketex(outdir, texname)

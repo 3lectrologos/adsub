@@ -114,7 +114,7 @@ def get_coords(x, y):
     
 def replace(datadir, fname, d, outname=None):
     if outname is None:
-        outname = fname.lower()
+        outname = fname
     with open(os.path.join(DIR_TEMPLATE, fname), 'r') as fin:
         s = fin.read()
         for k in d:

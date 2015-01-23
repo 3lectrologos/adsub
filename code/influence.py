@@ -151,12 +151,12 @@ class AdaptiveInfluence(BaseInfluence):
 
     def update_f_hook(self):
         active = ic(self.h, self.sol)
-        print '#sol =', len(self.sol), ', #active =', len(active)
+#        print '#sol =', len(self.sol), ', #active =', len(active)
         delete_active(self.g, active)
         csim = ic_sim_cond(self.g, self.p, self.nsim, active=active)
         self.f = lambda v, a: f_ic_ad(v, a, csim, active, self.fsol, self.fc)
         self.fsol = self.fc(len(active), len(self.sol))
-        print 'fsol =', self.fsol
+#        print 'fsol =', self.fsol
 
 def compare_worker(i, g, pedge, nsim_ad, v_nonad_rg, v_nonad_g, k_ratio, gamma):
     print '-> worker', i, 'started.'
