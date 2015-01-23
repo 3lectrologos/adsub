@@ -98,7 +98,7 @@ def train_2d(X, Y, fs):
 #    clf = ske.RandomForestClassifier()
     clf.fit(X, Y)
 
-    h = 0.02
+    h = 0.01
     x_min, x_max = X[:, 0].min() - 0.1, X[:, 0].max() + 0.1
     y_min, y_max = X[:, 1].min() - 0.1, X[:, 1].max() + 0.1
     xx, yy = np.meshgrid(np.arange(x_min, x_max, h), np.arange(y_min, y_max, h))
@@ -106,8 +106,14 @@ def train_2d(X, Y, fs):
     Z = Z.reshape(xx.shape)
     plt.figure(1, figsize=(4, 3))
     plt.pcolormesh(xx, yy, Z, cmap=plt.cm.Paired)
-    plt.plot(X[Y==1, 0], X[Y==1, 1], 'o', markerfacecolor=plt.cm.Paired(0.5), markersize=10, antialiased=True)
-    plt.plot(X[Y==0, 0], X[Y==0, 1], 'o', markerfacecolor=plt.cm.Paired(0.1), markersize=10, antialiased=True)
+    plt.plot(X[Y==1, 0], X[Y==1, 1], 'o',
+             markerfacecolor=plt.cm.Paired(0.5),
+             markersize=10,
+             antialiased=True)
+    plt.plot(X[Y==0, 0], X[Y==0, 1], 'o',
+             markerfacecolor=plt.cm.Paired(0.1),
+             markersize=10,
+             antialiased=True)
     plt.xlabel(PROP_NAMES[fs[0]])
     plt.ylabel(PROP_NAMES[fs[1]])
     plt.xlim(xx.min(), xx.max())
