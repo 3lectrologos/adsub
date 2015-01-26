@@ -1,0 +1,40 @@
+\documentclass{standalone}
+\usepackage{pgfplots}
+\pgfplotsset{compat=newest}
+
+\begin{document}
+\begin{tikzpicture}
+
+\begin{axis}[%
+tick label style={font=\Huge},
+label style={font=\Huge},
+legend style={font=\Huge},
+view={0}{90},
+width=7in,
+height=5in,
+scale only axis,
+xmin=0, xmax=1,
+xtick={0, 0.2, 0.4, 0.6, 0.8, 1},
+xlabel={$k$},
+ymin=-5, ymax=20,
+ytick={0, 5, 10, 15, 20},
+ylabel={$\%$ improvement},
+major tick length=5pt,
+axis lines*=left,
+legend cell align=left,
+clip=false]
+
+\addplot [
+mark=*,
+mark size=3.5pt,
+color=orange!60!black,
+solid,
+line width=3pt
+]
+coordinates{
+(0.01,14.8673658236)(0.05,21.8071099408)(0.1,12.0235476006)(0.15,6.35928785503)(0.3,3.18973418882)(0.5,1.11492663783)(0.7,0.319642334851)
+};
+
+\end{axis}
+\end{tikzpicture}
+\end{document}
