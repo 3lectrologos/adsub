@@ -1,0 +1,73 @@
+\documentclass{standalone}
+\usepackage{pgfplots}
+\pgfplotsset{compat=newest}
+
+\begin{document}
+\begin{tikzpicture}
+
+\begin{axis}[%
+tick label style={font=\Huge},
+label style={font=\Huge},
+legend style={font=\Huge},
+view={0}{90},
+max space between ticks=50pt,
+width=7in,
+height=5in,
+scale only axis,
+xmin=0, xmax=50,
+xtick={0, 10, 20, 30, 40, 50},
+xlabel={$k$},
+ymin=0, ymax=1026.0,
+%ytick={0, 200, 400, 600, 800, 1000},
+ylabel={$f_{avg}$},
+major tick length=5pt,
+axis lines*=left,
+legend cell align=left,
+clip=false]
+
+\addplot [
+only marks,
+mark=*,
+mark size=3.5pt,
+color=orange!80!black,
+%solid,
+%line width=2pt,
+]
+coordinates{
+(1,284.6)(1,284.6)(1,284.6)(1,284.6)(1,426.4)(5,568.0)(5,637.8)(5,723.0)(5,761.9)(5,762.7)(10,496.7)(10,708.6)(10,767.9)(10,813.5)(10,850.9)(20,497.0)(20,638.4)(20,782.6)(20,903.3)(20,978.1)(30,426.3)(30,637.5)(30,638.5)(30,809.4)(30,843.8)(50,883.8)(50,894.3)(50,928.9)(50,936.5)(50,974.7)
+};
+
+\addplot [
+only marks,
+mark=*,
+mark size=3.5pt,
+color=cyan!80!black,
+%solid,
+%line width=2pt,
+]
+coordinates{
+(1,284.6)(1,284.6)(1,284.6)(1,284.6)(1,426.4)(5,743.5)(5,830.6)(5,831.1)(5,860.7)(5,869.5)(10,920.1)(10,920.9)(10,957.7)(10,967.7)(10,976.7)(20,981.3)(20,1006.3)(20,1007.0)(20,1007.1)(20,1021.8)(30,1016.3)(30,1016.8)(30,1017.6)(30,1025.6)(30,1026.0)(50,997.9)(50,1007.8)(50,1013.3)(50,1019.1)(50,1021.1)
+};
+
+\addplot [
+color=orange!80!black,
+solid,
+line width=3pt
+]
+coordinates{
+(1,312.96)(5,690.68)(10,727.52)(20,759.88)(30,671.1)(50,923.64)
+};
+
+\addplot [
+color=cyan!80!black,
+solid,
+line width=3pt
+]
+coordinates{
+(1,312.96)(5,827.08)(10,948.62)(20,1004.7)(30,1020.46)(50,1011.84)
+};
+
+
+\end{axis}
+\end{tikzpicture}
+\end{document}

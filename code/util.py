@@ -12,7 +12,7 @@ DIR_DATA = os.path.abspath('../data/')
 DIR_RES = os.path.abspath('../results/')
 DIR_TEMPLATE = os.path.abspath('../templates/')
 
-def read_graph(filename, directed=True, nxgraph=False):
+def read_graph(filename, directed=False, nxgraph=False):
     if directed:
         g = nx.DiGraph()
     else:
@@ -49,12 +49,25 @@ def read_sig_graph(filename):
     h.add_edges(g.edges())
     return h
 
-def get_tc(fname, n=None, m=None, directed=True, nxgraph=False):
+def get_tc(fname, n, directed=True, nxgraph=False):
     if fname == 'B_A':
-        if n == None: n = 1000
-        if m == None: m = 2
-        name = 'B_A_{0}_{1}'.format(n, m)
-        g = ig.Graph.Barabasi(n, m)
+        g = ig.Graph.Barabasi(n, 2)
+        if directed:
+            g.to_directed()
+        else:
+            g.to_undirected()
+        for v in g.vs:
+            v['i'] = v.index
+    elif fname == 'E_R':
+        g = ig.Graph.Erdos_Renyi(n, m=2000)
+        if directed:
+            g.to_directed()
+        else:
+            g.to_undirected()
+        for v in g.vs:
+            v['i'] = v.index
+    elif fname == 'W_S':
+        g = ig.Graph.Watts_Strogatz(1, 1000, 3, 0.1)
         if directed:
             g.to_directed()
         else:
@@ -65,13 +78,12 @@ def get_tc(fname, n=None, m=None, directed=True, nxgraph=False):
         g = read_graph(os.path.join(DIR_DATA, fname + '.txt'), directed, nxgraph)
         g.simplify()
         if n != None:
-#            g = sample_RDN(g, n)
-            g = sample_RJ(g, n)
+            g = sample_RW(g, n)
         print 'check:', g.vcount()
         for v in g.vs:
             v['i'] = v.index
             print v.index
-        name = fname + '_' + str(len(g.vs))
+    name = fname + '_' + str(len(g.vs))
     return (name, g)
 
 def sample_RDN(g, n):
@@ -82,20 +94,86 @@ def sample_RDN(g, n):
     new_vs = np.random.choice(g.vs, size=n, replace=False, p=pr)
     return g.subgraph(new_vs)
 
+def sample_RW_edges(g, n):
+    MAX_COUNTER = 100 * n
+    if n == None:
+        return g
+    RP = 0.15
+    vstart = np.random.choice(g.vs).index    
+    v = vstart
+    new_vs = set()
+    new_es = set()
+    new_e = None
+    counter = 0
+    while len(new_vs) < n:
+        new_vs.add(v)
+        if new_e is not None:
+            new_es.add(new_e)
+            new_e = None
+        nbs = g.neighbors(v)
+        if len(nbs) == 0 or np.random.random() < RP:
+            v = vstart
+            print '--->', v
+        else:
+            w = np.random.choice(nbs)
+            new_e = (v, w)
+            v = w
+        print len(new_vs)
+        if counter >= MAX_COUNTER:
+            vstart = np.random.choice(g.vs).index
+            v = vstart
+            counter = 0
+            print '==============> resetting'
+        else:
+            counter += 1
+        print len(new_vs)
+    print 'vcount =', len(new_vs)
+    return g.subgraph_edges(new_es)
+
+def sample_RW(g, n):
+    MAX_COUNTER = 100 * n
+    if n == None:
+        return g
+    RP = 0.15
+    vstart = np.random.choice(g.vs).index
+    v = vstart
+    new_vs = set()
+    counter = 0
+    while len(new_vs) < n:
+        new_vs.add(v)
+        nbs = g.neighbors(v)
+        if len(nbs) == 0 or np.random.random() < RP:
+            v = vstart
+            print '--->', v
+        else:
+            v = np.random.choice(nbs)
+        print len(new_vs)
+        if counter >= MAX_COUNTER:
+            vstart = np.random.choice(g.vs).index
+            v = vstart
+            counter = 0
+            print '==============> resetting'
+        else:
+            counter += 1
+        print len(new_vs)
+    print 'vcount =', len(new_vs)
+    return g.induced_subgraph(new_vs)
+
 def sample_RJ(g, n):
     if n == None:
         return g
-    print n
     JP = 0.15
     v = np.random.choice(g.vs).index
     new_vs = set()
     while len(new_vs) < n:
         new_vs.add(v)
         nbs = g.neighbors(v)
-        if len(nbs) == 0 or np.random.random < JP:
-            v = np.random.choice(g.vs)
+        if len(nbs) == 0 or np.random.random() < JP:
+            v = np.random.choice(g.vs).index
+            print '--->', v
         else:
             v = np.random.choice(nbs)
+        print len(new_vs)
     print 'vcount =', len(new_vs)
     return g.induced_subgraph(new_vs)
 

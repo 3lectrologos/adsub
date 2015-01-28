@@ -1,0 +1,50 @@
+\documentclass{standalone}
+\usepackage{pgfplots}
+\pgfplotsset{compat=newest}
+
+\begin{document}
+\begin{tikzpicture}
+
+\begin{axis}[%
+tick label style={font=\Huge},
+label style={font=\Huge},
+legend style={font=\Huge},
+view={0}{90},
+width=7in,
+height=5in,
+scale only axis,
+xmin=0, xmax=25,
+xtick={0, 5, 10, 15, 20, 25},
+xlabel={$k$},
+ymin=-5, ymax=20,
+ytick={0, 5, 10, 15, 20},
+ylabel={$\%$ improvement},
+major tick length=5pt,
+axis lines*=left,
+legend cell align=left,
+clip=false]
+
+\addplot [
+only marks,
+mark=*,
+mark size=3.5pt,
+color=orange!80!black,
+%solid,
+%line width=2pt,
+]
+coordinates{
+(1,0.0)(1,0.0)(1,0.0)(1,0.0)(1,0.0)(5,-4.67005076142)(5,-2.12252773758)(5,7.41138560687)(5,9.99432140829)(5,10.1846337105)(10,-1.80825656772)(10,5.7474975783)(10,10.5263157895)(10,17.2719935432)(10,21.0646636185)(20,-8.11209439528)(20,-4.68264536174)(20,1.47644715257)(20,5.28185693984)(20,18.0284191829)(30,-16.9228331485)(30,-13.6349405135)(30,-10.5929003021)(30,-1.4672489083)(30,-0.71239231279)(50,-15.5849104534)(50,-9.87829040476)(50,-7.73312110359)(50,-6.03364382038)(50,-5.78710644678)
+};
+
+\addplot [
+color=orange!60!black,
+solid,
+line width=3pt
+]
+coordinates{
+(1,0.0)(5,4.15955244534)(10,10.5604427924)(20,2.39839670367)(30,-8.66606303703)(50,-9.00341444579)
+};
+
+\end{axis}
+\end{tikzpicture}
+\end{document}
