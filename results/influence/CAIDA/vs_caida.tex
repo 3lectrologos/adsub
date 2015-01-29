@@ -6,6 +6,8 @@
 \begin{tikzpicture}
 
 \begin{axis}[%
+title style={font=\Huge},
+title=CAIDA,
 tick label style={font=\Huge},
 label style={font=\Huge},
 legend style={font=\Huge},
@@ -27,23 +29,23 @@ clip=false]
 \addplot [
 mark=*,
 mark size=3.5pt,
-color=orange!60!black,
+color=orange!70!black,
 solid,
 line width=3pt
 ]
 coordinates{
-(0.01,0.359)(0.1,4.819)(0.3,17.3796875)(0.5,84.15)(0.7,443.6)(1,999.0)
+(0.01,0.5092)(0.1,5.544)(0.3,20.3664285714)(0.5,109.137142857)(0.7,890.92)(1,999.0)
 };
 
 \addplot [
 mark=*,
 mark size=3.5pt,
-color=cyan!60!black,
+color=cyan!70!black,
 solid,
 line width=3pt
 ]
 coordinates{
-(0.01,0.868497788916)(0.1,6.64520945006)(0.3,13.9678480691)(0.5,39.7024192077)(0.7,133.659442641)(1,999.0)
+(0.01,0.6272)(0.1,5.7776)(0.3,12.3110605586)(0.5,41.1947890796)(0.7,162.534886724)(1,999.0)
 };
 
 \end{axis}

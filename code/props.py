@@ -59,20 +59,27 @@ def get_graph_props(g):
 
 def get_features(gdir):
     X = []
-    Y = []
+#    Y = []
+    labels = []
     subdirs = sorted(os.listdir(gdir))
     for subdir in subdirs:
+        if not os.path.isdir(os.path.join(gdir, subdir)):
+            continue
         print subdir
         with open(os.path.join(gdir, subdir, 'props'), 'r') as f:
             X.append([float(p) for p in f.readlines()])
-        with open(os.path.join(gdir, subdir, 'res'), 'r') as f:
-            Y.append([int(f.readline())])
-    return (X, Y)
+#        with open(os.path.join(gdir, subdir, 'res'), 'r') as f:
+#            Y.append([int(f.readline())])
+        labels.append(subdir)
+    Y = [0, 1, 1, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 1, 0, 1, 0, 0]
+    return (X, Y, labels)
 
 
 def save_features(gdir):
     subdirs = sorted(os.listdir(gdir))
     for subdir in subdirs:
+        if not os.path.isdir(os.path.join(gdir, subdir)):
+            continue
         print subdir
         g = ig.Graph.Read_Edgelist(os.path.join(gdir, subdir, 'graph'),
                                    directed=False)
@@ -89,7 +96,7 @@ def train(X, Y):
     print X_new
 
 
-def train_2d(X, Y, fs):
+def train_2d(X, Y, labels, fs):
     print fs
     print X[:, fs]
     X = X[:, fs]
@@ -114,6 +121,13 @@ def train_2d(X, Y, fs):
              markerfacecolor=plt.cm.Paired(0.1),
              markersize=10,
              antialiased=True)
+#    labels = ['a' + str(i) for i in range(X.shape[0])]
+    for label, x, y in zip(labels, X[:, 0], X[:, 1]):
+        plt.annotate(label,
+                     xy = (x, y), xytext = (-20, 20),
+                     textcoords = 'offset points', ha = 'right', va = 'bottom',
+                     bbox = dict(boxstyle = 'round,pad=0.5', fc = 'yellow', alpha = 0.5),
+                     arrowprops = dict(arrowstyle = '->', connectionstyle = 'arc3,rad=0'))
     plt.xlabel(PROP_NAMES[fs[0]])
     plt.ylabel(PROP_NAMES[fs[1]])
     plt.xlim(xx.min(), xx.max())
@@ -123,10 +137,10 @@ def train_2d(X, Y, fs):
 
 
 if __name__ == '__main__':
-#    save_features(os.path.join(util.DIR_RES, 'maxcut'))
-    (X, Y) = get_features(os.path.join(util.DIR_RES, 'maxcut'))
+    save_features(os.path.join(util.DIR_RES, 'maxcut'))
+    (X, Y, labels) = get_features(os.path.join(util.DIR_RES, 'maxcut'))
     X = np.array(X)
     Y = np.array(Y).ravel()
     print X
 #    train(X, Y)
-    train_2d(X, Y, [3, 10])
+    train_2d(X, Y, labels, [3, 10])

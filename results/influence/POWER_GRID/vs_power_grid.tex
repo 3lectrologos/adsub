@@ -6,6 +6,8 @@
 \begin{tikzpicture}
 
 \begin{axis}[%
+title style={font=\Huge},
+title=POWER\_GRID,
 tick label style={font=\Huge},
 label style={font=\Huge},
 legend style={font=\Huge},
@@ -27,23 +29,23 @@ clip=false]
 \addplot [
 mark=*,
 mark size=3.5pt,
-color=orange!60!black,
+color=orange!70!black,
 solid,
 line width=3pt
 ]
 coordinates{
-(0.01,0.084)(0.1,0.783)(0.3,3.535)(0.5,8.232)(0.7,14.186)(1,499.0)
+(0.01,0.078)(0.1,0.8272)(0.3,3.8944)(0.5,8.6344)(0.7,14.7844)(1,332.333333333)
 };
 
 \addplot [
 mark=*,
 mark size=3.5pt,
-color=cyan!60!black,
+color=cyan!70!black,
 solid,
 line width=3pt
 ]
 coordinates{
-(0.01,0.0735714285714)(0.1,0.749)(0.3,4.011)(0.5,9.559)(0.7,15.706)(1,499.0)
+(0.01,0.0592)(0.1,0.876)(0.3,4.3324)(0.5,10.0528)(0.7,16.3032)(1,332.333333333)
 };
 
 \end{axis}

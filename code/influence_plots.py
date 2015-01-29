@@ -1,5 +1,6 @@
 import argparse
 import os
+import re
 import numpy as np
 import igraph as ig
 import util
@@ -32,9 +33,9 @@ def run(model, nodes):
     print '#edges =', g.ecount()
     print 'transitivity =', g.transitivity_undirected()
     for p in ps:
-        niter = 20
-        nsim_nonad = 100
-        nsim_ad = 10
+        niter = 50
+        nsim_nonad = 1000
+        nsim_ad = 100
         k_ratio = 20
         gamma = 1
         n_workers = 4
@@ -56,28 +57,29 @@ def run(model, nodes):
         print 'imp =', imp
         print 'v (nonad) =', vm_nonad
         print 'v (ad) =', np.mean(r['v_ad'])
-
+    esc_model = re.escape(model)
+    # Improvements plot
     imps_plot = util.get_coords(ps, imps)
     texname = 'imps_' + model.lower() + '.tex'
-    util.replace(outdir, TEMPLATE_INF_IMP, {'means': imps_plot},
+    util.replace(outdir, TEMPLATE_INF_IMP, {'means': imps_plot, 'title': esc_model},
                  outname=texname)
     util.maketex(outdir, texname)
-
+    # f_avg plot
     fs_nonad_plot = util.get_coords(ps, fs_nonad)
     fs_ad_plot = util.get_coords(ps, fs_ad)
     texname = 'fs_' + model.lower() + '.tex'
     util.replace(outdir,
                  TEMPLATE_INF_FS,
-                 {'fs_nonad': fs_nonad_plot, 'fs_ad': fs_ad_plot},
+                 {'fs_nonad': fs_nonad_plot, 'fs_ad': fs_ad_plot, 'title': esc_model},
                  outname=texname)
     util.maketex(outdir, texname)
-
+    # f_avg / num. of nodes plot
     vs_nonad_plot = util.get_coords(ps, vs_nonad)
     vs_ad_plot = util.get_coords(ps, vs_ad)
     texname = 'vs_' + model.lower() + '.tex'
     util.replace(outdir,
                  TEMPLATE_INF_VS,
-                 {'vs_nonad': vs_nonad_plot, 'vs_ad': vs_ad_plot},
+                 {'vs_nonad': vs_nonad_plot, 'vs_ad': vs_ad_plot, 'title': esc_model},
                  outname=texname)
     util.maketex(outdir, texname)
 

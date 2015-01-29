@@ -1,5 +1,6 @@
 import argparse
 import os
+import re
 import numpy as np
 import igraph as ig
 import util
@@ -33,9 +34,9 @@ def run(model, nodes):
     print '#edges =', g.ecount()
     print 'transitivity =', g.transitivity_undirected()
     for k in ks:
-        reps = 5
-        niter = 10
-        nsim_nonad = 10
+        reps = 20
+        niter = 100
+        nsim_nonad = 100
         r = maxcut.run(g, reps, niter, nsim_nonad, n_available, k)
         imps += r['imp']
         imp_means.append(np.mean(r['imp']))
@@ -44,14 +45,15 @@ def run(model, nodes):
         fs_ad += r['f_ad']
         fs_ad_means.append(np.mean(r['f_ad']))
         xs += [k] * reps
-
+    esc_model = re.escape(model)
+    # Improvements plot
     imp_ms = util.get_coords(ks, imp_means)
     imp_cs = util.get_coords(xs, imps)
     texname = 'imp_' + model.lower() + '.tex'
-    util.replace(outdir, TEMPLATE_MC_IMP, {'imps': imp_cs, 'imp_means': imp_ms},
+    util.replace(outdir, TEMPLATE_MC_IMP, {'imps': imp_cs, 'imp_means': imp_ms, 'title': esc_model},
                  outname=texname)
     util.maketex(outdir, texname)
-
+    # f_avg plot
     fs_nonad_ms = util.get_coords(ks, fs_nonad_means)
     fs_nonad_cs = util.get_coords(xs, fs_nonad)
     fs_ad_ms = util.get_coords(ks, fs_ad_means)
@@ -61,7 +63,7 @@ def run(model, nodes):
                  TEMPLATE_MC_FS,
                  {'fs_nonad': fs_nonad_cs, 'f_nonad_means': fs_nonad_ms,
                   'fs_ad': fs_ad_cs, 'f_ad_means': fs_ad_ms,
-                  'y_max': str(max(fs_ad))},
+                  'y_max': str(max(fs_ad)), 'title': esc_model},
                  outname=texname)
     util.maketex(outdir, texname)
 
