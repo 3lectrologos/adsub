@@ -39,13 +39,74 @@
 %-------------------------------------------------------------------------------
 % Custom definitions
 %-------------------------------------------------------------------------------
+\usepackage{etoolbox}
+% Define output mode (default: six-page IJCAI)
+\newtoggle{short}
+\toggletrue{short}
+% Uncomment for long version
+\togglefalse{short}
+
 \usepackage[usenames,dvipsnames]{xcolor}
 \usepackage{amsmath,amssymb,amsthm}
+\usepackage{mathtools}                    % For \vcentcolon
+\usepackage{xspace}            % Controls space after user-defined command
+\usepackage{xparse}            % Optional arguments in commands
+\usepackage{enumitem}
+\usepackage{fixltx2e}          % For subscripts in normal text
 \usepackage{bm}
 \usepackage{algorithm}
 \usepackage[noend]{algorithmic}
+\usepackage{pgfplots}
+\iftoggle{short}
+{
+\usepackage{nohyperref}
+\usepackage{url}
+}
+{
+\usepackage{flushend}
+\usepackage[debug]{hyperref}
+\definecolor{mydarkblue}{rgb}{0,0.08,0.45}
+\hypersetup{%
+  pdftitle={Active Learning for Level Set Estimation},
+  pdfauthor={},
+  pdfsubject={},
+  pdfkeywords={},
+  pdfborder=0 0 0,
+  pdfpagemode=UseNone,
+  colorlinks=true,
+  linkcolor=mydarkblue,
+  citecolor=mydarkblue,
+  filecolor=mydarkblue,
+  urlcolor=mydarkblue,
+  pdfview=FitH}
+}
 
 \newcommand{\todo}[1]{\noindent\texttt{\small\color[rgb]{0.5,0.1,0.1} TODO: #1}}
+
+% Refs
+\newcommand{\sectref}[1]{\hyperref[#1]{Section \ref*{#1}}}
+\newcommand{\chapref}[1]{\hyperref[#1]{Chapter \ref*{#1}}}
+\newcommand{\figref}[1]{\hyperref[#1]{Figure \ref*{#1}}}
+\newcommand{\figsref}[1]{\hyperref[#1]{Figures \ref*{#1}}}
+\newcommand{\tabref}[1]{\hyperref[#1]{ Table \ref*{#1}}}
+\newcommand{\algoref}[1]{\hyperref[#1]{Algorithm \ref*{#1}}}
+\newcommand{\theoremref}[1]{\hyperref[#1]{Theorem \ref*{#1}}}
+\newcommand{\lemmaref}[1]{\hyperref[#1]{Lemma \ref*{#1}}}
+\newcommand{\lemmasref}[1]{\hyperref[#1]{Lemmas \ref*{#1}}}
+\newcommand{\corref}[1]{\hyperref[#1]{Corollary \ref*{#1}}}
+\newcommand{\asref}[1]{\hyperref[#1]{Assumption \ref*{#1}}}
+\newcommand{\eqtref}[1]{\hyperref[#1]{\mbox{(\ref*{#1})}}}
+\newcommand{\appref}[1]{\hyperref[#1]{Appendix \ref*{#1}}}
+\newcommand{\lineref}[1]{\hyperref[#1]{line \ref*{#1}}}
+\newcommand{\linesref}[2]{\hyperref[#1]{lines \ref*{#1}--\ref*{#2}}}
+\newcommand{\linsref}[1]{\hyperref[#1]{lines \ref*{#1}}}
+
+% Theory environments
+\newtheorem{definition}{Definition}
+\newtheorem{theorem}{Theorem}
+\newtheorem{lemma}{Lemma}
+\newtheorem{cor}{Corollary}
+\newtheorem{assumption}{Assumption}
 
 % Algorithm-related
 \newcommand{\theHalgorithm}{\arabic{algorithm}}
@@ -72,8 +133,86 @@
 \newcommand{\argmin}{\operatornamewithlimits{argmin}}
 \def\*#1{\bm{#1}}
 
+\newcommand{\twopartdef}[4]
+{
+	\left\{
+		\begin{array}{ll}
+			#1\,,& \mbox{if } #2 \\
+			#3\,,& \mbox{if } #4
+		\end{array}
+	\right.
+}
+
+\newcommand{\twopartdefo}[3]
+{
+	\left\{
+		\begin{array}{ll}
+			#1\,,& \mbox{if } #2 \\
+			#3\,,& \mbox{otherwise}
+		\end{array}
+	\right.
+}
+
+\newcommand{\favg}{f_{\mathrm{avg}}}
+\DeclareMathOperator{\dom}{dom}
+\newcommand{\defeq}{\vcentcolon=}
+
+% Fix spacing problem with \left and \right
+\let\originalleft\left
+\let\originalright\right
+\renewcommand{\left}{\mathopen{}\mathclose\bgroup\originalleft}
+\renewcommand{\right}{\aftergroup\egroup\originalright}
+
+% Math definitions
+\newcommand{\smid}{\ \middle\vert\ }
+\newcommand{\mmid}{\,\vert\,}
+
+\DeclareDocumentCommand \E { o m o }{%
+  \IfValueTF {#1} {%
+    \mathbb{E}_{#1}
+  }{%
+    \mathbb{E}
+  }%
+  \left[#2
+  \IfValueT {#3} {%
+    \smid #3
+  }%
+  \right]
+}
+
+\DeclareDocumentCommand \P { o m o }{%
+  \IfValueTF {#1} {%
+    \mathbb{P}_{#1}
+  }{%
+    \mathbb{P}
+  }%
+  \left[#2
+  \IfValueT {#3} {%
+    \smid #3
+  }%
+  \right]
+}
+
+\newcommand{\D}[2]{\Delta(#1\mmid#2)}
+\newcommand{\sdef}[2]{\left\{#1\smid#2\right\}}
+
+\newcommand{\pio}{\pi_{[0]}}
+\newcommand{\pii}{\pi_{[i]}}
+\newcommand{\pik}{\pi_{[k]}}
+\newcommand{\pis}{\pi^*}
+\newcommand{\pisi}{\pi^*_{[i]}}
+\newcommand{\pisk}{\pi^*_{[k]}}
+\newcommand{\pig}{\pi^{\textrm{rg}}}
+\newcommand{\pigo}{\pi^{\textrm{rg}}_{[0]}}
+\newcommand{\pigi}{\pi^{\textrm{rg}}_{[i]}}
+\newcommand{\pigl}{\pi^{\textrm{rg}}_{[\ell]}}
+\newcommand{\pigii}{\pi^{\textrm{rg}}_{[i+1]}}
+\newcommand{\pigk}{\pi^{\textrm{rg}}_{[k]}}
+
+\newcommand{\uitem}[1]{\item[#1]}
+
 % For citations like: Author et. al [2010]
-\newcommand{\mscite}[1]{\citeauthor{#1}~\shortcite{#1}}
+\newcommand{\citet}[1]{\citeauthor{#1}~\shortcite{#1}}
 
 % Paragraph
 \renewcommand{\paragraph}[1]{\vspace{0.3em}\noindent\textbf{#1.}\makebox[0.5em]{}}
@@ -98,7 +237,7 @@ ETH Zurich}
 \end{abstract}
 
 \section{Introduction}
-Test \cite{golovin11} and \mscite{buchbinder14}
+Test \cite{golovin11} and \citet{buchbinder14}
 
 \section{Algorithm}
 \begin{algorithm}[!b]
@@ -129,13 +268,17 @@ Test \cite{golovin11} and \mscite{buchbinder14}
 }
 \end{algorithm}
 
-\appendix
-
-\section{Proofs}
-
 % The file named.bst is a bibliography style file for BibTeX 0.99c
 \bibliographystyle{named}
 \bibliography{ijcai15}
 
-\end{document}
+\iftoggle{short}
+{}
+{
+\clearpage
+\onecolumn
+\appendix
+\include{proofs}
+}
 
+\end{document}
