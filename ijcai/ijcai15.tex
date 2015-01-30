@@ -1,0 +1,141 @@
+%%%% ijcai15.tex
+
+\typeout{Non-monotone adaptive submodular maximization}
+
+% These are the instructions for authors for IJCAI-15.
+% They are the same as the ones for IJCAI-11 with superficical wording
+%   changes only.
+
+\documentclass{article}
+% The file ijcai15.sty is the style file for IJCAI-15 (same as ijcai07.sty).
+\usepackage{ijcai15}
+
+% Use the postscript times font!
+\usepackage{times}
+
+% the following package is optional:
+%\usepackage{latexsym} 
+
+% Following comment is from ijcai97-submit.tex:
+% The preparation of these files was supported by Schlumberger Palo Alto
+% Research, AT\&T Bell Laboratories, and Morgan Kaufmann Publishers.
+% Shirley Jowell, of Morgan Kaufmann Publishers, and Peter F.
+% Patel-Schneider, of AT\&T Bell Laboratories collaborated on their
+% preparation.
+
+% These instructions can be modified and used in other conferences as long
+% as credit to the authors and supporting agencies is retained, this notice
+% is not changed, and further modification or reuse is not restricted.
+% Neither Shirley Jowell nor Peter F. Patel-Schneider can be listed as
+% contacts for providing assistance without their prior permission.
+
+% To use for other conferences, change references to files and the
+% conference appropriate and use other authors, contacts, publishers, and
+% organizations.
+% Also change the deadline and address for returning papers and the length and
+% page charge instructions.
+% Put where the files are available in the appropriate places.
+
+%-------------------------------------------------------------------------------
+% Custom definitions
+%-------------------------------------------------------------------------------
+\usepackage[usenames,dvipsnames]{xcolor}
+\usepackage{amsmath,amssymb,amsthm}
+\usepackage{bm}
+\usepackage{algorithm}
+\usepackage[noend]{algorithmic}
+
+\newcommand{\todo}[1]{\noindent\texttt{\small\color[rgb]{0.5,0.1,0.1} TODO: #1}}
+
+% Algorithm-related
+\newcommand{\theHalgorithm}{\arabic{algorithm}}
+\renewcommand{\algorithmicrequire}{\textbf{Input:}}
+\renewcommand{\algorithmicensure}{\textbf{Output:}}
+\newcommand*\LNot{\textbf{not}\xspace}
+\newcommand*\LAnd{\textbf{and}\xspace}
+\newcommand*\LET[2]{\STATE #1 $\gets$ #2}
+\newcommand*\Fcall[1]{\textsc{#1}}
+\makeatletter
+\newcommand{\setalglineno}[1]{%
+  \setcounter{ALC@line}{\numexpr#1-1}}
+\makeatother
+\renewcommand{\algorithmiccomment}[1]{// #1}
+\newcommand{\LINEIF}[2]{%
+    \STATE\algorithmicif\ {#1}\ \algorithmicthen\ {#2}%
+}
+\newcommand{\LINEELSE}[1]{%
+    \STATE\algorithmicelse\ {#1}%
+}
+
+% Math definitions
+\newcommand{\argmax}{\operatornamewithlimits{argmax}}
+\newcommand{\argmin}{\operatornamewithlimits{argmin}}
+\def\*#1{\bm{#1}}
+
+% For citations like: Author et. al [2010]
+\newcommand{\mscite}[1]{\citeauthor{#1}~\shortcite{#1}}
+
+% Paragraph
+\renewcommand{\paragraph}[1]{\vspace{0.3em}\noindent\textbf{#1.}\makebox[0.5em]{}}
+%-------------------------------------------------------------------------------
+
+\title{Non-monotone adaptive submodular maximization}
+\author{Alkis Gotovos\\
+ETH Zurich
+\And
+Amin Karbasi\\
+Yale University
+\And
+Andreas Krause\\
+ETH Zurich}
+
+\begin{document}
+
+\maketitle
+
+\begin{abstract}
+\todo{abstract}
+\end{abstract}
+
+\section{Introduction}
+Test \cite{golovin11} and \mscite{buchbinder14}
+
+\section{Algorithm}
+\begin{algorithm}[!b]
+  \caption{The algorithm}
+  \label{alg:rg}
+\small{
+\begin{algorithmic}[1]
+  \REQUIRE ground set $E$, function $f$, distribution $p(\phi)$, cardinality constraint $k$
+  \ENSURE set $A \subseteq E$
+  \LET{$t$}{1}
+  \WHILE{$U_{t-1} \neq \varnothing$}
+    \STATE $H_t \gets H_{t-1}$, $L_t \gets L_{t-1}$, $U_t \gets U_{t-1}$
+    \FORALL{$\*x \in U_{t-1}$}
+      \LET{$C_{t}(\*x)$}{$C_{t-1}(\*x) \cap Q_t(\*x)$} \label{lin:upd}
+      \IF{$\min(C_t(\*x)) + \epsilon > h$} \label{lin:class1}
+        \STATE $U_t \gets U_t \setminus \{\*x\}$, $H_t \gets H_t \cup \{\*x\}$
+      \ELSIF{$\max(C_t(\*x)) - \epsilon \leq h$} \label{lin:class2_pre}
+        \STATE $U_t \gets U_t \setminus \{\*x\}$, $L_t \gets L_t \cup \{\*x\}$ \label{lin:class2}
+      \ENDIF
+    \ENDFOR
+    \LET{$\*x_t$}{$\argmax_{\*x \in U_t}(a_t(\*x))$} \label{lin:sel1}
+    \LET{$y_t$}{$f(\*x_t) + n_t$} \label{lin:sel2}
+    \STATE Compute $\mu_t(\*x)$ and $\sigma_t(\*x)$ for all $\*x \in U_t$ \label{lin:inf}
+    \LET{$t$}{$t + 1$}
+  \ENDWHILE
+  \STATE $\hat{H} \gets H_{t-1}$, $\hat{L} \gets L_{t-1}$
+\end{algorithmic}
+}
+\end{algorithm}
+
+\appendix
+
+\section{Proofs}
+
+% The file named.bst is a bibliography style file for BibTeX 0.99c
+\bibliographystyle{named}
+\bibliography{ijcai15}
+
+\end{document}
+
