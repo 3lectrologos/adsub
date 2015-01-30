@@ -1,0 +1,75 @@
+\documentclass{standalone}
+\usepackage{pgfplots}
+\pgfplotsset{compat=newest}
+
+\begin{document}
+\begin{tikzpicture}
+
+\begin{axis}[%
+title style={font=\Huge},
+title=FLIGHTS,
+tick label style={font=\Huge},
+label style={font=\Huge},
+legend style={font=\Huge},
+view={0}{90},
+max space between ticks=50pt,
+width=7in,
+height=5in,
+scale only axis,
+xmin=0, xmax=50,
+xtick={0, 10, 20, 30, 40, 50},
+xlabel={$k$},
+ymin=0, ymax=2321.9,
+%ytick={0, 200, 400, 600, 800, 1000},
+ylabel={$f_{avg}$},
+major tick length=5pt,
+axis lines*=left,
+legend cell align=left,
+clip=false]
+
+\addplot [
+only marks,
+mark=*,
+mark size=3.5pt,
+color=orange!70!black,
+%solid,
+%line width=2pt,
+]
+coordinates{
+(1,81.1)(1,95.05)(1,124.75)(5,420.95)(5,442.75)(5,476.1)(10,824.65)(10,828.5)(10,884.85)(20,1299.1)(20,1299.95)(20,1356.7)(30,1785.8)(30,1794.2)(30,1796.5)(50,2376.8)(50,2377.35)(50,2455.1)
+};
+
+\addplot [
+only marks,
+mark=*,
+mark size=3.5pt,
+color=cyan!70!black,
+%solid,
+%line width=2pt,
+]
+coordinates{
+(1,81.1)(1,95.05)(1,124.75)(5,440.8)(5,444.2)(5,446.75)(10,762.45)(10,796.0)(10,851.95)(20,1328.05)(20,1338.65)(20,1420.4)(30,1729.25)(30,1840.15)(30,1863.4)(50,2184.6)(50,2265.1)(50,2321.9)
+};
+
+\addplot [
+color=orange!70!black,
+solid,
+line width=3pt
+]
+coordinates{
+(1,100.3)(5,446.6)(10,846.0)(20,1318.58333333)(30,1792.16666667)(50,2403.08333333)
+};
+
+\addplot [
+color=cyan!70!black,
+solid,
+line width=3pt
+]
+coordinates{
+(1,100.3)(5,443.916666667)(10,803.466666667)(20,1362.36666667)(30,1810.93333333)(50,2257.2)
+};
+
+
+\end{axis}
+\end{tikzpicture}
+\end{document}

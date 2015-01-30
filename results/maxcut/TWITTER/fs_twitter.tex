@@ -1,0 +1,75 @@
+\documentclass{standalone}
+\usepackage{pgfplots}
+\pgfplotsset{compat=newest}
+
+\begin{document}
+\begin{tikzpicture}
+
+\begin{axis}[%
+title style={font=\Huge},
+title=TWITTER,
+tick label style={font=\Huge},
+label style={font=\Huge},
+legend style={font=\Huge},
+view={0}{90},
+max space between ticks=50pt,
+width=7in,
+height=5in,
+scale only axis,
+xmin=0, xmax=50,
+xtick={0, 10, 20, 30, 40, 50},
+xlabel={$k$},
+ymin=0, ymax=665.95,
+%ytick={0, 200, 400, 600, 800, 1000},
+ylabel={$f_{avg}$},
+major tick length=5pt,
+axis lines*=left,
+legend cell align=left,
+clip=false]
+
+\addplot [
+only marks,
+mark=*,
+mark size=3.5pt,
+color=orange!70!black,
+%solid,
+%line width=2pt,
+]
+coordinates{
+(1,71.8)(1,83.6)(1,142.6)(5,257.35)(5,263.5)(5,289.75)(10,223.6)(10,225.95)(10,243.1)(20,248.4)(20,425.35)(20,435.25)(30,173.0)(30,226.8)(30,267.85)(50,337.85)(50,618.65)(50,670.85)
+};
+
+\addplot [
+only marks,
+mark=*,
+mark size=3.5pt,
+color=cyan!70!black,
+%solid,
+%line width=2pt,
+]
+coordinates{
+(1,71.8)(1,83.6)(1,142.6)(5,291.05)(5,297.0)(5,306.3)(10,378.2)(10,391.9)(10,402.25)(20,449.4)(20,470.8)(20,484.65)(30,524.15)(30,526.1)(30,535.5)(50,600.5)(50,650.3)(50,665.95)
+};
+
+\addplot [
+color=orange!70!black,
+solid,
+line width=3pt
+]
+coordinates{
+(1,99.3333333333)(5,270.2)(10,230.883333333)(20,369.666666667)(30,222.55)(50,542.45)
+};
+
+\addplot [
+color=cyan!70!black,
+solid,
+line width=3pt
+]
+coordinates{
+(1,99.3333333333)(5,298.116666667)(10,390.783333333)(20,468.283333333)(30,528.583333333)(50,638.916666667)
+};
+
+
+\end{axis}
+\end{tikzpicture}
+\end{document}

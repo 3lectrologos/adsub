@@ -1,0 +1,53 @@
+\documentclass{standalone}
+\usepackage{pgfplots}
+\pgfplotsset{compat=newest}
+
+\begin{document}
+\begin{tikzpicture}
+
+\begin{axis}[%
+title style={font=\Huge},
+title=FLIGHTS,
+tick label style={font=\Huge},
+label style={font=\Huge},
+legend style={font=\Huge},
+view={0}{90},
+width=7in,
+height=5in,
+scale only axis,
+xmin=0, xmax=1,
+xtick={0, 0.2, 0.4, 0.6, 0.8, 1},
+xlabel={$p$},
+ymin=0, ymax=1000,
+ytick={0, 200, 400, 600, 800, 1000},
+ylabel={$f_{avg} / |V_s|$},
+major tick length=5pt,
+axis lines*=left,
+legend cell align=left,
+clip=false]
+
+\addplot [
+mark=*,
+mark size=3.5pt,
+color=orange!70!black,
+solid,
+line width=3pt
+]
+coordinates{
+(0.01,1.001)(0.1,11.408)(0.3,58.4214285714)(0.5,152.675)(0.7,961.5)(1,999.0)
+};
+
+\addplot [
+mark=*,
+mark size=3.5pt,
+color=cyan!70!black,
+solid,
+line width=3pt
+]
+coordinates{
+(0.01,1.201)(0.1,15.4233801193)(0.3,34.933023099)(0.5,108.831704545)(0.7,234.683690476)(1,999.0)
+};
+
+\end{axis}
+\end{tikzpicture}
+\end{document}

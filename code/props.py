@@ -62,7 +62,6 @@ def get_features(gdir):
     for subdir in subdirs:
         if not os.path.isdir(os.path.join(gdir, subdir)):
             continue
-        print subdir
         with open(os.path.join(gdir, subdir, 'props'), 'r') as f:
             X.append([float(p) for p in f.readlines()])
         labels.append(subdir)
@@ -146,15 +145,17 @@ if __name__ == '__main__':
     if args.objective == 'inf':
         subdir = 'influence'
         Y = [0, 1, 1, 0, 1, 0,
-             1, 0, 0, 1, 1, 1,
-             0, 0, 0, 1, 1,
-             1, 1, 1, 0, 1]
+             1, 0, 0, 1, 1, 0,
+             1, 0, 0, 0, 0, 1,
+             1, 1, 1, 1, 0, 1,
+             0]
     elif args.objective == 'mc':
         subdir = 'maxcut'
         Y = [0, 0, 1, 1, 0, 0,
              0, 1, 0, 0, 0, 0,
-             1, 1, 0, 0, 1,
-             0, 1, 0, 1, 0]
+             0, 1, 1, 0, 1, 0,
+             1, 0, 1, 0, 1, 0,
+             1]
     if args.generate:
         save_features(os.path.join(util.DIR_RES, subdir))
     (X, labels) = get_features(os.path.join(util.DIR_RES, subdir))

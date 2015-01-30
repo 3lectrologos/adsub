@@ -1,0 +1,52 @@
+\documentclass{standalone}
+\usepackage{pgfplots}
+\pgfplotsset{compat=newest}
+
+\begin{document}
+\begin{tikzpicture}
+
+\begin{axis}[%
+title style={font=\Huge},
+title=TWITTER,
+tick label style={font=\Huge},
+label style={font=\Huge},
+legend style={font=\Huge},
+view={0}{90},
+width=7in,
+height=5in,
+scale only axis,
+xmin=0, xmax=25,
+xtick={0, 5, 10, 15, 20, 25},
+xlabel={$k$},
+ymin=-5, ymax=20,
+ytick={0, 5, 10, 15, 20},
+ylabel={$\%$ improvement},
+major tick length=5pt,
+axis lines*=left,
+legend cell align=left,
+clip=false]
+
+\addplot [
+only marks,
+mark=*,
+mark size=3.5pt,
+color=orange!70!black,
+%solid,
+%line width=2pt,
+]
+coordinates{
+(1,0.0)(1,0.0)(1,0.0)(5,5.71182053494)(5,12.7134724858)(5,13.0950068001)(10,55.5738379268)(10,75.2683363148)(10,78.0261119717)(20,8.16771970132)(20,13.9414599741)(20,80.9178743961)(30,95.6878850103)(30,131.9664903)(30,209.537572254)(50,-2.93380748404)(50,-0.730416635612)(50,92.4818706527)
+};
+
+\addplot [
+color=orange!70!black,
+solid,
+line width=3pt
+]
+coordinates{
+(1,0.0)(5,10.5067666069)(10,69.6227620711)(20,34.3423513572)(30,145.730649188)(50,29.6058821777)
+};
+
+\end{axis}
+\end{tikzpicture}
+\end{document}

@@ -1,0 +1,52 @@
+\documentclass{standalone}
+\usepackage{pgfplots}
+\pgfplotsset{compat=newest}
+
+\begin{document}
+\begin{tikzpicture}
+
+\begin{axis}[%
+title style={font=\Huge},
+title=JDK,
+tick label style={font=\Huge},
+label style={font=\Huge},
+legend style={font=\Huge},
+view={0}{90},
+width=7in,
+height=5in,
+scale only axis,
+xmin=0, xmax=25,
+xtick={0, 5, 10, 15, 20, 25},
+xlabel={$k$},
+ymin=-5, ymax=20,
+ytick={0, 5, 10, 15, 20},
+ylabel={$\%$ improvement},
+major tick length=5pt,
+axis lines*=left,
+legend cell align=left,
+clip=false]
+
+\addplot [
+only marks,
+mark=*,
+mark size=3.5pt,
+color=orange!70!black,
+%solid,
+%line width=2pt,
+]
+coordinates{
+(1,0.0)(1,0.0)(1,0.0)(5,-7.9363780215)(5,-3.59356501149)(5,-3.45748664437)(10,5.49088086923)(10,5.75575475653)(10,15.6461441479)(20,1.94067703165)(20,5.60130202878)(20,20.9619782733)(30,0.222996131981)(30,15.9872480785)(30,36.429003797)(50,-5.33899211812)(50,17.6393629979)(50,38.2043075858)
+};
+
+\addplot [
+color=orange!70!black,
+solid,
+line width=3pt
+]
+coordinates{
+(1,0.0)(5,-4.99580989245)(10,8.96425992456)(20,9.50131911124)(30,17.5464160025)(50,16.8348928219)
+};
+
+\end{axis}
+\end{tikzpicture}
+\end{document}

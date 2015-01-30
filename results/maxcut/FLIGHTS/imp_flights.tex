@@ -1,0 +1,52 @@
+\documentclass{standalone}
+\usepackage{pgfplots}
+\pgfplotsset{compat=newest}
+
+\begin{document}
+\begin{tikzpicture}
+
+\begin{axis}[%
+title style={font=\Huge},
+title=FLIGHTS,
+tick label style={font=\Huge},
+label style={font=\Huge},
+legend style={font=\Huge},
+view={0}{90},
+width=7in,
+height=5in,
+scale only axis,
+xmin=0, xmax=25,
+xtick={0, 5, 10, 15, 20, 25},
+xlabel={$k$},
+ymin=-5, ymax=20,
+ytick={0, 5, 10, 15, 20},
+ylabel={$\%$ improvement},
+major tick length=5pt,
+axis lines*=left,
+legend cell align=left,
+clip=false]
+
+\addplot [
+only marks,
+mark=*,
+mark size=3.5pt,
+color=orange!70!black,
+%solid,
+%line width=2pt,
+]
+coordinates{
+(1,0.0)(1,0.0)(1,0.0)(5,-6.70027305188)(5,-0.440429136081)(5,6.12899394227)(10,-7.54259382768)(10,-3.92275196138)(10,-3.71814431825)(20,2.22846586098)(20,2.97703757837)(20,4.69521633375)(30,-3.1666480009)(30,2.56102998551)(30,3.72390759811)(50,-8.08650286099)(50,-5.4254409189)(50,-4.72164384714)
+};
+
+\addplot [
+color=orange!70!black,
+solid,
+line width=3pt
+]
+coordinates{
+(1,0.0)(5,-0.337236081896)(10,-5.0611633691)(20,3.30023992437)(30,1.03942986091)(50,-6.07786254234)
+};
+
+\end{axis}
+\end{tikzpicture}
+\end{document}
