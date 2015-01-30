@@ -1,6 +1,6 @@
 %%%% ijcai15.tex
 
-\typeout{Non-monotone adaptive submodular maximization}
+\typeout{Non-monotone Adaptive Submodular Maximization}
 
 % These are the instructions for authors for IJCAI-15.
 % They are the same as the ones for IJCAI-11 with superficical wording
@@ -55,7 +55,7 @@
 \usepackage{fixltx2e}          % For subscripts in normal text
 \usepackage{bm}
 \usepackage{algorithm}
-\usepackage[noend]{algorithmic}
+\usepackage{algorithmic}
 \usepackage{pgfplots}
 \iftoggle{short}
 {
@@ -218,7 +218,7 @@
 \renewcommand{\paragraph}[1]{\vspace{0.3em}\noindent\textbf{#1.}\makebox[0.5em]{}}
 %-------------------------------------------------------------------------------
 
-\title{Non-monotone adaptive submodular maximization}
+\title{Non-monotone Adaptive Submodular Maximization}
 \author{Alkis Gotovos\\
 ETH Zurich
 \And
@@ -237,36 +237,68 @@ ETH Zurich}
 \end{abstract}
 
 \section{Introduction}
+
+\subsection{Related work}
 Test \cite{golovin11} and \citet{buchbinder14}
 
-\section{Algorithm}
+\section{Problem Statement}
+We now formally introduce the class of problems of interest.
+Assume we are given a finite ground set $E$ and a set $O$ of observable states.
+Each item $e \in E$ is associated with a state $o \in O$ through a function $\phi : E \to O$, which is called a realization of the ground set.
+In our setting, we assume that the realization $\Phi$ is a random variable with known distribution $p(\phi)$.
+Furthermore, we are given an objective function $f : 2^E \times O^E \to \mathbb{R}_{\geq 0}$.
+For a set $A \subseteq E$ and a realization $\phi$, the quantity $f(A, \phi)$ expresses the utility we get by selecting subset $A$, if the true realization is $\phi$.
+
+Our goal is to come up with a sequential policy that builds up a set $A \subseteq E$, such that our utility $f(A, \Phi)$ is maximized.
+That is, we iteratively select an item $e \in E$ to add to $A$ and observe its state $\Phi(e)$.
+In this setting, there are two factors that complicate matters compared to its non-adaptive counterpart.
+First, since our utility depends on the (random) realization, we need to maximize the expected utility under the distribution of realizations $p(\phi)$.
+Second, the chosen set $A$ itself is a random variable that depends on the realization, since the choices of our policy will change according to each observation $\Phi(e)$, which is, of course, the whole point of adaptivity.
+In addition, the policy itself might make random decisions, which is an additional source of randomness for $A$.
+
+To address the above, we define a partial realization as a set $ \psi \subseteq E \times O$, which represents the item-observation pairs over a subset of $E$.
+In particular, we call this subset the \emph{domain} of $\psi$, which is formally defined as $\dom(\psi) \defeq \sdef{e \in E}{\exists o \in O : (e, o) \in \psi}$.
+Additionally, we write $\psi(e) = o$, if $(e, o) \in \psi$ and call $\psi$ \emph{consistent} with realization $\phi$, if $\psi(e) = \phi(e)$, for all $e \in \dom(\psi)$, which means that the observations of a subset according to $\psi$ agree with the assignments over the whole ground set according to $\phi$.
+
+Now, we can define a \emph{policy} $\pi$ as a function from partial realizations to a distribution over which item to pick next, formally, $\pi : 2^{E \times O} \to \mathcal{P}(E)$.
+The policy terminates when the current partial realization is not in its domain denoted by $\dom(\pi) \subseteq 2^{E \times O}$.
+We use the notation $\pi(e\mmid\psi)$ for the probability of picking item $e$ given partial realization $\psi$.
+We call $E(\pi, \Phi) \subseteq E$ the set of items that have been selected upon termination of policy $\pi$ under realization $\Phi$.
+Note that this set a random variable that depends on both the randomness of the policy, as well as the randomness of the realization.
+
+Finally, we can formalize the performance of a policy $\pi$ by its expected utility $\favg(\pi) \defeq \E[\Phi,\Pi]{f(E(\pi, \Phi), \Phi)}$.
+Then, our goal is to come up with a policy that maximizes the expected utility, subject to a cardinality constraint on the number of items to be picked, $|E(\pi, \Phi)| \leq k$.
+
+\section{The Adaptive Random Greedy Algorithm}
+\todo{Need to mention $2k$ dummy elements added to $E$.}
+
 \begin{algorithm}[!b]
-  \caption{The algorithm}
+  \caption{Adaptive random greedy}
   \label{alg:rg}
-\small{
+\normalsize{
 \begin{algorithmic}[1]
   \REQUIRE ground set $E$, function $f$, distribution $p(\phi)$, cardinality constraint $k$
-  \ENSURE set $A \subseteq E$
-  \LET{$t$}{1}
-  \WHILE{$U_{t-1} \neq \varnothing$}
-    \STATE $H_t \gets H_{t-1}$, $L_t \gets L_{t-1}$, $U_t \gets U_{t-1}$
-    \FORALL{$\*x \in U_{t-1}$}
-      \LET{$C_{t}(\*x)$}{$C_{t-1}(\*x) \cap Q_t(\*x)$} \label{lin:upd}
-      \IF{$\min(C_t(\*x)) + \epsilon > h$} \label{lin:class1}
-        \STATE $U_t \gets U_t \setminus \{\*x\}$, $H_t \gets H_t \cup \{\*x\}$
-      \ELSIF{$\max(C_t(\*x)) - \epsilon \leq h$} \label{lin:class2_pre}
-        \STATE $U_t \gets U_t \setminus \{\*x\}$, $L_t \gets L_t \cup \{\*x\}$ \label{lin:class2}
-      \ENDIF
-    \ENDFOR
-    \LET{$\*x_t$}{$\argmax_{\*x \in U_t}(a_t(\*x))$} \label{lin:sel1}
-    \LET{$y_t$}{$f(\*x_t) + n_t$} \label{lin:sel2}
-    \STATE Compute $\mu_t(\*x)$ and $\sigma_t(\*x)$ for all $\*x \in U_t$ \label{lin:inf}
-    \LET{$t$}{$t + 1$}
-  \ENDWHILE
-  \STATE $\hat{H} \gets H_{t-1}$, $\hat{L} \gets L_{t-1}$
+%  \ENSURE set $S_k \subseteq E$
+  \LET{$A$}{$\varnothing$}
+  \LET{$\psi$}{$\varnothing$}
+  \FOR{$i = 1$ \TO $k$}
+    \STATE Compute $\D{e}{\psi}$, for all $e \in E$ \label{lin:marg}
+    \LET{$\mathcal{M}_k(\psi)$}{$\displaystyle\argmax_{S \subseteq E, |S| \leq k}\left\{\sum_{e \in S} \D{e}{\psi} \right\}$} \label{lin:argmax}
+    \STATE Sample $m$ uniformly at random from $\mathcal{M}_k(\psi)$
+    \LET{$A$}{$A \cup \{m\}$}
+    \STATE Observe $\Phi(m)$
+    \LET{$\psi$}{$\psi \cup \left\{\big(m, \Phi(m)\big)\right\}$}
+  \ENDFOR
+  \STATE Return $A$
 \end{algorithmic}
 }
 \end{algorithm}
+
+\section{Theoretical Analysis}
+
+\section{Experiments}
+
+\section{Conclusion}
 
 % The file named.bst is a bibliography style file for BibTeX 0.99c
 \bibliographystyle{named}
