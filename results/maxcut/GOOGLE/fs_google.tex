@@ -1,0 +1,75 @@
+\documentclass{standalone}
+\usepackage{pgfplots}
+\pgfplotsset{compat=newest}
+
+\begin{document}
+\begin{tikzpicture}
+
+\begin{axis}[%
+title style={font=\Huge},
+title=GOOGLE,
+tick label style={font=\Huge},
+label style={font=\Huge},
+legend style={font=\Huge},
+view={0}{90},
+max space between ticks=50pt,
+width=7in,
+height=5in,
+scale only axis,
+xmin=0, xmax=50,
+xtick={0, 10, 20, 30, 40, 50},
+xlabel={$k$},
+ymin=0, ymax=4355.55,
+%ytick={0, 200, 400, 600, 800, 1000},
+ylabel={$f_{avg}$},
+major tick length=5pt,
+axis lines*=left,
+legend cell align=left,
+clip=false]
+
+\addplot [
+only marks,
+mark=*,
+mark size=3.5pt,
+color=orange!70!black,
+%solid,
+%line width=2pt,
+]
+coordinates{
+(1,346.15)(1,414.5)(1,436.0)(5,1454.55)(5,1489.75)(5,1628.85)(10,1965.25)(10,2097.9)(10,2104.9)(20,2927.65)(20,3061.35)(20,3139.05)(30,3337.8)(30,3503.95)(30,3668.95)(50,3621.95)(50,3642.05)(50,3929.2)
+};
+
+\addplot [
+only marks,
+mark=*,
+mark size=3.5pt,
+color=cyan!70!black,
+%solid,
+%line width=2pt,
+]
+coordinates{
+(1,346.15)(1,414.5)(1,436.0)(5,1483.95)(5,1574.8)(5,1592.7)(10,2119.75)(10,2286.25)(10,2377.8)(20,3108.05)(20,3250.05)(20,3380.85)(30,3639.2)(30,3716.6)(30,3818.35)(50,3924.1)(50,3991.8)(50,4355.55)
+};
+
+\addplot [
+color=orange!70!black,
+solid,
+line width=3pt
+]
+coordinates{
+(1,398.883333333)(5,1524.38333333)(10,2056.01666667)(20,3042.68333333)(30,3503.56666667)(50,3731.06666667)
+};
+
+\addplot [
+color=cyan!70!black,
+solid,
+line width=3pt
+]
+coordinates{
+(1,398.883333333)(5,1550.48333333)(10,2261.26666667)(20,3246.31666667)(30,3724.71666667)(50,4090.48333333)
+};
+
+
+\end{axis}
+\end{tikzpicture}
+\end{document}

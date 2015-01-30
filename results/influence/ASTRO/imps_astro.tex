@@ -1,0 +1,42 @@
+\documentclass{standalone}
+\usepackage{pgfplots}
+\pgfplotsset{compat=newest}
+
+\begin{document}
+\begin{tikzpicture}
+
+\begin{axis}[%
+title style={font=\Huge},
+title=ASTRO,
+tick label style={font=\Huge},
+label style={font=\Huge},
+legend style={font=\Huge},
+view={0}{90},
+width=7in,
+height=5in,
+scale only axis,
+xmin=0, xmax=1,
+xtick={0, 0.2, 0.4, 0.6, 0.8, 1},
+xlabel={$p$},
+ymin=-5, ymax=30,
+ytick={0, 5, 10, 15, 20},
+ylabel={$\%$ improvement},
+major tick length=5pt,
+axis lines*=left,
+legend cell align=left,
+clip=false]
+
+\addplot [
+mark=*,
+mark size=3.5pt,
+color=orange!70!black,
+solid,
+line width=3pt
+]
+coordinates{
+(0.01,0.99)(0.1,2.16)(0.3,0.965)(0.5,0.52)(0.7,0.28)(1,0.0)
+};
+
+\end{axis}
+\end{tikzpicture}
+\end{document}

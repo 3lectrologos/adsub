@@ -1,0 +1,52 @@
+\documentclass{standalone}
+\usepackage{pgfplots}
+\pgfplotsset{compat=newest}
+
+\begin{document}
+\begin{tikzpicture}
+
+\begin{axis}[%
+title style={font=\Huge},
+title=SPANISH,
+tick label style={font=\Huge},
+label style={font=\Huge},
+legend style={font=\Huge},
+view={0}{90},
+width=7in,
+height=5in,
+scale only axis,
+xmin=0, xmax=25,
+xtick={0, 5, 10, 15, 20, 25},
+xlabel={$k$},
+ymin=-5, ymax=20,
+ytick={0, 5, 10, 15, 20},
+ylabel={$\%$ improvement},
+major tick length=5pt,
+axis lines*=left,
+legend cell align=left,
+clip=false]
+
+\addplot [
+only marks,
+mark=*,
+mark size=3.5pt,
+color=orange!70!black,
+%solid,
+%line width=2pt,
+]
+coordinates{
+(1,0.0)(1,0.0)(1,0.0)(5,-0.0361112225655)(5,9.53970412494)(5,29.0330893722)(10,-1.44521534232)(10,20.8755075199)(10,21.3637840872)(20,7.16410695028)(20,12.7930884504)(20,16.357826231)(30,9.60783688056)(30,16.7210413023)(30,18.7656123277)(50,-2.59722913656)(50,-0.584540835529)(50,8.06009638099)
+};
+
+\addplot [
+color=orange!70!black,
+solid,
+line width=3pt
+]
+coordinates{
+(1,0.0)(5,12.8455607582)(10,13.5980254216)(20,12.1050072106)(30,15.0314968368)(50,1.62610880297)
+};
+
+\end{axis}
+\end{tikzpicture}
+\end{document}

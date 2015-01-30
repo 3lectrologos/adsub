@@ -1,0 +1,75 @@
+\documentclass{standalone}
+\usepackage{pgfplots}
+\pgfplotsset{compat=newest}
+
+\begin{document}
+\begin{tikzpicture}
+
+\begin{axis}[%
+title style={font=\Huge},
+title=ASTRO,
+tick label style={font=\Huge},
+label style={font=\Huge},
+legend style={font=\Huge},
+view={0}{90},
+max space between ticks=50pt,
+width=7in,
+height=5in,
+scale only axis,
+xmin=0, xmax=50,
+xtick={0, 10, 20, 30, 40, 50},
+xlabel={$k$},
+ymin=0, ymax=1270.75,
+%ytick={0, 200, 400, 600, 800, 1000},
+ylabel={$f_{avg}$},
+major tick length=5pt,
+axis lines*=left,
+legend cell align=left,
+clip=false]
+
+\addplot [
+only marks,
+mark=*,
+mark size=3.5pt,
+color=orange!70!black,
+%solid,
+%line width=2pt,
+]
+coordinates{
+(1,48.35)(1,53.65)(1,55.55)(5,220.9)(5,253.8)(5,271.9)(10,371.95)(10,406.85)(10,413.85)(20,699.0)(20,724.75)(20,747.45)(30,906.55)(30,919.8)(30,957.3)(50,1200.9)(50,1218.9)(50,1342.3)
+};
+
+\addplot [
+only marks,
+mark=*,
+mark size=3.5pt,
+color=cyan!70!black,
+%solid,
+%line width=2pt,
+]
+coordinates{
+(1,48.35)(1,53.65)(1,55.55)(5,238.5)(5,247.25)(5,247.5)(10,397.45)(10,426.7)(10,437.5)(20,676.1)(20,720.15)(20,773.45)(30,871.95)(30,929.95)(30,1001.65)(50,1184.1)(50,1192.55)(50,1270.75)
+};
+
+\addplot [
+color=orange!70!black,
+solid,
+line width=3pt
+]
+coordinates{
+(1,52.5166666667)(5,248.866666667)(10,397.55)(20,723.733333333)(30,927.883333333)(50,1254.03333333)
+};
+
+\addplot [
+color=cyan!70!black,
+solid,
+line width=3pt
+]
+coordinates{
+(1,52.5166666667)(5,244.416666667)(10,420.55)(20,723.233333333)(30,934.516666667)(50,1215.8)
+};
+
+
+\end{axis}
+\end{tikzpicture}
+\end{document}

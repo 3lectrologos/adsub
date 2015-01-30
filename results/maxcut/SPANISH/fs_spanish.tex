@@ -1,0 +1,75 @@
+\documentclass{standalone}
+\usepackage{pgfplots}
+\pgfplotsset{compat=newest}
+
+\begin{document}
+\begin{tikzpicture}
+
+\begin{axis}[%
+title style={font=\Huge},
+title=SPANISH,
+tick label style={font=\Huge},
+label style={font=\Huge},
+legend style={font=\Huge},
+view={0}{90},
+max space between ticks=50pt,
+width=7in,
+height=5in,
+scale only axis,
+xmin=0, xmax=50,
+xtick={0, 10, 20, 30, 40, 50},
+xlabel={$k$},
+ymin=0, ymax=4226.35,
+%ytick={0, 200, 400, 600, 800, 1000},
+ylabel={$f_{avg}$},
+major tick length=5pt,
+axis lines*=left,
+legend cell align=left,
+clip=false]
+
+\addplot [
+only marks,
+mark=*,
+mark size=3.5pt,
+color=orange!70!black,
+%solid,
+%line width=2pt,
+]
+coordinates{
+(1,302.0)(1,329.8)(1,355.5)(5,970.1)(5,1213.35)(5,1246.15)(10,1692.35)(10,1748.7)(10,1909.75)(20,2529.1)(20,2566.05)(20,2689.1)(30,2973.2)(30,3082.5)(30,3133.9)(50,3704.05)(50,4117.85)(50,4251.2)
+};
+
+\addplot [
+only marks,
+mark=*,
+mark size=3.5pt,
+color=cyan!70!black,
+%solid,
+%line width=2pt,
+]
+coordinates{
+(1,302.0)(1,329.8)(1,355.5)(5,1245.7)(5,1251.75)(5,1329.1)(10,1882.15)(10,2053.9)(10,2113.75)(20,2852.65)(20,2881.75)(20,2985.8)(30,3435.0)(30,3470.35)(30,3660.95)(50,4002.6)(50,4010.9)(50,4226.35)
+};
+
+\addplot [
+color=orange!70!black,
+solid,
+line width=3pt
+]
+coordinates{
+(1,329.1)(5,1143.2)(10,1783.6)(20,2594.75)(30,3063.2)(50,4024.36666667)
+};
+
+\addplot [
+color=cyan!70!black,
+solid,
+line width=3pt
+]
+coordinates{
+(1,329.1)(5,1275.51666667)(10,2016.6)(20,2906.73333333)(30,3522.1)(50,4079.95)
+};
+
+
+\end{axis}
+\end{tikzpicture}
+\end{document}
