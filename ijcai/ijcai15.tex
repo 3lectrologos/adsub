@@ -1,0 +1,344 @@
+%%%% ijcai15.tex
+
+\typeout{Non-monotone Adaptive Submodular Maximization}
+
+% These are the instructions for authors for IJCAI-15.
+% They are the same as the ones for IJCAI-11 with superficical wording
+%   changes only.
+
+\documentclass{article}
+% The file ijcai15.sty is the style file for IJCAI-15 (same as ijcai07.sty).
+\usepackage{ijcai15}
+
+% Use the postscript times font!
+\usepackage{times}
+
+% the following package is optional:
+%\usepackage{latexsym} 
+
+% Following comment is from ijcai97-submit.tex:
+% The preparation of these files was supported by Schlumberger Palo Alto
+% Research, AT\&T Bell Laboratories, and Morgan Kaufmann Publishers.
+% Shirley Jowell, of Morgan Kaufmann Publishers, and Peter F.
+% Patel-Schneider, of AT\&T Bell Laboratories collaborated on their
+% preparation.
+
+% These instructions can be modified and used in other conferences as long
+% as credit to the authors and supporting agencies is retained, this notice
+% is not changed, and further modification or reuse is not restricted.
+% Neither Shirley Jowell nor Peter F. Patel-Schneider can be listed as
+% contacts for providing assistance without their prior permission.
+
+% To use for other conferences, change references to files and the
+% conference appropriate and use other authors, contacts, publishers, and
+% organizations.
+% Also change the deadline and address for returning papers and the length and
+% page charge instructions.
+% Put where the files are available in the appropriate places.
+
+%-------------------------------------------------------------------------------
+% Custom definitions
+%-------------------------------------------------------------------------------
+\usepackage{etoolbox}
+% Define output mode (default: six-page IJCAI)
+\newtoggle{short}
+\toggletrue{short}
+% Uncomment for long version
+\togglefalse{short}
+
+\usepackage[usenames,dvipsnames]{xcolor}
+\usepackage{amsmath,amssymb,amsthm}
+\usepackage{mathtools}                    % For \vcentcolon
+\usepackage{xspace}            % Controls space after user-defined command
+\usepackage{xparse}            % Optional arguments in commands
+\usepackage{enumitem}
+\usepackage{fixltx2e}          % For subscripts in normal text
+\usepackage{bm}
+\usepackage{algorithm}
+\usepackage{algorithmic}
+\usepackage{pgfplots}
+\iftoggle{short}
+{
+\usepackage{nohyperref}
+\usepackage{url}
+}
+{
+\usepackage{flushend}
+\usepackage[debug]{hyperref}
+\definecolor{mydarkblue}{rgb}{0,0.08,0.45}
+\hypersetup{%
+  pdftitle={Active Learning for Level Set Estimation},
+  pdfauthor={},
+  pdfsubject={},
+  pdfkeywords={},
+  pdfborder=0 0 0,
+  pdfpagemode=UseNone,
+  colorlinks=true,
+  linkcolor=mydarkblue,
+  citecolor=mydarkblue,
+  filecolor=mydarkblue,
+  urlcolor=mydarkblue,
+  pdfview=FitH}
+}
+
+\newcommand{\todo}[1]{\noindent\texttt{\small\color[rgb]{0.5,0.1,0.1} TODO: #1}}
+
+% Refs
+\newcommand{\sectref}[1]{\hyperref[#1]{Section \ref*{#1}}}
+\newcommand{\chapref}[1]{\hyperref[#1]{Chapter \ref*{#1}}}
+\newcommand{\figref}[1]{\hyperref[#1]{Figure \ref*{#1}}}
+\newcommand{\figsref}[1]{\hyperref[#1]{Figures \ref*{#1}}}
+\newcommand{\tabref}[1]{\hyperref[#1]{ Table \ref*{#1}}}
+\newcommand{\algoref}[1]{\hyperref[#1]{Algorithm \ref*{#1}}}
+\newcommand{\theoremref}[1]{\hyperref[#1]{Theorem \ref*{#1}}}
+\newcommand{\lemmaref}[1]{\hyperref[#1]{Lemma \ref*{#1}}}
+\newcommand{\lemmasref}[1]{\hyperref[#1]{Lemmas \ref*{#1}}}
+\newcommand{\corref}[1]{\hyperref[#1]{Corollary \ref*{#1}}}
+\newcommand{\asref}[1]{\hyperref[#1]{Assumption \ref*{#1}}}
+\newcommand{\eqtref}[1]{\hyperref[#1]{\mbox{(\ref*{#1})}}}
+\newcommand{\appref}[1]{\hyperref[#1]{Appendix \ref*{#1}}}
+\newcommand{\lineref}[1]{\hyperref[#1]{line \ref*{#1}}}
+\newcommand{\linesref}[2]{\hyperref[#1]{lines \ref*{#1}--\ref*{#2}}}
+\newcommand{\linsref}[1]{\hyperref[#1]{lines \ref*{#1}}}
+
+% Theory environments
+\newtheorem{definition}{Definition}
+\newtheorem{theorem}{Theorem}
+\newtheorem{lemma}{Lemma}
+\newtheorem{cor}{Corollary}
+\newtheorem{assumption}{Assumption}
+
+% Algorithm-related
+\newcommand{\theHalgorithm}{\arabic{algorithm}}
+\renewcommand{\algorithmicrequire}{\textbf{Input:}}
+\renewcommand{\algorithmicensure}{\textbf{Output:}}
+\newcommand*\LNot{\textbf{not}\xspace}
+\newcommand*\LAnd{\textbf{and}\xspace}
+\newcommand*\LET[2]{\STATE #1 $\gets$ #2}
+\newcommand*\Fcall[1]{\textsc{#1}}
+\makeatletter
+\newcommand{\setalglineno}[1]{%
+  \setcounter{ALC@line}{\numexpr#1-1}}
+\makeatother
+\renewcommand{\algorithmiccomment}[1]{// #1}
+\newcommand{\LINEIF}[2]{%
+    \STATE\algorithmicif\ {#1}\ \algorithmicthen\ {#2}%
+}
+\newcommand{\LINEELSE}[1]{%
+    \STATE\algorithmicelse\ {#1}%
+}
+
+% Math definitions
+\newcommand{\argmax}{\operatornamewithlimits{argmax}}
+\newcommand{\argmin}{\operatornamewithlimits{argmin}}
+\def\*#1{\bm{#1}}
+
+\newcommand{\twopartdef}[4]
+{
+	\left\{
+		\begin{array}{ll}
+			#1\,,& \mbox{if } #2 \\
+			#3\,,& \mbox{if } #4
+		\end{array}
+	\right.
+}
+
+\newcommand{\twopartdefo}[3]
+{
+	\left\{
+		\begin{array}{ll}
+			#1\,,& \mbox{if } #2 \\
+			#3\,,& \mbox{otherwise}
+		\end{array}
+	\right.
+}
+
+\newcommand{\favg}{f_{\mathrm{avg}}}
+\newcommand{\dom}{\mathcal{D}}
+\newcommand{\defeq}{\vcentcolon=}
+
+% Fix spacing problem with \left and \right
+\let\originalleft\left
+\let\originalright\right
+\renewcommand{\left}{\mathopen{}\mathclose\bgroup\originalleft}
+\renewcommand{\right}{\aftergroup\egroup\originalright}
+
+% Math definitions
+\newcommand{\smid}{\ \middle\vert\ }
+\newcommand{\mmid}{\,\vert\,}
+
+\DeclareDocumentCommand \E { o m o }{%
+  \IfValueTF {#1} {%
+    \mathbb{E}_{#1}
+  }{%
+    \mathbb{E}
+  }%
+  \left[#2
+  \IfValueT {#3} {%
+    \smid #3
+  }%
+  \right]
+}
+
+\DeclareDocumentCommand \P { o m o }{%
+  \IfValueTF {#1} {%
+    \mathbb{P}_{#1}
+  }{%
+    \mathbb{P}
+  }%
+  \left[#2
+  \IfValueT {#3} {%
+    \smid #3
+  }%
+  \right]
+}
+
+\newcommand{\D}[2]{\Delta(#1\mmid#2)}
+\newcommand{\sdef}[2]{\left\{#1\smid#2\right\}}
+
+\newcommand{\pio}{\pi_{[0]}}
+\newcommand{\pii}{\pi_{[i]}}
+\newcommand{\pik}{\pi_{[k]}}
+\newcommand{\pis}{\pi^*}
+\newcommand{\pisi}{\pi^*_{[i]}}
+\newcommand{\pisk}{\pi^*_{[k]}}
+\newcommand{\pigr}{\pi^{\textrm{g}}}
+\newcommand{\pig}{\pi^{\textrm{rg}}}
+\newcommand{\pigo}{\pi^{\textrm{rg}}_{[0]}}
+\newcommand{\pigi}{\pi^{\textrm{rg}}_{[i]}}
+\newcommand{\pigl}{\pi^{\textrm{rg}}_{[\ell]}}
+\newcommand{\pigii}{\pi^{\textrm{rg}}_{[i+1]}}
+\newcommand{\pigk}{\pi^{\textrm{rg}}_{[k]}}
+
+\newcommand{\uitem}[1]{\item[#1]}
+
+% For citations like: Author et. al [2010]
+\newcommand{\citet}[1]{\citeauthor{#1}~\shortcite{#1}}
+
+% Paragraph
+\renewcommand{\paragraph}[1]{\vspace{0.3em}\noindent\textbf{#1.}\makebox[0.5em]{}}
+%-------------------------------------------------------------------------------
+
+\title{Non-monotone Adaptive Submodular Maximization}
+\author{Alkis Gotovos\\
+ETH Zurich
+\And
+Amin Karbasi\\
+Yale University
+\And
+Andreas Krause\\
+ETH Zurich}
+
+\begin{document}
+
+\maketitle
+
+\begin{abstract}
+\todo{abstract}
+\end{abstract}
+
+\section{Introduction}
+
+\subsection{Related work}
+
+\section{Problem Statement and Background}
+Assume we are given a finite ground set $E$ and a set $O$ of observable states.
+Each item $e \in E$ is associated with a state $o \in O$ through a function $\phi : E \to O$, which is called a realization of the ground set.
+In our setting, we assume that the realization $\Phi$ is a random variable with known distribution $p(\phi)$.
+Furthermore, we are given an objective function $f : 2^E \times O^E \to \mathbb{R}_{\geq 0}$.
+For a set $A \subseteq E$ and a realization $\phi$, the quantity $f(A, \phi)$ expresses the utility we get by selecting subset $A$, if the true realization is $\phi$.
+
+Our goal is to come up with a sequential policy that builds up a set $A \subseteq E$, such that our utility $f(A, \Phi)$ is maximized.
+That is, we iteratively select an item $e \in E$ to add to $A$ and observe its state $\Phi(e)$.
+In this setting, there are two factors that complicate matters compared to its non-adaptive counterpart.
+First, since our utility depends on the (random) realization, we need to maximize the expected utility under the distribution of realizations $p(\phi)$.
+Second, the chosen set $A$ itself is a random variable that depends on the realization, since the choices of our policy will change according to each observation $\Phi(e)$, which is, of course, the whole point of adaptivity.
+In addition, the policy itself might make random decisions, which is an additional source of randomness for $A$.
+
+To address the above complications, we define a partial realization as a set $ \psi \subseteq E \times O$, which represents the item-observation pairs over a subset of $E$.
+In particular, we call this subset the \emph{domain} of $\psi$, which is formally defined as $\dom(\psi) \defeq \sdef{e \in E}{\exists o \in O : (e, o) \in \psi}$.
+Additionally, we write $\psi(e) = o$, if $(e, o) \in \psi$, and call $\psi$ \emph{consistent} with realization $\phi$ (denoted by $\phi \sim \psi$), if $\psi(e) = \phi(e)$, for all $e \in \dom(\psi)$, which means that the observations of a subset according to $\psi$ agree with the assignments over the whole ground set according to $\phi$.
+
+Now, we can define a \emph{policy} $\pi$ as a function from partial realizations to a distribution over which item to pick next, formally, $\pi : 2^{E \times O} \to \mathcal{P}(E)$.
+The policy terminates when the current partial realization is not in its domain denoted by $\dom(\pi) \subseteq 2^{E \times O}$.
+We use the notation $\pi(e\mmid\psi)$ for the probability of picking item $e$ given partial realization $\psi$.
+We call $E(\pi, \Phi) \subseteq E$ the set of items that have been selected upon termination of policy $\pi$ under realization $\Phi$.
+Note that this set a random variable that depends on both the randomness of the policy, as well as the randomness of the realization.
+
+Finally, we can formalize the performance of a policy $\pi$ by its expected utility $\favg(\pi) \defeq \E[\Phi,\Pi]{f(E(\pi, \Phi), \Phi)}$.
+Then, our goal is to come up with a policy that maximizes the expected utility, subject to a cardinality constraint on the number of items to be picked, $|E(\pi, \Phi)| \leq k$.
+
+\subsection{Monotonicity and Submodularity}
+\paragraph{Non-adaptive}
+Even in the non-adaptive setting, where the realization is fixed and known in advance, or equivalently, the objective function $f : 2^E \to \mathbb{R}_{\geq 0}$ depends only on the chosen subset, the problem of maximizing $f(A)$, subject to a cardinality constraint $|A| \leq k$, is NP-hard in general.
+In this setting, the marginal gain of an element $e \in E$ given set $B \subseteq E$ is defined as $f(B \cup \{e\}) - f(B)$.
+Intuitively, the marginal gain quantifies the increase in utility if we add $e$ to our selection, given that we have already picked the elements in $B$.
+Function $f$ is called monotone if for any $B \subseteq C \subseteq E$, it holds that $f(B) \leq f(C)$, which is equivalent to saying that the marginal gain is always positive.
+Furthermore, $f$ is called submodular, if for any $B \subseteq C \subseteq E$ and any $e \in E \setminus C$, it holds that $f(C \cup \{e\}) - f(C) \leq  f(B \cup \{e\}) - f(B)$.
+This means that the marginal gain of any element decreases as the given set increases ($C \supseteq B$); in other words, it expresses a behavior of ``diminishing returns''.
+
+In their famous result, \citet{nemhauser78} showed that, if $f$ is normalized ($f(\varnothing) = 0$), monotone, and submodular, then constructing a subset $A$ by picking elements greedily according to their marginal gains, guarantees that $f(A)$ is a ($1 - 1/e$)-approximation to the optimal value.
+
+\paragraph{Adaptive}
+In the significantly more complex adaptive setting, the problem of computing an optimal policy is hard to approximate even for seemingly simple classes of objective functions (e.g. linear) \cite{golovin11}.
+However, \citet{golovin11} showed that the notions of monotonicity and submodularity can be naturally generalized to this setting, and that, for objective functions that satisfy these properties, a simple adaptive greedy policy is a ($1 - 1/e$)-approximation to the optimal policy in terms of expected utility.
+
+More concretely, the (expected) marginal gain of element $e \in E$ given partial realization $\psi$ can be defined as
+\begin{align*}
+  \D{e}{\psi} \defeq \E[\Phi]{f\big(\mathcal{D}(\psi) \cup \{e\}, \Phi\big) - f\big(\dom(\psi), \Phi\big)}[\Phi \sim \psi].
+\end{align*}
+Note that this is a conditional expectation, which only considers realizations that are consistent with $\psi$.
+Then, the following definitions are analogous to their non-adaptive counterparts:
+\begin{itemize}
+\item $f$ is called adaptive monotone, if $\D{e}{\psi} \geq 0$, for all $e \in E$ and all $\psi$ of positive probability,
+\item $f$ is called adaptive submodular, if $\D{e}{\psi'} \leq \D{e}{\psi}$, for all $e \in E \setminus \dom(\psi')$ and all $\psi' \supseteq \psi$.
+\end{itemize}
+The random greedy policy $\pigr$ selects at each step the element $e \in E$ that achieves the highest marginal gain $\D{e}{\psi}$, given all previously selected elements and their corresponding observed states encoded in partial realization $\psi$.
+
+\subsection{Example: Adaptive Graph Cut}
+
+\section{The Adaptive Random Greedy Algorithm}
+\todo{Need to mention $2k$ dummy elements added to $E$.}
+
+\begin{algorithm}[!b]
+  \caption{Adaptive random greedy}
+  \label{alg:rg}
+\normalsize{
+\begin{algorithmic}[1]
+  \REQUIRE ground set $E$, function $f$, distribution $p(\phi)$, cardinality constraint $k$
+%  \ENSURE set $S_k \subseteq E$
+  \LET{$A$}{$\varnothing$}
+  \LET{$\psi$}{$\varnothing$}
+  \FOR{$i = 1$ \TO $k$}
+    \STATE Compute $\D{e}{\psi}$, for all $e \in E$ \label{lin:marg}
+    \LET{$\mathcal{M}_k(\psi)$}{$\displaystyle\argmax_{S \subseteq E, |S| \leq k}\left\{\sum_{e \in S} \D{e}{\psi} \right\}$} \label{lin:argmax}
+    \STATE Sample $m$ uniformly at random from $\mathcal{M}_k(\psi)$
+    \LET{$A$}{$A \cup \{m\}$}
+    \STATE Observe $\Phi(m)$
+    \LET{$\psi$}{$\psi \cup \left\{\big(m, \Phi(m)\big)\right\}$}
+  \ENDFOR
+  \STATE Return $A$
+\end{algorithmic}
+}
+\end{algorithm}
+
+\section{Theoretical Analysis}
+
+\section{Experiments}
+
+\section{Conclusion}
+
+% The file named.bst is a bibliography style file for BibTeX 0.99c
+\bibliographystyle{named}
+\bibliography{ijcai15}
+
+\iftoggle{short}
+{}
+{
+\clearpage
+\onecolumn
+\appendix
+\include{proofs}
+}
+
+\end{document}
