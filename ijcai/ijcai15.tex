@@ -234,13 +234,16 @@ ETH Zurich}
 \maketitle
 
 \begin{abstract}
-\todo{abstract}
 \end{abstract}
 
 \section{Introduction}
 
-\subsection{Related work}
+\section{Related work}
+\paragraph{Non-monotone submodular maximization}\\
+\paragraph{Adaptive submodularity}\\
+\paragraph{Influence maximization and max-cut}
 
+\clearpage
 \section{Problem Statement and Background}
 Assume we are given a finite ground set $E$ and a set $O$ of observable states.
 Each item $e \in E$ is associated with a state $o \in O$ through a function $\phi : E \to O$, which is called a realization of the ground set.
@@ -265,7 +268,10 @@ We use the notation $\pi(e\mmid\psi)$ for the probability of picking item $e$ gi
 We call $E(\pi, \Phi) \subseteq E$ the set of items that have been selected upon termination of policy $\pi$ under realization $\Phi$.
 Note that this set a random variable that depends on both the randomness of the policy, as well as the randomness of the realization.
 
-Finally, we can formalize the performance of a policy $\pi$ by its expected utility $\favg(\pi) \defeq \E[\Phi,\Pi]{f(E(\pi, \Phi), \Phi)}$.
+Finally, we can formally assess the performance of a policy $\pi$ via its expected utility,
+\begin{align*}
+  \favg(\pi) \defeq \E[\Phi,\Pi]{f(E(\pi, \Phi), \Phi)}.
+\end{align*}
 Then, our goal is to come up with a policy that maximizes the expected utility, subject to a cardinality constraint on the number of items to be picked, $|E(\pi, \Phi)| \leq k$.
 
 \subsection{Monotonicity and Submodularity}
@@ -281,53 +287,96 @@ In their famous result, \citet{nemhauser78} showed that, if $f$ is normalized ($
 
 \paragraph{Adaptive}
 In the significantly more complex adaptive setting, the problem of computing an optimal policy is hard to approximate even for seemingly simple classes of objective functions (e.g. linear) \cite{golovin11}.
-However, \citet{golovin11} showed that the notions of monotonicity and submodularity can be naturally generalized to this setting, and that, for objective functions that satisfy these properties, a simple adaptive greedy policy is a ($1 - 1/e$)-approximation to the optimal policy in terms of expected utility.
+However, \citet{golovin11} showed that the notions of monotonicity and submodularity can be naturally generalized to this setting, and be used to give similar performance guarantees as in the non-adaptive case.
 
 More concretely, the (expected) marginal gain of element $e \in E$ given partial realization $\psi$ can be defined as
 \begin{align*}
   \D{e}{\psi} \defeq \E[\Phi]{f\big(\mathcal{D}(\psi) \cup \{e\}, \Phi\big) - f\big(\dom(\psi), \Phi\big)}[\Phi \sim \psi].
 \end{align*}
-Note that this is a conditional expectation, which only considers realizations that are consistent with $\psi$.
-Then, the following definitions are analogous to their non-adaptive counterparts:
+The above expression is a conditional expectation, which only considers realizations that are consistent with $\psi$.
+Then, following properties can be defined analogously to their non-adaptive counterparts:
 \begin{itemize}
 \item $f$ is called adaptive monotone, if $\D{e}{\psi} \geq 0$, for all $e \in E$ and all $\psi$ of positive probability,
 \item $f$ is called adaptive submodular, if $\D{e}{\psi'} \leq \D{e}{\psi}$, for all $e \in E \setminus \dom(\psi')$ and all $\psi' \supseteq \psi$.
 \end{itemize}
-The random greedy policy $\pigr$ selects at each step the element $e \in E$ that achieves the highest marginal gain $\D{e}{\psi}$, given all previously selected elements and their corresponding observed states encoded in partial realization $\psi$.
+A stronger condition, which is often much easier to verify in practice, is that $f(\cdot, \phi)$ be submodular for any $\phi$, which immediately implies adaptive submodularity of $f$ for any distribution $p(\phi)$.
 
-\subsection{Example: Adaptive Graph Cut}
+Given a number of previously selected elements and their corresponding observed states encoded in a partial realization $\psi$, the adaptive greedy policy $\pigr$ selects the element $e \in E \setminus \psi$ that achieves the highest marginal gain $\D{e}{\psi}$, and does so iteratively until $k$ elements have been selected.
+\citet{golovin11} showed that under the assumption of adaptive monotonicity and submodularity, $\pigr$ is a $(1-1/e)$-approximation to the optimal policy in terms of expected utility $\favg$.
 
-\section{The Adaptive Random Greedy Algorithm}
-\todo{Need to mention $2k$ dummy elements added to $E$.}
+\subsection{Non-monotone functions}
+While many functions of interest have been shown to satisfy adaptive monotonicity and submodularity, there is a number of notable objectives that are adaptive submodular, but non-monotone. \todo{refs?}
+In particular, there are two classes of adaptive submodular functions, for which non-monotonicity results naturally from their definition.
+First, functions that directly incorporate a cost term in their definition, for example, of the form $f(A, \phi) = f_{\textrm{utility}}(A, \phi) - f_{\textrm{cost}}(A)$, where $f_{\textrm{utility}}$ is a monotone, submodular function.
+Even for $f_{\textrm{cost}}$ being a simple modular function, such as $f_{\textrm{cost}}(A) = |A|$, the resulting objective is submodular, but non-monotone.
+Second, symmetric submodular functions, that is, submodular functions that satisfy $f(A, \phi) = f(E \setminus A, \phi)$, for all $A \subseteq E$, which are by definition non-monotone.
+
+\section{Adaptive Random Greedy}
+We now present our proposed adaptive random greedy policy ($\pig$) for maximizing (non-monotone) adaptive submodular objectives.
+Much like the adaptive greedy policy generalized the non-adaptive greedy algorithm, we generalize the recently proposed non-adaptive random greedy algorithm \cite{buchbinder14} to the adaptive setting.
+
+For technical reasons that will become apparent below, let us assume that we always add a set $D$ of $2k - 1$ dummy elements to the ground set, such that, for any $d \in D$, and any partial realization $\psi$, it holds that $\D{d}{\psi} = 0$.
+Obviously, these elements do not affect the optimal policy, and may be removed from the solution of any policy, without affecting its expected utility.
+
+The detailed pseudocode of using adaptive random greedy is presented \algoref{alg:rg}.
+As discussed before, we are given a ground set and an objective function, as well as a known distribution over realizations $\Phi$.
+After computing the marginal gains
+The key difference compared to the adaptive greedy policy is shown in \linesref{lin:upd1}{lin:upd2} of the algorithm.
+Rather than selecting the element with the largest expected marginal gain, $\pig$ randomly selects an element among the ones with the $k$ largest gains.
+(The dummy elements added to the ground set ensure that the policy never picks an element with negative expected marginal gain.)
 
 \begin{algorithm}[!b]
   \caption{Adaptive random greedy}
   \label{alg:rg}
-\normalsize{
-\begin{algorithmic}[1]
-  \REQUIRE ground set $E$, function $f$, distribution $p(\phi)$, cardinality constraint $k$
-%  \ENSURE set $S_k \subseteq E$
-  \LET{$A$}{$\varnothing$}
-  \LET{$\psi$}{$\varnothing$}
-  \FOR{$i = 1$ \TO $k$}
-    \STATE Compute $\D{e}{\psi}$, for all $e \in E$ \label{lin:marg}
-    \LET{$\mathcal{M}_k(\psi)$}{$\displaystyle\argmax_{S \subseteq E, |S| \leq k}\left\{\sum_{e \in S} \D{e}{\psi} \right\}$} \label{lin:argmax}
-    \STATE Sample $m$ uniformly at random from $\mathcal{M}_k(\psi)$
-    \LET{$A$}{$A \cup \{m\}$}
-    \STATE Observe $\Phi(m)$
-    \LET{$\psi$}{$\psi \cup \left\{\big(m, \Phi(m)\big)\right\}$}
-  \ENDFOR
-  \STATE Return $A$
-\end{algorithmic}
-}
+  \normalsize{
+    \begin{algorithmic}[1]
+      \REQUIRE ground set $E$, function $f$, distribution $p(\phi)$, cardinality constraint $k$
+      %  \ENSURE set $S_k \subseteq E$
+      \LET{$A$}{$\varnothing$}
+      \LET{$\psi$}{$\varnothing$}
+      \FOR{$i = 1$ \TO $k$}
+      \STATE Compute $\D{e}{\psi}$, for all $e \in E$ \label{lin:marg}
+      \LET{$\mathcal{M}_k(\psi)$}{$\displaystyle\argmax_{S \subseteq E \setminus A,\,|S| = k}\left\{\sum_{e \in S} \D{e}{\psi} \right\}$} \label{lin:upd1}
+      \STATE Sample $m$ uniformly at random from $\mathcal{M}_k(\psi)$ \label{lin:upd2}
+      \LET{$A$}{$A \cup \{m\}$}
+      \STATE Observe $\Phi(m)$
+      \LET{$\psi$}{$\psi \cup \left\{\big(m, \Phi(m)\big)\right\}$}
+      \ENDFOR
+      \STATE Return $A$
+    \end{algorithmic}
+  }
 \end{algorithm}
 
-\section{Theoretical Analysis}
+\subsection{Theoretical Analysis}
 
+\clearpage
 \section{Experiments}
+We evaluated our proposed algorithm on two objective functions using both synthetic and real-world data sets.
+Since we have no competitor policy for the adaptive non-monotone submodular setting, we rather focus here on showcasing the potential benefits of adaptivity by comparing adaptive to non-adaptive random greedy on two objectives that can be formulated in both settings.
+
+\subsection{Influence maximization}
+The problem of influence maximization in a social network was posed by \citet{kempe03}.
+Given a graph and a model of influence propagation, e.g., independent cascades, the goal is to find a subset of nodes, which will maximize the expected number of nodes that will be ultimately influenced according to the propagation model.
+\citet{kempe03} showed that this objective is monotone submodular.
+\cite{golovin11} formulated an adaptive version of this problem, where the selection of a node $v$ reveals the status (active or not active) of all outgoing edges of $v$ and of any other node that can be reached from $v$.
+
+Here, we consider a modular cost term $|A|$, that is, each select incurs a unit cost.
+This term is subtracted from the original expected influence functions resulting in a new normalized, non-monotone, submodular objective for any realization, which satisfies our assumptions for both the non-adaptive and the adaptive settings.
+
+\subsection{Maximum graph cut}
+The problem of finding the maximum cut in a graph is a much studied NP-complete problem with various proposed algorithms. \todo{refs}
+Interestingly, the maximum cut objective is normalized, symmetric submodular, and, therefore, non-monotone.
+
+Here, we consider an adaptive version of this problem, in which selecting a node results in cutting that node or either of its neighbors with equal probability.
+This objective is also normalized, non-monotone, and submodular for any realization.
+
+\subsection{Data sets}
+
+\subsection{Results}
 
 \section{Conclusion}
 
+\clearpage
 % The file named.bst is a bibliography style file for BibTeX 0.99c
 \bibliographystyle{named}
 \bibliography{ijcai15}
