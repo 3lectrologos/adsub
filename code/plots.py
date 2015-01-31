@@ -35,6 +35,14 @@ MC_SLOW = dict(reps=20,
                niter=100)
 
 
+def print_info(name, g):
+    print 'Running {0}'.format(name)
+    print '#nodes =', g.vcount()
+    print '#edges =', g.ecount()
+    print 'transitivity =', g.transitivity_undirected()
+    print 'assortativity =', g.assortativity_degree()
+
+
 def run_inf(model, nodes, fast=True, plot=False):
     (name, g) = util.get_tc(model, nodes, directed=False)
     if plot:
@@ -52,10 +60,7 @@ def run_inf(model, nodes, fast=True, plot=False):
     vs_nonad = []
     vs_ad = []
     ps = [0.01, 0.1, 0.3, 0.5, 0.7, 1]
-    print 'Running {0}'.format(name)
-    print '#nodes =', g.vcount()
-    print '#edges =', g.ecount()
-    print 'transitivity =', g.transitivity_undirected()
+    print_info(name, g)
     for p in ps:
         if fast:
             params = INF_FAST
@@ -128,10 +133,7 @@ def run_mc(model, nodes, fast=True, plot=False):
     fs_ad_means = []
     n_available = len(g.vs) / 10
     ks = [int(kr * n_available) for kr in [0.01, 0.05, 0.1, 0.2, 0.3, 0.5]]
-    print 'Running {0}'.format(name)
-    print '#nodes =', g.vcount()
-    print '#edges =', g.ecount()
-    print 'transitivity =', g.transitivity_undirected()
+    print_info(name, g)
     for k in ks:
         if fast:
             params = MC_FAST
