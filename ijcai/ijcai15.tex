@@ -351,19 +351,28 @@ Rather than selecting the element with the largest expected marginal gain, $\pig
 
 \clearpage
 \section{Experiments}
-We evaluated our proposed algorithm on two objective functions using both synthetic and real-world data sets.
-Since we have no competitor policy for the adaptive non-monotone submodular setting, we rather focus here on showcasing the potential benefits of adaptivity by comparing adaptive to non-adaptive random greedy on two objectives that can be formulated in both settings.
+We have evaluated our proposed algorithm on two objective functions using both synthetic and real-world data sets.
+Since we have no competitor policy for the adaptive non-monotone submodular setting, we rather focus here on showcasing the potential benefits of adaptivity by comparing adaptive to non-adaptive random greedy on two objectives that are directly applicable to both settings.
 
-\subsection{Influence maximization}
+\subsection{Objective Functions}
+\paragraph{Influence maximization}
 The problem of influence maximization in a social network was posed by \citet{kempe03}.
-Given a graph and a model of influence propagation, e.g., independent cascades, the goal is to find a subset of nodes, which will maximize the expected number of nodes that will be ultimately influenced according to the propagation model.
-\citet{kempe03} showed that this objective is monotone submodular.
-\cite{golovin11} formulated an adaptive version of this problem, where the selection of a node $v$ reveals the status (active or not active) of all outgoing edges of $v$ and of any other node that can be reached from $v$.
+Given a graph and a model of influence propagation, the goal is to select a subset of nodes that maximizes the expected number of nodes that will ultimately be active or influenced according to the propagation model.
+We focus here on the independent cascade model, for which the problem setup is as follows.
+The ground set $E$ consists of network nodes and each realization $\Phi$ corresponds to a full ``outcome'' of the independent cascade model, that is, a boolean assignment to each network edge being either ``live'' or ``blocked''.
+Then, the objective function $f_{\textrm{inf}}(A, \Phi)$ is the number of active nodes under realization $\Phi$, if subset $A$ is initially active.
+\citet{kempe03} showed that this function is normalized, monotone, and submodular, for any realization $\Phi$.
 
-Here, we consider a modular cost term $|A|$, that is, each select incurs a unit cost.
-This term is subtracted from the original expected influence functions resulting in a new normalized, non-monotone, submodular objective for any realization, which satisfies our assumptions for both the non-adaptive and the adaptive settings.
+\citet{golovin11} formulated an adaptive version of this problem, in which, each selection of a node $v$ reveals the status (``live'' or ``blocked'') of all outgoing edges of $v$ and of any other node that can be reached from $v$ through ``live'' edges.
+Furthermore, they showed that the above objective is adaptive monotone submodular.
 
-\subsection{Maximum graph cut}
+For our experiments, we assume that each selected node incurs a unit cost, or, equivalently, we subtract a modular term from the original influence objective,
+\begin{align*}
+  f_1(A, \Phi) \defeq f_{\textrm{inf}}(A, \Phi) - |A|.
+\end{align*}
+This results in a new normalized, non-monotone, submodular objective for any realization, which satisfies the assumptions of \todo{refer to theorem}.
+
+\paragraph{Maximum graph cut}
 The problem of finding the maximum cut in a graph is a much studied NP-complete problem with various proposed algorithms. \todo{refs}
 Interestingly, the maximum cut objective is normalized, symmetric submodular, and, therefore, non-monotone.
 
