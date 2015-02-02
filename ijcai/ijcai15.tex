@@ -287,15 +287,15 @@ This means that the marginal gain of any element decreases as the given set incr
 In their famous result, \citet{nemhauser78} showed that, if $f$ is normalized ($f(\varnothing) = 0$), monotone, and submodular, then constructing a subset $A$ by picking elements greedily according to their marginal gains, guarantees that $f(A)$ is a ($1 - 1/e$)-approximation to the optimal value.
 
 \paragraph{Adaptive}
-In the significantly more complex adaptive setting, the problem of computing an optimal policy is hard to approximate even for seemingly simple classes of objective functions (e.g. linear) \cite{golovin11}.
-However, \citet{golovin11} showed that the notions of monotonicity and submodularity can be naturally generalized to this setting, and be used to give similar performance guarantees as in the non-adaptive case.
+In the significantly more complex adaptive setting, the problem of computing an optimal policy is hard to approximate even for seemingly simple classes of objective functions (e.g. linear), as shown by \citet{golovin11}.
+However, they also showed that the notions of monotonicity and submodularity can be naturally generalized to this setting, and be used to give similar performance guarantees as in the non-adaptive case.
 
-More concretely, the (expected) marginal gain of element $e \in E$ given partial realization $\psi$ can be defined as
+More concretely, the expected marginal gain of element $e \in E$ given partial realization $\psi$ can be defined as
 \begin{align*}
   \D{e}{\psi} \defeq \E[\Phi]{f\big(\mathcal{D}(\psi) \cup \{e\}, \Phi\big) - f\big(\dom(\psi), \Phi\big)}[\Phi \sim \psi].
 \end{align*}
 The above expression is a conditional expectation, which only considers realizations that are consistent with $\psi$.
-Then, following properties can be defined analogously to their non-adaptive counterparts:
+Then, the following properties can be defined analogously to their non-adaptive counterparts:
 \begin{itemize}
 \item $f$ is called adaptive monotone, if $\D{e}{\psi} \geq 0$, for all $e \in E$ and all $\psi$ of positive probability,
 \item $f$ is called adaptive submodular, if $\D{e}{\psi'} \leq \D{e}{\psi}$, for all $e \in E \setminus \dom(\psi')$ and all $\psi' \supseteq \psi$.
