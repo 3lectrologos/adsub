@@ -145,18 +145,18 @@ if __name__ == '__main__':
     args = parser.parse_args()
     if args.objective == 'inf':
         subdir = 'influence'
-        Y = [0, 1, 1, 1, 0, 0,
+        Y = [0, 1, 1, 0, 1, 0,
              1, 0, 0, 1, 1, 0,
              1, 0, 0, 0, 0, 1,
              1, 1, 1, 1, 0, 1,
-             1]
+             1, 0]
     elif args.objective == 'mc':
         subdir = 'maxcut'
         Y = [0, 0, 1, 1, 0, 0,
              0, 1, 0, 0, 0, 0,
              0, 0, 1, 0, 0, 1,
              1, 0, 0, 0, 1, 0,
-             1]
+             1, 1]
     if args.generate:
         save_features(os.path.join(util.DIR_RES, subdir))
     (X, labels) = get_features(os.path.join(util.DIR_RES, subdir))
