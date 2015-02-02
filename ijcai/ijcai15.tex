@@ -313,7 +313,7 @@ Even for $f_{\textrm{cost}}$ being a simple modular function, such as $f_{\textr
 Second, symmetric submodular functions, that is, submodular functions that satisfy $f(A, \phi) = f(E \setminus A, \phi)$, for all $A \subseteq E$, which are by definition non-monotone.
 
 \section{Adaptive Random Greedy}
-We now present our proposed adaptive random greedy policy ($\pig$) for maximizing (non-monotone) adaptive submodular objectives.
+We now present our proposed adaptive random greedy policy ($\pig$) for maximizing (non-monotone) adaptive submodular functions.
 Much like the adaptive greedy policy generalized the non-adaptive greedy algorithm, we generalize the recently proposed non-adaptive random greedy algorithm \cite{buchbinder14} to the adaptive setting.
 
 For technical reasons that will become apparent below, let us assume that we always add a set $D$ of $2k - 1$ dummy elements to the ground set, such that, for any $d \in D$, and any partial realization $\psi$, it holds that $\D{d}{\psi} = 0$.
@@ -324,7 +324,8 @@ As discussed before, we are given a ground set and an objective function, as wel
 After computing the marginal gains
 The key difference compared to the adaptive greedy policy is shown in \linesref{lin:upd1}{lin:upd2} of the algorithm.
 Rather than selecting the element with the largest expected marginal gain, $\pig$ randomly selects an element among the ones with the $k$ largest gains.
-(The dummy elements added to the ground set ensure that the policy never picks an element with negative expected marginal gain.)
+The dummy elements added to the ground set ensure that the policy never picks an element with negative expected marginal gain.
+Also, note that, although in \algoref{alg:rg} the returned set $A$ contains exactly $k$ elements, since we remove any dummy elements from it, the actual selected set may very well contain less than $k$ elements.
 
 When running the original adaptive greedy policy, non-monotonicity can lead to situations, where selecting the element of maximum marginal gain leads to traps of low utility that cannot be escaped by that policy.
 In contrast, the randomness introduced by adaptive random greedy to the selection of each element helps dealing with such traps (on average) and, thus, leads to guaranteed approximation guarantees for the expected utility, even for non-monotone objectives.
@@ -352,7 +353,7 @@ In contrast, the randomness introduced by adaptive random greedy to the selectio
 \end{algorithm}
 
 \paragraph{Theoretical analysis}
-More concretely, we now show that the adaptive random greedy policy retains the $(1-1/e)$ approximation ratio for adaptive monotone submodular objectives, while, at the same time, it achieves a $1/e$ approximation ratio for non-monotone objectives, under the somewhat stronger condition of submodularity for each realization.
+More concretely, we now show that the adaptive random greedy policy retains the $1-1/e$ approximation ratio for adaptive monotone submodular objectives, while, at the same time, it achieves a $1/e$ approximation ratio for non-monotone objectives, under the somewhat stronger condition of submodularity for each realization.
 As stated in the previous section, this stronger condition implies adaptive submodularity and, in fact, is satisfied in the majority of practical applications, since it is the most common way to prove adaptive submodularity in the first place.
 Therefore, we do not consider it a major restriction in the choice of objective functions.
 Also, note that our proofs generalize the results of \cite{buchbinder14} for the random greedy algorithm.
@@ -387,14 +388,14 @@ Based on \lemmaref{lem:submod} and the fact that $\pig$ selects at each step one
 \end{lemma}
 \noindent The lemma compares the expected gain at the $i$-th step of $\pig$ to the total gain of running any other policy (e.g., the optimal one) after the $i$-th step and, thereby, provides a means for obtaining approximation guarantees for $\pig$, as long as we can bound the term $\favg(\pigi @ \pi)$.
 
-If $f$ is adaptive monotone, we may use the bound $\favg(\pigi @ \pi) \geq \favg(\pi)$ and, more specifically, $\favg(\pigi @ \pik) \geq \favg(\pik)$, which readily follow from the definition of adaptive monotonicity, to obtain the following theorem.
+If $f$ is adaptive monotone, we may use the bound $\favg(\pigi @ \pi) \geq \favg(\pi)$, which readily follows from the definition of adaptive monotonicity, to obtain the following theorem.
 \begin{theorem}
   If $f$ is adaptive monotone submodular, then for any policy $\pi$ and all integers $i, k > 0$ it holds that
   \begin{align*}
     \favg(\pigi) \geq \left(1 - e^{-i/k}\right)\favg(\pik).
   \end{align*}
 \end{theorem}
-\noindent In particular, by setting $i = k$ we get the familiar $(1-1/e)$ approximation ratio for $\pigk$.
+\noindent In particular, by setting $i = k$ we get the familiar $1-1/e$ approximation ratio for $\pigk$.
 
 For the non-monotone case, we need to leverage the randomness of the selection process of $\pig$ to bound $\favg(\pigi @ \pi)$.
 For that purpose, we generalize to the adaptive setting the following lemma shown by \citet{buchbinder14}, which itself is based on a lemma by \citet{feige07} for the expected value of a submodular function under a randomly selected subset.
@@ -415,9 +416,9 @@ The following lemma extends the above claim to the adaptive setting.
 \end{align*}
 \end{lemma}
 \noindent Although we have not found concrete examples of adaptive submodular functions that do not satisfy this lemma, adaptive submodularity by itself does not seem to be a sufficient condition for it to hold; rather, we require the stronger assumption that $f$ be submodular for any realization.
-As a consequence, we get that $\favg(\pigi@\pi) = \favg(\pi@\pigi) \geq (1-p)\favg(\pi)$, meaning that the elements added by adaptive random greedy cannot reduce the average value obtained by any other policy $\pi$ by too much.
-The probability $p$ in this case can be bounded by using the fact that $\pig$ randomly selects one of $k$ elements at each step, therefore at the $i$-step we have $p \leq (1-1/k)^i$.
 
+As a consequence of the above lemma, we get that $\favg(\pigi@\pi) = \favg(\pi@\pigi) \geq (1-p)\favg(\pi)$, meaning that the elements added by adaptive random greedy cannot reduce the average value obtained by any other policy $\pi$ by too much.
+The probability $p$ in this case can be bounded by using the fact that $\pig$ randomly selects one of $k$ elements at each step, therefore at the $i$-step we have $p \leq (1-1/k)^i$.
 Putting it all together, we obtain the following theorem for non-monotone objectives.
 \begin{theorem}\label{thm:nonm}
   If $f(\cdot\,, \phi) : 2^E \to \mathbb{R}_{\geq 0}$ is submodular for all $\phi \in O^E$, then, for any policy $\pi$, and all integers $i, k > 0$, it holds that
