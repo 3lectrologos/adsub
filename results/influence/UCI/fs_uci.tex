@@ -1,0 +1,64 @@
+\documentclass{standalone}
+\usepackage{pgfplots}
+\pgfplotsset{compat=newest}
+
+\begin{document}
+\begin{tikzpicture}
+
+\begin{axis}[%
+title style={font=\Huge},
+title=UCI,
+tick label style={font=\Huge},
+label style={font=\Huge},
+legend style={font=\Huge},
+view={0}{90},
+width=7in,
+height=5in,
+scale only axis,
+xmin=0, xmax=1,
+xtick={0, 0.2, 0.4, 0.6, 0.8, 1},
+xlabel={$p$},
+ymin=0, ymax=1000,
+ytick={0, 200, 400, 600, 800, 1000},
+ylabel={$f_{avg}$},
+major tick length=5pt,
+axis lines*=left,
+legend cell align=left,
+clip=false]
+
+\addplot [
+mark=*,
+mark size=3.5pt,
+color=green!70!black,
+solid,
+line width=3pt
+]
+coordinates{
+(0.01,15.2)(0.1,623.1)(0.3,845.65)(0.5,905.35)(0.7,932.6)(1,950.0)
+};
+
+\addplot [
+mark=*,
+mark size=3.5pt,
+color=orange!70!black,
+solid,
+line width=3pt
+]
+coordinates{
+(0.01,48.95)(0.1,655.05)(0.3,890.8)(0.5,951.25)(0.7,980.35)(1,999.0)
+};
+
+\addplot [
+mark=*,
+mark size=3.5pt,
+color=cyan!70!black,
+solid,
+line width=3pt
+]
+coordinates{
+(0.01,51.8)(0.1,663.7)(0.3,892.5)(0.5,951.85)(0.7,980.6)(1,999.0)
+};
+
+\end{axis}
+\end{tikzpicture}
+\end{document}

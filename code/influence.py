@@ -158,7 +158,7 @@ class AdaptiveInfluence(BaseInfluence):
         self.fsol = self.fc(len(active), len(self.sol))
 #        print 'fsol =', self.fsol
 
-def compare_worker(i, g, pedge, nsim_ad, v_nonad_rg, v_nonad_g, k_ratio, gamma):
+def compare_worker(i, g, pedge, nsim_ad, v_nonad_rg, v_nonad_g, v_nonad_r, k_ratio, gamma):
     print '-> worker', i, 'started.'
     fc = lambda a, b: f_comb(a, b, gamma)
     h = random_instance(g, pedge, copy=True)
@@ -166,16 +166,19 @@ def compare_worker(i, g, pedge, nsim_ad, v_nonad_rg, v_nonad_g, k_ratio, gamma):
     (v_ad, _) = solver_ad.random_greedy(g.vcount()/k_ratio)
     active_nonad_rg = ic(h, v_nonad_rg)
     active_nonad_g = ic(h, v_nonad_g)
+    active_nonad_r = ic(h, v_nonad_r)
     active_ad = ic(h, v_ad)
     if f_ic_base(h, v_ad, fc) != solver_ad.fsol:
         raise 'Inconsistent adaptive function values'
     return {
         'active_nonad_rg': active_nonad_rg,
         'active_nonad_g': active_nonad_g,
+        'active_nonad_r': active_nonad_r,
         'active_ad': active_ad,
         'v_ad': v_ad,
         'f_nonad_rg': f_ic_base(h, v_nonad_rg, fc),
         'f_nonad_g': f_ic_base(h, v_nonad_g, fc),
+        'f_nonad_r': f_ic_base(h, v_nonad_r, fc),
         'f_ad': f_ic_base(h, v_ad, fc)
         }
 
@@ -193,9 +196,10 @@ def compare(g, pedge, nsim_nonad, nsim_ad, niter, k_ratio, gamma, workers=0):
     solver_nonad = NonAdaptiveInfluence(g, pedge, fc,  nsim_nonad)
     (v_nonad_rg, _) = solver_nonad.random_greedy(g.vcount()/k_ratio)
     (v_nonad_g, _) = solver_nonad.greedy(g.vcount()/k_ratio)
+    (v_nonad_r, _) = solver_nonad.random(g.vcount()/k_ratio)
     del solver_nonad.csim
     # Adaptive simulation
-    arg = [g, pedge, nsim_ad, v_nonad_rg, v_nonad_g, k_ratio, gamma]
+    arg = [g, pedge, nsim_ad, v_nonad_rg, v_nonad_g, v_nonad_r, k_ratio, gamma]
     if workers > 1:
         res = joblib.Parallel(n_jobs=workers)((compare_worker, [i] + arg, {})
                                         for i in range(niter))
@@ -204,13 +208,16 @@ def compare(g, pedge, nsim_nonad, nsim_ad, niter, k_ratio, gamma, workers=0):
     # Return results
     r_nonad_rg = [r['f_nonad_rg'] for r in res]
     r_nonad_g = [r['f_nonad_g'] for r in res]
+    r_nonad_r = [r['f_nonad_r'] for r in res]
     r_ad = [r['f_ad'] for r in res]
     v_ad = [len(r['v_ad']) for r in res]
     return {
         'r_nonad_rg': r_nonad_rg,
-        'r_nonad_g': r_nonad_g,
         'v_nonad_rg': v_nonad_rg,
+        'r_nonad_g': r_nonad_g,
         'v_nonad_g': v_nonad_g,
+        'r_nonad_r': r_nonad_r,
+        'v_nonad_r': v_nonad_r,
         'r_ad': r_ad,
         'v_ad': v_ad
         }
@@ -248,149 +255,3 @@ def test_graph():
 def tc_test():
     name = 'TEST_GRAPH'
     return (name, test_graph())
-
-def format_result(r):
-    sqn = np.sqrt(r['niter'])
-
-    lon = 'Adaptive     |       favg = {0:.4g} '.format(np.mean(r['r_ad']))
-    lon +=  '+/- {0:.3g}\n'.format(np.std(r['r_ad'])/sqn)
-    bar = '-'*len(lon) + '\n'
-
-    s = ''
-    s += '{0} ({1})\n'.format(r['name'], r['git'])
-    s += bar
-    s += 'Nodes             : {0}\n'.format(r['vcount'])
-    s += 'Edges             : {0}\n'.format(r['ecount'])
-    s += 'Transitivity      : {0:.3g}\n'.format(r['trans'])
-    s += 'Edge prob.        : {0:.3g}\n'.format(r['pedge'])
-    s += 'Sims non-adaptive : {0}\n'.format(r['nsim_nonad'])
-    s += 'Sims adaptive     : {0}\n'.format(r['nsim_ad'])
-    s += 'Iterations        : {0}\n'.format(r['niter'])
-    s += 'Gamma             : {0}\n'.format(r['gamma'])
-    s += 'k-ratio           : {0}\n'.format(r['kratio'])
-    s += 'Workers           : {0}\n'.format(r['workers'])
-    s += 'Time taken        : {0}h{1}m{2}s\n'.format(r['t_h'],
-                                                     r['t_m'],
-                                                     r['t_s'])
-    s += bar
-    s += 'Non-adaptive |       favg = {0:.4g} '.format(np.mean(r['r_nonad_g']))
-    s +=  '+/- {0:.3g}\n'.format(np.std(r['r_nonad_g'])/sqn)
-    s += '     (g)     |     #nodes = {0:.3g}\n'.format(len(r['v_nonad_g']))
-    s += bar
-    s += bar
-    s += 'Non-adaptive |       favg = {0:.4g} '.format(np.mean(r['r_nonad_rg']))
-    s +=  '+/- {0:.3g}\n'.format(np.std(r['r_nonad_rg'])/sqn)
-    s += '    (rg)     |     #nodes = {0:.3g}\n'.format(len(r['v_nonad_rg']))
-    s += bar
-
-    s += lon
-    s += '             | avg #nodes = {0:.3g}\n'.format(np.mean(r['v_ad']))
-    s += bar
-    return s
-
-RESULT_DIR = os.path.abspath('../results/')
-
-if __name__ == "__main__":
-    parser = argparse.ArgumentParser(description='Influence maximization')
-    parser.add_argument('-m', '--model',
-                        dest='model',
-                        default='B_A',
-                        help='Graph type')
-    parser.add_argument('-n', '--nodes',
-                        dest='nodes',
-                        default=None,
-                        type=int,
-                        help='Number of nodes')
-    parser.add_argument('-p', '--pedge',
-                        dest='p_edge',
-                        default=0.05,
-                        type=float,
-                        help='Probability of each edge being removed')
-    parser.add_argument('-nn', '--nnonadaptive',
-                        dest='nsim_nonad',
-                        default=1000,
-                        type=int,
-                        help='Number of non-adaptive instances drawn')
-    parser.add_argument('-na', '--nadaptive',
-                        dest='nsim_ad',
-                        default=1000,
-                        type=int,
-                        help='Number of instances drawn at each adaptive step')
-    parser.add_argument('-ni', '--niter',
-                        dest='niter',
-                        default=8,
-                        type=int,
-                        help='Number of evaluation instances')
-    parser.add_argument('-k', '--kratio',
-                        dest='k_ratio',
-                        default=10,
-                        type=int,
-                        help='Cardinality constraint as a % of #nodes')
-    parser.add_argument('-g', '--gamma',
-                        dest='gamma',
-                        default=2,
-                        type=float,
-                        help='Cost per node')
-    parser.add_argument('-w', '--workers',
-                        dest='workers',
-                        default=1,
-                        type=int,
-                        help='Number of parallel workers (1 = sequential)')
-    args = parser.parse_args()
-    P_EDGE = args.p_edge
-    NSIM_NONAD = args.nsim_nonad
-    NSIM_AD = args.nsim_ad
-    NITER = args.niter
-    K_RATIO = args.k_ratio
-    GAMMA = args.gamma
-    WORKERS = args.workers
-    MODEL = args.model
-    NODES = args.nodes
-
-    random.seed(0)
-    np.random.seed(0)
-
-    (name, g) = util.get_tc(MODEL, NODES)
-
-    print 'Running {0}'.format(name)
-    print '#nodes =', g.vcount()
-    print '#edges =', g.ecount()
-    print 'transitivity =', g.transitivity_undirected()
-
-    stime = time.time()
-    r = compare(g, P_EDGE, NSIM_NONAD, NSIM_AD, NITER, K_RATIO, GAMMA, WORKERS)
-    etime = time.time()
-    dt = int(etime - stime)
-    hours = dt / 3600
-    mins = (dt % 3600) / 60
-    secs = (dt % 3600) % 60
-
-    r['name'] = name
-    r['vcount'] = g.vcount()
-    r['ecount'] = g.ecount()
-    r['trans'] = g.transitivity_undirected()
-    r['pedge'] = P_EDGE
-    r['nsim_nonad'] = NSIM_NONAD
-    r['nsim_ad'] = NSIM_AD
-    r['niter'] = NITER
-    r['gamma'] = GAMMA
-    r['kratio'] = K_RATIO
-    r['workers'] = WORKERS
-    r['t_h'] = hours
-    r['t_m'] = mins
-    r['t_s'] = secs
-    r['git'] = sub.check_output(['git', 'rev-parse', '--short', 'HEAD']).strip()
-    
-    s = format_result(r)
-    print s
-
-    now = time.localtime()
-    fname = name + '_'
-    fname += '{0:02d}{1}_'.format(now.tm_mday, cal.month_name[now.tm_mon][:3])
-    fname += '{0:02d}_{1:02d}_{2:02d}'.format(now.tm_hour,
-                                              now.tm_min,
-                                              now.tm_sec)
-    with open(os.path.join(RESULT_DIR, fname + '.txt'), 'w') as f:
-        f.write(s)
-    with open(os.path.join(RESULT_DIR, fname + '.pickle'), 'w') as f:
-        pickle.dump(r, f)

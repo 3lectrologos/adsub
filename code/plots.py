@@ -57,6 +57,7 @@ def run_inf(model, nodes, fast=True, plot=False):
     imps = []
     fs_nonad = []
     fs_ad = []
+    fs_rand = []
     vs_nonad = []
     vs_ad = []
     ps = [0.01, 0.1, 0.3, 0.5, 0.7, 1]
@@ -69,8 +70,10 @@ def run_inf(model, nodes, fast=True, plot=False):
         r = influence.compare(g, p, **params)
         fm_nonad = np.mean(r['r_nonad_rg'])
         fm_ad = np.mean(r['r_ad'])
+        fm_rand = np.mean(r['r_nonad_r'])
         fs_nonad.append(fm_nonad)
         fs_ad.append(fm_ad)
+        fs_rand.append(fm_rand)
         imp = 100.0 * (fm_ad - fm_nonad) / nodes
         imps.append(imp)
         vm_nonad = len(r['v_nonad_rg'])
@@ -78,6 +81,7 @@ def run_inf(model, nodes, fast=True, plot=False):
         fv_ratios = [(1.0 * x) / y for x, y in zip(r['r_ad'], r['v_ad'])]
         vs_ad.append(np.mean(fv_ratios))
         print 'p =', p
+        print 'f (rand) =', fm_rand
         print 'f (nonad) =', fm_nonad
         print 'f (ad) =', fm_ad
         print 'imp =', imp
@@ -94,11 +98,12 @@ def run_inf(model, nodes, fast=True, plot=False):
     # f_avg plot
     fs_nonad_plot = util.get_coords(ps, fs_nonad)
     fs_ad_plot = util.get_coords(ps, fs_ad)
+    fs_rand_plot = util.get_coords(ps, fs_rand)
     texname = 'fs_' + model.lower() + '.tex'
     util.replace(outdir,
                  TEMPLATE_INF_FS,
                  {'fs_nonad': fs_nonad_plot, 'fs_ad': fs_ad_plot,
-                  'title': esc_model},
+                  'fs_rand': fs_rand_plot, 'title': esc_model},
                  outname=texname)
     util.maketex(outdir, texname)
     # f_avg / num. of nodes plot
@@ -127,12 +132,14 @@ def run_mc(model, nodes, fast=True, plot=False):
     xs = []
     imps = []
     imp_means = []
+    fs_rand = []
+    fs_rand_means = []
     fs_nonad = []
     fs_nonad_means = []
     fs_ad = []
     fs_ad_means = []
     n_available = len(g.vs) / 10
-    ks = [int(kr * n_available) for kr in [0.01, 0.05, 0.1, 0.2, 0.3, 0.5]]
+    ks = [max(1, int(kr * n_available)) for kr in [0.01, 0.1, 0.3, 0.5, 0.7, 1]]
     print_info(name, g)
     for k in ks:
         if fast:
@@ -142,6 +149,8 @@ def run_mc(model, nodes, fast=True, plot=False):
         r = maxcut.run(g, n_available=n_available, k=k, **params)
         imps += r['imp']
         imp_means.append(np.mean(r['imp']))
+        fs_rand += r['f_rand']
+        fs_rand_means.append(np.mean(r['f_rand']))
         fs_nonad += r['f_nonad']
         fs_nonad_means.append(np.mean(r['f_nonad']))
         fs_ad += r['f_ad']
@@ -157,6 +166,8 @@ def run_mc(model, nodes, fast=True, plot=False):
                  outname=texname)
     util.maketex(outdir, texname)
     # f_avg plot
+    fs_rand_ms = util.get_coords(ks, fs_rand_means)
+    fs_rand_cs = util.get_coords(xs, fs_rand)
     fs_nonad_ms = util.get_coords(ks, fs_nonad_means)
     fs_nonad_cs = util.get_coords(xs, fs_nonad)
     fs_ad_ms = util.get_coords(ks, fs_ad_means)
@@ -165,6 +176,7 @@ def run_mc(model, nodes, fast=True, plot=False):
     util.replace(outdir,
                  TEMPLATE_MC_FS,
                  {'fs_nonad': fs_nonad_cs, 'f_nonad_means': fs_nonad_ms,
+                  'fs_rand': fs_rand_cs, 'f_rand_means': fs_rand_ms,
                   'fs_ad': fs_ad_cs, 'f_ad_means': fs_ad_ms,
                   'y_max': str(max(fs_ad)), 'title': esc_model},
                  outname=texname)

@@ -16,8 +16,8 @@ max space between ticks=50pt,
 width=7in,
 height=5in,
 scale only axis,
-xmin=0, xmax=50,
-xtick={0, 10, 20, 30, 40, 50},
+xmin=0, xmax=200,
+xtick={0, 50, 100, 150, 200},
 xlabel={$k$},
 ymin=0, ymax=%y_max%,
 %ytick={0, 200, 400, 600, 800, 1000},
@@ -26,6 +26,18 @@ major tick length=5pt,
 axis lines*=left,
 legend cell align=left,
 clip=false]
+
+\addplot [
+only marks,
+mark=*,
+mark size=3.5pt,
+color=green!70!black,
+%solid,
+%line width=2pt,
+]
+coordinates{
+%fs_rand%
+};
 
 \addplot [
 only marks,
@@ -49,6 +61,15 @@ color=cyan!70!black,
 ]
 coordinates{
 %fs_ad%
+};
+
+\addplot [
+color=green!70!black,
+solid,
+line width=3pt
+]
+coordinates{
+%f_rand_means%
 };
 
 \addplot [

@@ -53,7 +53,7 @@ class NonAdaptiveMaxCut(submod.AdaptiveMax):
         self.f = lambda v, a: self.mean_pcut(v)
 
     def update_f_hook(self):
-        print 'nonad:', len(self.sol)
+        #        print 'nonad:', len(self.sol)
         self.fsol = self.f(self.sol[-1], self.sol[:-1])
         cset = self.csets[self.sol[-1]]
         for i, (cut, cut_edges, val) in enumerate(self.ins):
@@ -96,24 +96,29 @@ def eval_instance(g, inst, cutids):
     return cutval(g, cut)
 
 def compare(g, csets, nsim_nonad, niter, k):
+    f_rand = []
     f_nonad = []
     f_ad = []
     solver_nonad = NonAdaptiveMaxCut(g, csets, nsim_nonad)
     cut_nonad, _ = solver_nonad.random_greedy(k)
+    cut_rand, _ = solver_nonad.random(k)
     for i in range(niter):
-        #print 'i =', i
         instance = random_instance(csets)
         solver_ad = AdaptiveMaxCut(g, csets, instance)
         cut_ad, _ = solver_ad.random_greedy(k)
+        f_rand.append(eval_instance(g, instance, cut_rand))
         f_nonad.append(eval_instance(g, instance, cut_nonad))
         f_ad.append(eval_instance(g, instance, cut_ad))
+    fm_rand = np.mean(f_rand)
     fm_nonad = np.mean(f_nonad)
     fm_ad = np.mean(f_ad)
     imp = 100.0 * (fm_ad - fm_nonad) / fm_nonad
+    print 'f_rand =', fm_rand
     print 'f_nonad =', fm_nonad
     print 'f_ad =', fm_ad
     print 'improvement = {0:.1f}%'.format(imp)
     return {
+        'f_rand': fm_rand,
         'f_nonad': fm_nonad,
         'f_ad': fm_ad,
         'imp': imp
@@ -146,10 +151,12 @@ def profile():
     prof.run('maxcut.profile_aux()', sort='cumulative')
 
 def run(g, reps, niter, nsim_nonad, n_available, k):
-    res = {'f_nonad': [], 'f_ad': [], 'imp': []}
+    res = {'f_rand': [], 'f_nonad': [], 'f_ad': [], 'imp': []}
     for rep in range(reps):
-        print 'Rep:', rep
+        print 'Rep:', rep, '(k = {0})'.format(k)
+        print '==============================='
         r = compare(g, k_csets(g, n_available), nsim_nonad, niter, k)
+        res['f_rand'].append(r['f_rand'])
         res['f_nonad'].append(r['f_nonad'])
         res['f_ad'].append(r['f_ad'])
         res['imp'].append(r['imp'])

@@ -1,5 +1,6 @@
 import abc
 import random
+import numpy as np
 import Queue
 
 
@@ -16,6 +17,10 @@ class AdaptiveMax(object):
 
     def update_f_hook(self):
         self.fsol = self.f(self.sol[-1], self.sol[:-1])
+
+    def random(self, k):
+        a = np.random.choice(self.E, size=k, replace=False)
+        return (a, None)
 
     def greedy(self, k):
         self.init_f_hook()

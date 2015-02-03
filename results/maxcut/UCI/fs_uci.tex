@@ -1,0 +1,96 @@
+\documentclass{standalone}
+\usepackage{pgfplots}
+\pgfplotsset{compat=newest}
+
+\begin{document}
+\begin{tikzpicture}
+
+\begin{axis}[%
+title style={font=\Huge},
+title=UCI,
+tick label style={font=\Huge},
+label style={font=\Huge},
+legend style={font=\Huge},
+view={0}{90},
+max space between ticks=50pt,
+width=7in,
+height=5in,
+scale only axis,
+xmin=0, xmax=200,
+xtick={0, 50, 100, 150, 200},
+xlabel={$k$},
+ymin=0, ymax=5756.6,
+%ytick={0, 200, 400, 600, 800, 1000},
+ylabel={$f_{avg}$},
+major tick length=5pt,
+axis lines*=left,
+legend cell align=left,
+clip=false]
+
+\addplot [
+only marks,
+mark=*,
+mark size=3.5pt,
+color=green!70!black,
+%solid,
+%line width=2pt,
+]
+coordinates{
+(1,74.05)(1,74.15)(1,74.2)(18,844.9)(18,895.65)(18,1043.7)(56,2460.85)(56,2530.8)(56,2553.85)(94,3431.05)(94,3469.05)(94,3812.8)(132,4443.5)(132,4572.55)(132,4659.15)(189,5425.9)(189,5499.55)(189,5751.05)
+};
+
+\addplot [
+only marks,
+mark=*,
+mark size=3.5pt,
+color=orange!70!black,
+%solid,
+%line width=2pt,
+]
+coordinates{
+(1,106.75)(1,140.45)(1,147.15)(18,1509.55)(18,1529.75)(18,1577.5)(56,2944.4)(56,2992.85)(56,3141.85)(94,2949.75)(94,3377.55)(94,4191.75)(132,4411.3)(132,4761.55)(132,4882.9)(189,3968.9)(189,4370.15)(189,4825.65)
+};
+
+\addplot [
+only marks,
+mark=*,
+mark size=3.5pt,
+color=cyan!70!black,
+%solid,
+%line width=2pt,
+]
+coordinates{
+(1,106.75)(1,140.45)(1,147.15)(18,1643.3)(18,1668.95)(18,1676.6)(56,3180.0)(56,3286.55)(56,3291.45)(94,3892.25)(94,3904.45)(94,4111.6)(132,4677.75)(132,4721.4)(132,4851.9)(189,5432.1)(189,5503.6)(189,5756.6)
+};
+
+\addplot [
+color=green!70!black,
+solid,
+line width=3pt
+]
+coordinates{
+(1,74.1333333333)(18,928.083333333)(56,2515.16666667)(94,3570.96666667)(132,4558.4)(189,5558.83333333)
+};
+
+\addplot [
+color=orange!70!black,
+solid,
+line width=3pt
+]
+coordinates{
+(1,131.45)(18,1538.93333333)(56,3026.36666667)(94,3506.35)(132,4685.25)(189,4388.23333333)
+};
+
+\addplot [
+color=cyan!70!black,
+solid,
+line width=3pt
+]
+coordinates{
+(1,131.45)(18,1662.95)(56,3252.66666667)(94,3969.43333333)(132,4750.35)(189,5564.1)
+};
+
+
+\end{axis}
+\end{tikzpicture}
+\end{document}

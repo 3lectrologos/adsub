@@ -77,7 +77,7 @@ def get_tc(fname, n, directed=True, nxgraph=False):
     else:
         g = read_graph(os.path.join(DIR_DATA, fname + '.txt'), directed, nxgraph)
         g.simplify()
-        if n != None:
+        if n != None and n < g.vcount():
             g = sample_RW(g, n)
         print 'check:', g.vcount()
         for v in g.vs:

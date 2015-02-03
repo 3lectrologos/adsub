@@ -15,7 +15,7 @@ parser.add_argument('-s', '--slow',
                     help='more detailed simulation')
 args = parser.parse_args()
 
-n = 1000
+n = 2000
 for m in models:
     cargs = [args.objective, m, str(n)]
     if args.slow:
