@@ -284,7 +284,7 @@ Function $f$ is called monotone if for any $B \subseteq C \subseteq E$, it holds
 Furthermore, $f$ is called submodular, if for any $B \subseteq C \subseteq E$ and any $e \in E \setminus C$, it holds that $f(C \cup \{e\}) - f(C) \leq  f(B \cup \{e\}) - f(B)$.
 This means that the marginal gain of any element decreases as the given set increases ($C \supseteq B$); in other words, it expresses a behavior of ``diminishing returns''.
 
-In their famous result, \citet{nemhauser78} showed that, if $f$ is normalized ($f(\varnothing) = 0$), monotone, and submodular, then constructing a subset $A$ by picking elements greedily according to their marginal gains, guarantees that $f(A)$ is a ($1 - 1/e$)-approximation to the optimal value.
+In their famous result, \citet{nemhauser78} showed that, if $f$ is non-negative, monotone, and submodular, then constructing a subset $A$ by picking elements greedily according to their marginal gains, guarantees that $f(A)$ is a ($1 - 1/e$)-approximation to the optimal value.
 
 \paragraph{Adaptive}
 In the significantly more complex adaptive setting, the problem of computing an optimal policy is hard to approximate even for seemingly simple classes of objective functions (e.g. linear), as shown by \citet{golovin11}.
@@ -406,7 +406,7 @@ For that purpose, we generalize to the adaptive setting the following lemma show
   \end{align*}
 \end{lemma}
 \noindent Roughly speaking, the lemma states that a ``random enough'' subset $A$ cannot have much worse value than that of the empty set.
-Note that $f$ here is neither normalized nor monotone.
+Note that $f$ here is not assumed to be monotone.
 
 The following lemma extends the above claim to the adaptive setting.
 \begin{lemma}
@@ -440,7 +440,7 @@ Given a graph and a model of influence propagation, the goal is to select a subs
 We focus here on the independent cascade model, for which the problem setup is as follows.
 The ground set $E$ consists of network nodes and each realization $\Phi$ corresponds to a full ``outcome'' of the independent cascade model, that is, a boolean assignment to each network edge being either ``live'' or ``blocked''.
 Then, the objective function $f_{\textrm{inf}}(A, \Phi)$ is the number of active nodes under realization $\Phi$, if subset $A$ is initially active.
-\citet{kempe03} showed that this function is normalized, monotone, and submodular, for any realization $\Phi$.
+\citet{kempe03} showed that this function is non-negative, monotone, and submodular, for any realization $\Phi$.
 
 \citet{golovin11} formulated an adaptive version of this problem, in which, each selection of a node $v$ reveals the status (``live'' or ``blocked'') of all outgoing edges of $v$ and of any other node that can be reached from $v$ through ``live'' edges.
 Furthermore, they showed that the above objective is adaptive monotone submodular.
@@ -449,11 +449,11 @@ For our experiments, we assume that each selected node incurs a unit cost, or, e
 \begin{align*}
   f_1(A, \Phi) \defeq f_{\textrm{inf}}(A, \Phi) - |A|,
 \end{align*}
-which results in a new normalized, non-monotone, submodular objective for any realization $\Phi$.
+which results in a new non-negative, non-monotone, submodular objective for any realization $\Phi$.
 
 \paragraph{Maximum graph cut}
 The problem of finding the maximum cut in a graph is a much studied NP-complete problem with various proposed algorithms. \todo{refs}
-Interestingly, the maximum cut objective is normalized, symmetric submodular, and, therefore, non-monotone.
+Interestingly, the maximum cut objective is non-negative, symmetric submodular, and, therefore, non-monotone.
 
 For our experiments, we consider a modified version of this problem, in which, selecting a node results in cutting that node or either of its neighbors with equal probability.
 The ground set $E$ consists again of network nodes and each realization $\Phi$ corresponds to a function $\sigma_{\Phi}$ that maps each node $v \in V$ to the node that is actually cut if $v$ is selected.
@@ -461,7 +461,7 @@ If we call the classic maximum cut objective $f_{\textrm{cut}}$, then our modifi
 \begin{align*}
   f_2(A, \Phi) \defeq f_{\textrm{cut}}\left(\bigcup_{v \in A}\sigma_{\Phi}(v)\right).
 \end{align*}
-The new objective is also normalized, non-monotone, and submodular, for any realization $\Phi$.
+The new objective is also non-negative, non-monotone, and submodular, for any realization $\Phi$.
 
 \subsection{Data sets}
 
