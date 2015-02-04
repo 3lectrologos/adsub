@@ -236,7 +236,7 @@ ETH Zurich}
 \maketitle
 
 \begin{abstract}
-A wide range of AI problems require us to sequentially select elements from a large set with the goal of optimizing some form of utility of our selected subset.
+A wide range of AI problems require sequentially selecting elements from a large set with the goal of optimizing some form of utility over our selected subset.
 Moreover, each element we pick may provide us with stochastic feedback, which we can use to make smarter decisions about future selections.
 While finding efficient policies for this general class of adaptive stochastic optimization problems can be extremely hard, the subclass of problems, for which the objective function is adaptive monotone and adaptive submodular, has been shown to possess a number of desirable properties; most notably, the simple and efficient greedy policy obtains a $1-1/e$ approximation ratio.
 However, many objectives of practical interest are naturally non-monotone; as a simple example, each selected element may incur some cost that needs to be subtracted from the original monotone utility, resulting in a non-monotone objective.
