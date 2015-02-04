@@ -20,7 +20,6 @@ xmin=0, xmax=200,
 xtick={0, 50, 100, 150, 200},
 xlabel={$k$},
 ymin=0, ymax=%y_max%,
-%ytick={0, 200, 400, 600, 800, 1000},
 ylabel={$f_{avg}$},
 major tick length=5pt,
 axis lines*=left,
@@ -36,7 +35,7 @@ color=green!70!black,
 %line width=2pt,
 ]
 coordinates{
-%fs_rand%
+%rand%
 };
 
 \addplot [
@@ -48,7 +47,7 @@ color=orange!70!black,
 %line width=2pt,
 ]
 coordinates{
-%fs_nonad%
+%nonad%
 };
 
 \addplot [
@@ -60,16 +59,16 @@ color=cyan!70!black,
 %line width=2pt,
 ]
 coordinates{
-%fs_ad%
+%ad%
 };
-
+p
 \addplot [
 color=green!70!black,
 solid,
 line width=3pt
 ]
 coordinates{
-%f_rand_means%
+%mean_rand%
 };
 
 \addplot [
@@ -78,7 +77,7 @@ solid,
 line width=3pt
 ]
 coordinates{
-%f_nonad_means%
+%mean_nonad%
 };
 
 \addplot [
@@ -87,7 +86,7 @@ solid,
 line width=3pt
 ]
 coordinates{
-%f_ad_means%
+%mean_ad%
 };
 
 

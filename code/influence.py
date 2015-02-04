@@ -1,23 +1,14 @@
-import argparse
 import os
 import sys
 import random
-import time
-import cProfile as prof
-import uuid
-import subprocess as sub
-import pickle
-import calendar as cal
-
-import networkx as nx
 import igraph as ig
 import numpy as np
 import joblib
 import bitarray as ba
 import progressbar
-
 import submod
 import util
+
 
 DEBUG = False
 
@@ -34,6 +25,7 @@ def random_instance(g, p, copy=False, ret=False):
     else:
         return g
 
+
 def ic(g, a):
     r = list(set(a))
     for v in a:
@@ -41,6 +33,7 @@ def ic(g, a):
         # Just to avoid the list getting too long
         r = list(set(r))
     return set(r)
+
 
 def ic_sim(g, p, niter, pbar=False):
     if pbar:
@@ -61,6 +54,7 @@ def ic_sim(g, p, niter, pbar=False):
         pb.finish()
     return csim
 
+
 def ic_sim_cond(g, p, niter, active):
     n = g.vcount()
     csim = {v.index: 0 for v in g.vs}
@@ -74,15 +68,19 @@ def ic_sim_cond(g, p, niter, active):
         d[v['i']] = len(active) + csim[v.index]/(1.0*niter)
     return d
 
+
 def delete_active(g, active):
     g.delete_vertices([v for v in g.vs if v['i'] in active])
+
 
 def f_comb(val, cost, GAMMA):
     return val - GAMMA*cost
 
+
 def f_ic_base(h, a, fc):
     active = ic(h, a)
     return fc(len(active), len(a))
+
 
 def f_ic(v, a, csim, prev, fc, ret=False):
     s = 0
@@ -107,6 +105,7 @@ def f_ic(v, a, csim, prev, fc, ret=False):
     else:
         return fc((1.0*s)/nsim, len(a) + 1)
 
+
 def f_ic_ad(v, a, csim, active, fprev, fc):
     a = set(a)
     active = list(set(active))
@@ -114,12 +113,10 @@ def f_ic_ad(v, a, csim, active, fprev, fc):
         return fprev
     return fc(csim[v], len(a) + 1)
 
-class BaseInfluence(submod.AdaptiveMax):
-    pass
 
-class NonAdaptiveInfluence(BaseInfluence):
-    def __init__(self, g, p, fc, nsim):
-        super(NonAdaptiveInfluence, self).__init__([v['i'] for v in g.vs])
+class NonAdaptiveInfluence(submod.AdaptiveMax):
+    def __init__(self, g, gset, p, fc, nsim):
+        super(NonAdaptiveInfluence, self).__init__(gset)
         self.g = g
         self.p = p
         self.fc = fc
@@ -135,10 +132,11 @@ class NonAdaptiveInfluence(BaseInfluence):
         (self.fsol, self.prev) = f_ic(self.sol[-1], self.sol[:-1], self.csim,
                                       self.prev, self.fc, ret=True)
         self.f = lambda v, a: f_ic(v, a, self.csim, self.prev, self.fc)
-        
-class AdaptiveInfluence(BaseInfluence):
-    def __init__(self, g, h, p, fc, nsim):
-        super(AdaptiveInfluence, self).__init__([v['i'] for v in g.vs])
+
+
+class AdaptiveInfluence(submod.AdaptiveMax):
+    def __init__(self, g, gset, h, p, fc, nsim):
+        super(AdaptiveInfluence, self).__init__(gset)
         self.g = g.copy()
         self.h = h
         self.p = p
@@ -151,107 +149,62 @@ class AdaptiveInfluence(BaseInfluence):
 
     def update_f_hook(self):
         active = ic(self.h, self.sol)
-#        print '#sol =', len(self.sol), ', #active =', len(active)
         delete_active(self.g, active)
         csim = ic_sim_cond(self.g, self.p, self.nsim, active=active)
         self.f = lambda v, a: f_ic_ad(v, a, csim, active, self.fsol, self.fc)
         self.fsol = self.fc(len(active), len(self.sol))
-#        print 'fsol =', self.fsol
 
-def compare_worker(i, g, pedge, nsim_ad, v_nonad_rg, v_nonad_g, v_nonad_r, k_ratio, gamma):
-    print '-> worker', i, 'started.'
+
+def worker(i, g, gset, pedge, k, gamma, nsim_ad, v_rand, v_nonad):
+    sys.stdout.write('.')
+    sys.stdout.flush()
     fc = lambda a, b: f_comb(a, b, gamma)
     h = random_instance(g, pedge, copy=True)
-    solver_ad = AdaptiveInfluence(g, h, pedge, fc, nsim_ad)
-    (v_ad, _) = solver_ad.random_greedy(g.vcount()/k_ratio)
-    active_nonad_rg = ic(h, v_nonad_rg)
-    active_nonad_g = ic(h, v_nonad_g)
-    active_nonad_r = ic(h, v_nonad_r)
-    active_ad = ic(h, v_ad)
+    solver_ad = AdaptiveInfluence(g, gset, h, pedge, fc, nsim_ad)
+    (v_ad, _) = solver_ad.random_greedy(k)
     if f_ic_base(h, v_ad, fc) != solver_ad.fsol:
         raise 'Inconsistent adaptive function values'
     return {
-        'active_nonad_rg': active_nonad_rg,
-        'active_nonad_g': active_nonad_g,
-        'active_nonad_r': active_nonad_r,
-        'active_ad': active_ad,
-        'v_ad': v_ad,
-        'f_nonad_rg': f_ic_base(h, v_nonad_rg, fc),
-        'f_nonad_g': f_ic_base(h, v_nonad_g, fc),
-        'f_nonad_r': f_ic_base(h, v_nonad_r, fc),
+        'f_rand': f_ic_base(h, v_rand, fc),
+        'f_nonad': f_ic_base(h, v_nonad, fc),
         'f_ad': f_ic_base(h, v_ad, fc)
         }
 
-def compare(g, pedge, nsim_nonad, nsim_ad, niter, k_ratio, gamma, workers=0):
-    f_nonad = []
-    f_ad = []
-    v_ad = []
-    st_nonad = {}
-    st_ad = {}
-    for v in g.vs:
-        st_nonad[v['i']] = 0
-        st_ad[v['i']] = 0
-    fc = lambda a, b: f_comb(a, b, gamma)
-    # Non-adaptive simulation
-    solver_nonad = NonAdaptiveInfluence(g, pedge, fc,  nsim_nonad)
-    (v_nonad_rg, _) = solver_nonad.random_greedy(g.vcount()/k_ratio)
-    (v_nonad_g, _) = solver_nonad.greedy(g.vcount()/k_ratio)
-    (v_nonad_r, _) = solver_nonad.random(g.vcount()/k_ratio)
-    del solver_nonad.csim
-    # Adaptive simulation
-    arg = [g, pedge, nsim_ad, v_nonad_rg, v_nonad_g, v_nonad_r, k_ratio, gamma]
-    if workers > 1:
-        res = joblib.Parallel(n_jobs=workers)((compare_worker, [i] + arg, {})
-                                        for i in range(niter))
-    else:
-        res = [compare_worker(*([i] + arg)) for i in range(niter)]
-    # Return results
-    r_nonad_rg = [r['f_nonad_rg'] for r in res]
-    r_nonad_g = [r['f_nonad_g'] for r in res]
-    r_nonad_r = [r['f_nonad_r'] for r in res]
-    r_ad = [r['f_ad'] for r in res]
-    v_ad = [len(r['v_ad']) for r in res]
-    return {
-        'r_nonad_rg': r_nonad_rg,
-        'v_nonad_rg': v_nonad_rg,
-        'r_nonad_g': r_nonad_g,
-        'v_nonad_g': v_nonad_g,
-        'r_nonad_r': r_nonad_r,
-        'v_nonad_r': v_nonad_r,
-        'r_ad': r_ad,
-        'v_ad': v_ad
-        }
 
-def profile_aux():
-    random.seed(0)
-    np.random.seed(0)
-    P_EDGE = 0.3
-    NSIM_NONAD = 1000
-    NSIM_AD = 1000
-    NITER = 10
-    K_RATIO = 10
-    GAMMA = 3
-    (name, g) = tc_snap_gr(100)
-    compare(g, P_EDGE, NSIM_NONAD, NSIM_AD, NITER, K_RATIO, GAMMA)
+def compare(g, pedge, n_available, k ,gamma, nsim_nonad, nsim_ad, niter, workers):
+        gset = [v['i'] for v in np.random.choice(g.vs, n_available, replace=False)]
+        # Non-adaptive simulation
+        fc = lambda a, b: f_comb(a, b, gamma)
+        solver_nonad = NonAdaptiveInfluence(g, gset, pedge, fc,  nsim_nonad)
+        (v_rand, _) = solver_nonad.random(k)
+        (v_nonad, _) = solver_nonad.random_greedy(k)
+        del solver_nonad.csim
+        # Adaptive simulation
+        arg = [g, gset, pedge, k, gamma, nsim_ad, v_rand, v_nonad]
+        if workers > 1:
+            r = joblib.Parallel(n_jobs=workers)((worker, [i] + arg, {})
+                                                  for i in range(niter))
+        else:
+            r = [worker(*([i] + arg)) for i in range(niter)]
+        return {
+            'f_rand': np.mean([x['f_rand'] for x in r]),
+            'f_nonad': np.mean([x['f_nonad'] for x in r]),
+            'f_ad': np.mean([x['f_ad'] for x in r])
+            }
 
-def profile():
-    prof.run('influence.profile_aux()', sort='cumulative')
 
-def test_graph():
-    g = ig.Graph()
-    g.add_vertices(7)
-    for v in g.vs:
-        v['i'] = v.index
-    g.add_edge(0, 1)
-    g.add_edge(0, 2)
-    g.add_edge(0, 3)
-    g.add_edge(4, 1)
-    g.add_edge(4, 2)
-    g.add_edge(4, 3)
-    g.add_edge(5, 6)
-    g.to_directed()
-    return g
-
-def tc_test():
-    name = 'TEST_GRAPH'
-    return (name, test_graph())
+def run(g, reps, pedge, n_available, k, gamma, nsim_nonad, nsim_ad, niter, workers=0):
+    res = {'f_rand': [], 'f_nonad': [], 'f_ad': []}
+    for rep in range(reps):
+        print 'Rep:', rep, '(k = {0})'.format(k)
+        print '==============================='
+        r = compare(g, pedge, n_available, k, gamma, nsim_nonad, nsim_ad, niter, workers)
+        res['f_rand'].append(r['f_rand'])
+        res['f_nonad'].append(r['f_nonad'])
+        res['f_ad'].append(r['f_ad'])
+        print ''
+        print 'f_rand =', r['f_rand']
+        print 'f_nonad =', r['f_nonad']
+        print 'f_ad =', r['f_ad']
+        print '===============================\n'
+    return res

@@ -5,12 +5,12 @@ import numpy as np
 import matplotlib.pylab as plt
 import networkx as nx
 import igraph as ig
-import influence
 
 
 DIR_DATA = os.path.abspath('../data/')
 DIR_RES = os.path.abspath('../results/')
 DIR_TEMPLATE = os.path.abspath('../templates/')
+
 
 def read_graph(filename, directed=False, nxgraph=False):
     if directed:
@@ -34,6 +34,7 @@ def read_graph(filename, directed=False, nxgraph=False):
     h.add_edges(g.edges())
     return h
 
+
 def read_sig_graph(filename):
     g = nx.Graph()
     with open(filename, 'rb') as f:
@@ -48,6 +49,7 @@ def read_sig_graph(filename):
     h.add_vertices(g.number_of_nodes())
     h.add_edges(g.edges())
     return h
+
 
 def get_tc(fname, n, directed=True, nxgraph=False):
     if fname == 'B_A':
@@ -86,6 +88,7 @@ def get_tc(fname, n, directed=True, nxgraph=False):
     name = fname + '_' + str(len(g.vs))
     return (name, g)
 
+
 def sample_RDN(g, n):
     if n == None:
         return g
@@ -93,6 +96,7 @@ def sample_RDN(g, n):
     pr /= np.sum(pr)
     new_vs = np.random.choice(g.vs, size=n, replace=False, p=pr)
     return g.subgraph(new_vs)
+
 
 def sample_RW_edges(g, n):
     MAX_COUNTER = 100 * n
@@ -130,6 +134,7 @@ def sample_RW_edges(g, n):
     print 'vcount =', len(new_vs)
     return g.subgraph_edges(new_es)
 
+
 def sample_RW(g, n):
     MAX_COUNTER = 100 * n
     if n == None:
@@ -159,6 +164,7 @@ def sample_RW(g, n):
     print 'vcount =', len(new_vs)
     return g.induced_subgraph(new_vs)
 
+
 def sample_RJ(g, n):
     if n == None:
         return g
@@ -177,11 +183,13 @@ def sample_RJ(g, n):
     print 'vcount =', len(new_vs)
     return g.induced_subgraph(new_vs)
 
+
 def plot_degree_dist(g):
     xs, ys = zip(*[(left, count) for left, _, count in 
                    g.degree_distribution().bins()])
     plt.loglog(xs, ys, 'o')
     plt.show()
+
 
 def get_coords(x, y):
     s = ''
@@ -189,6 +197,7 @@ def get_coords(x, y):
     for e in z:
         s += '(' + str(e[0]) + ',' + str(e[1]) + ')'
     return s
+
     
 def replace(datadir, fname, d, outname=None):
     if outname is None:
@@ -200,12 +209,14 @@ def replace(datadir, fname, d, outname=None):
             with open(os.path.join(datadir, outname), 'w') as fout:
                 fout.write(s)
 
+
 def maketex(datadir, fname):
     cwd = os.getcwd()
     os.chdir(datadir)
     subprocess.call(['latexmk', '-pdf', fname])
     subprocess.call(['latexmk', '-c'])
     os.chdir(cwd)
+
 
 def clean(datadir):
     cwd = os.getcwd()
