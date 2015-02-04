@@ -238,11 +238,11 @@ ETH Zurich}
 \begin{abstract}
 A wide range of AI problems require sequentially selecting elements from a large set with the goal of optimizing some form of utility over our selected subset.
 Moreover, each element we pick may provide us with stochastic feedback, which we can use to make smarter decisions about future selections.
-While finding efficient policies for this general class of adaptive stochastic optimization problems can be extremely hard, the subclass of problems, for which the objective function is adaptive monotone and adaptive submodular, has been shown to possess a number of desirable properties; most notably, the simple and efficient greedy policy obtains a $1-1/e$ approximation ratio.
-However, many objectives of practical interest are naturally non-monotone; as a simple example, each selected element may incur some cost that needs to be subtracted from the original monotone utility, resulting in a non-monotone objective.
-For these objectives, there are no existing policies with provable performance guarantees.
+While finding efficient policies for this general class of adaptive stochastic optimization problems can be extremely hard, the subclass of problems, for which the objective function is adaptive monotone and adaptive submodular, has been shown to possess a number of desirable properties. Most notably, the simple and efficient greedy policy attains a $1-1/e$ approximation ratio in terms of expected utility.
+However, many objectives of practical interest are naturally non-monotone; as a simple example, each selected element may incur some cost that needs to be subtracted from the original monotone utility, resulting in objective that is not monotone anymore.
+To our knowledge, no existing policy has provable performance guarantees for non-monotone objectives.
 We propose the \emph{random greedy policy} for maximizing adaptive submodular functions, and prove that it retains the aforementioned $1-1/e$ approximation ratio for functions that are also adaptive monotone, while it additionally provides a $1/e$ ratio for non-monotone functions.
-We showcase the benefits of our proposed policy on several small-scale network data sets using two non-monotone objectives.
+We showcase the benefits of our proposed policy on several small-scale network data sets using two representative non-monotone objectives.
 \end{abstract}
 
 \section{Introduction}
