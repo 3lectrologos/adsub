@@ -10,6 +10,9 @@ parser = argparse.ArgumentParser(
 parser.add_argument('objective',
                     choices=['inf', 'mc'],
                     help='objective function')
+parser.add_argument('nodes',
+                    type=int,
+                    help='number of nodes to subsample')
 parser.add_argument('-s', '--slow',
                     action='store_true',
                     help='more detailed simulation')
@@ -17,7 +20,7 @@ args = parser.parse_args()
 
 n = 2000
 for m in models:
-    cargs = [args.objective, m, str(n)]
+    cargs = [str(x) for x in [args.objective, m, args.nodes]]
     if args.slow:
         cargs = ['-s'] + cargs
     cmd = 'python plots.py ' + ' '.join(cargs)
