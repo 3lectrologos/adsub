@@ -46,7 +46,8 @@ class NonAdaptiveMaxCut(submod.AdaptiveMax):
         self.f = lambda v, a: self.mean_pcut(v)
 
     def update_f_hook(self):
-        #        print 'nonad:', len(self.sol)
+        sys.stdout.write('.')
+        sys.stdout.flush()
         self.fsol = self.f(self.sol[-1], self.sol[:-1])
         cset = self.csets[self.sol[-1]]
         for i, (cut, cut_edges, val) in enumerate(self.ins):
@@ -135,6 +136,7 @@ def run(g, reps, n_available, k, niter, nsim_nonad):
         res['f_rand'].append(r['f_rand'])
         res['f_nonad'].append(r['f_nonad'])
         res['f_ad'].append(r['f_ad'])
+        print ''
         print 'f_rand =', r['f_rand']
         print 'f_nonad =', r['f_nonad']
         print 'f_ad =', r['f_ad']
