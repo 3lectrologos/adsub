@@ -426,10 +426,11 @@ Putting it all together, we obtain the following theorem for non-monotone object
 
 \section{Examples of Non-Monotone Objectives}
 To underline the importance of non-monotonicity, we now present two different ways, in which non-monotone adaptive submodular functions commonly arise in practice.
-We also illustrate them through two representative example objectives, which are themselves of practical interest.
+The two resulting classes of functions satisfy the assumptions of \theoremref{thm:nonm}, and are, therefore, suitable to be maximized using adaptive random greedy.
+We also introduce two representative example objectives, one for each class, which are themselves of practical interest.
 
 \subsection{Objectives with a Modular Cost Term}
-Assume that we are given an adaptive monotone submodular function $f_{\textrm{utility}}(A, \phi)$.
+Assume we are given an adaptive monotone submodular function $f_{\textrm{utility}}(A, \phi)$.
 In practice, apart from benefit, there might also be some associated cost with the selection of each element, which can be directly incorporated into the objective function via a modular cost term a cost term $f_{\textrm{cost}}(A) = \sum_{a \in A} c_a$.
 In this case, the resulting objective is of the form
 \begin{align} \label{eq:cost}
@@ -454,27 +455,35 @@ Now, assume that each selected node incurs a unit cost, that is, we have a cost 
 Since our cost term is modular, $\tilde{f}_{\textrm{inf}}$ has the form of equation \eqref{eq:cost}, and, therefore, is non-monotone adaptive submodular.
 It is also non-negative, since $f_{\textrm{inf}}(A, \Phi) \geq |A|$.
 
-\subsection{\todo{Submodular for each Realization over Distributions that Factorize?}}
-\todo{Use what was shown by \cite{golovin11} or prove more general?}
+\subsection{Objectives with Factorial Realization Distributions}
+Assume we are given a utility function $f(A, \phi)$, whose dependence of $\phi$ is constrained to the outcomes of the selected elements.
+More formally, there exists a function $g : 2^{E \times O} \to \mathbb{R}_{\geq 0}$, such that $f(A, \phi) = g\left(\{(e, \phi(e)) \mid e \in A\}\right)$.
+Furthermore, assume that $f$ is submodular in its first argument, for any realization $\phi$, and that the distribution of realizations factorizes over the elements of the ground set $E$, that is, $\P[\Phi]{\phi} = \prod_{e \in E}\P[\Phi(e)]{\phi(e)}$.
+Given the above assumptions, it follows that $f$ is adaptive submodular (cf. Theorem 6.1 of \citet{golovin11}).
 
 \paragraph{Maximum graph cut}
-The problem of finding the maximum cut in a graph $(\mathcal{V}, \mathcal{E})$ is a much studied problem, for which the objective
+The problem of finding the maximum cut in a graph $(\mathcal{V}, \mathcal{E})$ can be posed using the following objective:
 \begin{align*}
-  f_{\textrm{cut}}(A) = \sum_{(v, w) \in \mathcal{E}} \mathds{1}_{\left\{v \in A, w \in \mathcal{V}\setminus A\ \textrm{or}\ v \in \mathcal{V}\setminus A, w \in A\right\}}
+  f_{\textrm{cut}}(A) = \sum_{(v, w) \in \mathcal{E}} \mathds{1}_{\left\{v \in A, w \in \mathcal{V}\setminus A\ \textrm{or}\ v \in \mathcal{V}\setminus A, w \in A\right\}},
 \end{align*}
-is non-negative, symmetric submodular, and, therefore, non-monotone.
-We consider here an adaptive version of this problem, in which, selecting a node results in cutting that node or either of its neighbors with equal probability.
+which is non-negative and submodular.
+Furthermore, it is symmetric, i.e., $f(A) = f(\mathcal{V}\setminus A)$, which implies that it is also non-monotone.
+We consider here an adaptive version of the maximum cut problem, in which, the selection of a node triggers either cutting that node itself, or a random neighbor of it with some prespecified probability.
 
-The ground set $E$ consists of the network nodes, and each realization $\Phi$ corresponds to a function $\sigma_{\Phi}$ that maps each node $v \in V$ to the node that is actually cut if $v$ is selected.
-Our modified objective can then be written as follows:
+Again, the ground set $E$ consists of network nodes, and each realization $\phi$ corresponds to a function $\sigma_{\phi}$ that maps each node $v \in V$ to the node that would actually be cut, were $v$ to be selected.
+Our adaptive max-cut objective can then be written as follows:
 \begin{align*}
   \tilde{f}_{\textrm{cut}}(A, \Phi) \defeq f_{\textrm{cut}}\left(\bigcup_{v \in A}\sigma_{\Phi}(v)\right).
 \end{align*}
-The new objective is non-negative, non-monotone, and submodular, for any realization $\Phi$. \todo{Show that $\tilde{f}$ is adaptive submodular.}
+We can directly see that, in terms of realization, $\tilde{f}_{\textrm{cut}}$ only depends on the outcomes of the selected elements.
+Furthermore, the distribution of realizations is factorial, since the outcome of each node cut is independent of all the others, i.e., $\sigma_{\phi}(v) = \hat{\sigma}_{\phi(v)}(v)$.
+Finally, since $f_{\textrm{cut}}$ is submodular, it follows that $\tilde{f}_{\textrm{cut}}$ is submodular in its first argument for any realization.
+We conclude that $\tilde{f}_{\textrm{cut}}$ satisfies the properties described above, hence it is (non-monotone) adaptive submodular.
+It is also non-negative, because $f_{\textrm{cut}}$ is non-negative.
 
 \section{Experiments}
-We have evaluated our proposed algorithm on the two objective functions described in the previous section using both synthetic and real-world data sets.
-Since we have no competitor policy for the adaptive non-monotone submodular setting, we rather focus here on showcasing the potential benefits of adaptivity by comparing adaptive to non-adaptive random greedy on these two functions that are directly applicable to both settings and satisfy the assumptions of \theoremref{thm:nonm}.
+We have evaluated our proposed algorithm on the two objective functions, namely influence maximization, and maximum cut, described in the previous section on several real-world data sets.
+Since we have no competitor policy for the adaptive non-monotone submodular setting, we rather focus here on showcasing the potential benefits of adaptivity by comparing adaptive to non-adaptive random greedy on these two objectives.
 
 \subsection{Data sets}
 
