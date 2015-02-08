@@ -1,4 +1,5 @@
 import os
+import sys
 import numpy as np
 import igraph as ig
 import submod
@@ -99,8 +100,13 @@ def compare(g, csets, k, nsim_nonad, niter):
     f_ad = []
     solver_nonad = NonAdaptiveMaxCut(g, csets, nsim_nonad)
     cut_rand, _ = solver_nonad.random(k)
+    print 'nonad ',
     cut_nonad, _ = solver_nonad.random_greedy(k)
+    print ''
+    print 'iter  ',
     for i in range(niter):
+        sys.stdout.write('.')
+        sys.stdout.flush()
         instance = random_instance(csets)
         solver_ad = AdaptiveMaxCut(g, csets, instance)
         cut_ad, _ = solver_ad.random_greedy(k)
