@@ -46,6 +46,7 @@
 % Uncomment for long version
 \togglefalse{short}
 
+\usepackage[scaled=0.9]{inconsolata}
 \usepackage[usenames,dvipsnames]{xcolor}
 \usepackage{amsmath,amssymb,amsthm}
 \usepackage{mathtools}                    % For \vcentcolon
@@ -486,11 +487,25 @@ It is also non-negative, because $f_{\textrm{cut}}$ is non-negative.
 We have evaluated our proposed algorithm on the two objective functions, namely influence maximization, and maximum cut, described in the previous section on several real-world data sets.
 Since we have no competitor policy for the adaptive non-monotone submodular setting, we rather focus here on showcasing the potential benefits of adaptivity by comparing adaptive to non-adaptive random greedy on these two objectives.
 
-\subsection{Data sets}
+\subsection{Data Sets and Experimental Setup}
+For our experiments, we used $20$ networks from the KONECT\footnote{\url{http://konect.uni-koblenz.de/}} database, which accumulates network data sets from various other sources.
+The network sizes range from a few thousands to tens of thousands nodes.
+
+Computing the (expected) marginal gains is at the heart of both the non-adaptive random greedy algorithm and our proposed random greedy policy.
+This computation may range from being completely straightforward to extremely demanding, depending on the specific objective at hand.
+For the influence optimization objective, the exact computation of the expected influence of a subset of nodes has been shown to be NP-hard \cite{kempe03}.
+To obtain an estimate we use Monte Carlo sampling over the outcomes of the independent cascades.
+Note within adaptive random greedy we have to perform this simulation at every step conditioning on the observations obtained up to that step.
+For the maximum cut objective, it is very simple to compute the marginal gains in the adaptive case, since we already know at each step the outcomes of the previously selected nodes.
+In the non-adaptive setting, however, this is considerably harder, since we have to average over every possible outcome of the current selection; we again resort to sampling from the space of possible realizations to obtain estimates.
+To make the aforementioned computations more efficient, we subsample each network down to $2000$ nodes, using a technique based on random walks proposed by \citet{leskovec06}.
+
+For both objectives, we select uniformly at random a subset of \todo{$50$} nodes as the ground set $E$, and repeat the experiments for \todo{$100$} such random ground sets.
+For each ground set instance, we evaluate the algorithms' performance on \todo{$100$} random realizations.
 
 \subsection{Results}
 
-\section{Related work}
+\section{Related Work}
 \paragraph{Non-monotone submodular maximization}\\
 \paragraph{Adaptive submodularity}\\
 \paragraph{Influence maximization and max-cut}
