@@ -457,7 +457,7 @@ Now, assume that each selected node incurs a unit cost, that is, we have a cost 
 Since our cost term is modular, $\tilde{f}_{\textrm{inf}}$ has the form of equation \eqref{eq:cost}, and, therefore, is non-monotone adaptive submodular.
 It is also non-negative, since $f_{\textrm{inf}}(A, \Phi) \geq |A|$.
 
-\subsection{Objectives with Factorial Realization Distributions}
+\subsection{Objectives with Factorial Realizations}
 Assume we are given a utility function $f(A, \phi)$, whose dependence of $\phi$ is constrained to the outcomes of the selected elements.
 More formally, there exists a function $g : 2^{E \times O} \to \mathbb{R}_{\geq 0}$, such that $f(A, \phi) = g\left(\{(e, \phi(e)) \mid e \in A\}\right)$.
 Furthermore, assume that $f$ is submodular in its first argument, for any realization $\phi$, and that the distribution of realizations factorizes over the elements of the ground set $E$, that is, $\P[\Phi]{\phi} = \prod_{e \in E}\P[\Phi(e)]{\phi(e)}$.
@@ -477,7 +477,7 @@ Our adaptive max-cut objective can then be written as follows:
 \begin{align*}
   \tilde{f}_{\textrm{cut}}(A, \Phi) \defeq f_{\textrm{cut}}\left(\bigcup_{v \in A}\sigma_{\Phi}(v)\right).
 \end{align*}
-We can directly see that, in terms of realization, $\tilde{f}_{\textrm{cut}}$ only depends on the outcomes of the selected elements.
+We can directly see that, in terms of the realization $\Phi$, $\tilde{f}_{\textrm{cut}}$ only depends on the outcomes of the selected elements.
 Furthermore, the distribution of realizations is factorial, since the outcome of each node cut is independent of all the others, i.e., $\sigma_{\phi}(v) = \hat{\sigma}_{\phi(v)}(v)$.
 Finally, since $f_{\textrm{cut}}$ is submodular, it follows that $\tilde{f}_{\textrm{cut}}$ is submodular in its first argument for any realization.
 We conclude that $\tilde{f}_{\textrm{cut}}$ satisfies the properties described above, hence it is (non-monotone) adaptive submodular.
@@ -506,9 +506,19 @@ For each ground set instance, we evaluate the algorithms' performance on \todo{$
 \subsection{Results}
 
 \section{Related Work}
-\paragraph{Non-monotone submodular maximization}\\
-\paragraph{Adaptive submodularity}\\
-\paragraph{Influence maximization and max-cut}
+Compared to monotone submodular maximization, for which the $(1-1/e)$-approximation of the greedy algorithm was shown by \citet{nemhauser78}, constant-factor approximations for non-monotone submodular functions have been much more recent, for both the unconstrained case \cite{feige07}, as well as under matroid and knapsack constraints \cite{lee09}.
+Even more recently, \citet{buchbinder14} introduced the random greedy algorithm for maximizing non-monotone submodular functions under a cardinality constraint, from which we drew inspiration for our proposed adaptive random greedy policy.
+
+The concepts of adaptive monotonicity and adaptive submodularity were introduced by \citet{golovin11}, who also showed that the greedy policy provides a $(1-1/e)$-approximation under these assumptions.
+Example application domains, apart from those we present in this paper, include active learning \cite{chen14} and incentive mechanism design \cite{singla13}.
+
+The problem of influence maximization was originally proposed by \citet{kempe03} and was extended to the adaptive setting by \citet{golovin11}.
+Various techniques have been proposed to make the computation of marginal gains feasible for large-scale networks \cite{cohen14,ohsaka14}.
+In this paper we chose to run experiments on smaller-scale networks, but these techniques can also be applied to scale up adaptive random greedy.
+In the same context, \citet{he14} recently introduced the problem of influence difference maximization, which interestingly results in maximizing a non-monotone submodular objective.
+
+Maximum cut has been a much-studied NP-complete problem with provable approximation guarantees given by SDP-based algorithms for both the unconstrained \cite{goemans95} and cardinality-constrained \cite{feige01} problems.
+An interesting application of maximum cut objectives has been proposed by \citet{lin11} for text summarization.
 
 \section{Conclusion}
 
