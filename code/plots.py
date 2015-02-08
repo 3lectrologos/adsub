@@ -10,22 +10,18 @@ import influence
 import maxcut
 
 
-TEMPLATE_INF_IMP = 'inf_imp.tex'
-TEMPLATE_INF_FS = 'inf_fs.tex'
-TEMPLATE_INF_VS = 'inf_vs.tex'
-TEMPLATE_MC_IMP = 'mc_imp.tex'
-TEMPLATE_MC_FS = 'mc_fs.tex'
+TEMPLATE__FS = 'fs.tex'
 
 
 INF_K_FAST = dict(reps=5,
-                  pedge=0.1,
+                  pedge=0.2,
                   gamma=1,
-                  nsim_nonad=100,
+                  nsim_nonad=200,
                   nsim_ad=20,
-                  niter=50,
+                  niter=20,
                   workers=7)
 INF_K_SLOW = dict(reps=20,
-                  pedge=0.1,
+                  pedge=0.2,
                   gamma=1,
                   nsim_nonad=1000,
                   nsim_ad=100,
@@ -36,9 +32,9 @@ INF_SLOW = dict(gamma=1,
                 nsim_ad=100,
                 niter=50,
                 workers=7)
-MC_FAST = dict(reps=3,
-               nsim_nonad=10,
-               niter=20)
+MC_FAST = dict(reps=30,
+               nsim_nonad=100,
+               niter=50)
 MC_SLOW = dict(reps=20,
                nsim_nonad=100,
                niter=100)
@@ -65,7 +61,7 @@ def run_inf(model, nodes, fast=True, plot=False):
     fs_rand = []
     fs_nonad = []
     fs_ad = []
-    n_available = len(g.vs) / 10
+    n_available = 100#len(g.vs) / 10
     pcts = [0.01, 0.1, 0.3, 0.5, 0.7, 1]
     ks = list(np.unique([max(1, int(kr * n_available)) for kr in pcts]))
     print_info(name, g)
@@ -104,7 +100,7 @@ def run_mc(model, nodes, fast=True, plot=False):
     fs_rand = []
     fs_nonad = []
     fs_ad = []
-    n_available = len(g.vs) / 10
+    n_available = 100#len(g.vs) / 10
     pcts = [0.01, 0.1, 0.3, 0.5, 0.7, 1]
     ks = list(np.unique([max(1, int(kr * n_available)) for kr in pcts]))
     print_info(name, g)
@@ -139,10 +135,11 @@ def plot_fs(data, outdir):
         for k in ks:
             means.append(np.mean(np.array(data[name])[data['ks'] == k]))
         cs['mean_' + name] = util.get_coords(ks, means)
+    cs['x_max'] = str(max(data['ks']))
     cs['y_max'] = str(max(data['ad']))
     cs['title'] = re.escape(data['model'])
     texname = 'fs_' + data['model'].lower() + '.tex'
-    util.replace(outdir, TEMPLATE_MC_FS, cs, texname)
+    util.replace(outdir, TEMPLATE_FS, cs, texname)
     util.maketex(outdir, texname)
     
 

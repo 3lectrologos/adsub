@@ -12,41 +12,83 @@ tick label style={font=\Huge},
 label style={font=\Huge},
 legend style={font=\Huge},
 view={0}{90},
+max space between ticks=50pt,
 width=7in,
 height=5in,
 scale only axis,
-xmin=0, xmax=1,
-xtick={0, 0.2, 0.4, 0.6, 0.8, 1},
-xlabel={$p$},
-ymin=0, ymax=1000,
-ytick={0, 200, 400, 600, 800, 1000},
-ylabel={$f_{avg} / |V_s|$},
+xmin=0, xmax=%x_max%,
+%xtick={0, 20, 40, 60, 80, 100},
+xlabel={$k$},
+ymin=0, ymax=%y_max%,
+ylabel={$f_{avg}$},
 major tick length=5pt,
 axis lines*=left,
 legend cell align=left,
 clip=false]
 
 \addplot [
+only marks,
 mark=*,
 mark size=3.5pt,
+color=green!70!black,
+%solid,
+%line width=2pt,
+]
+coordinates{
+%rand%
+};
+
+\addplot [
+only marks,
+mark=*,
+mark size=3.5pt,
+color=orange!70!black,
+%solid,
+%line width=2pt,
+]
+coordinates{
+%nonad%
+};
+
+\addplot [
+only marks,
+mark=*,
+mark size=3.5pt,
+color=cyan!70!black,
+%solid,
+%line width=2pt,
+]
+coordinates{
+%ad%
+};
+p
+\addplot [
+color=green!70!black,
+solid,
+line width=3pt
+]
+coordinates{
+%mean_rand%
+};
+
+\addplot [
 color=orange!70!black,
 solid,
 line width=3pt
 ]
 coordinates{
-%vs_nonad%
+%mean_nonad%
 };
 
 \addplot [
-mark=*,
-mark size=3.5pt,
 color=cyan!70!black,
 solid,
 line width=3pt
 ]
 coordinates{
-%vs_ad%
+%mean_ad%
 };
+
 
 \end{axis}
 \end{tikzpicture}
