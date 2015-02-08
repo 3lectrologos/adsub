@@ -101,7 +101,8 @@ def compare(g, csets, k, nsim_nonad, niter):
     solver_nonad = NonAdaptiveMaxCut(g, csets, nsim_nonad)
     cut_rand, _ = solver_nonad.random(k)
     print 'nonad ',
-    cut_nonad, _ = solver_nonad.random_greedy(k)
+    solver_nonad_new = NonAdaptiveMaxCut(g, csets, nsim_nonad)
+    cut_nonad, _ = solver_nonad_new.random_greedy(k)
     print ''
     print 'iter  ',
     for i in range(niter):
