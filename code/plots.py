@@ -10,33 +10,28 @@ import influence
 import maxcut
 
 
-TEMPLATE__FS = 'fs.tex'
+TEMPLATE_FS = 'fs.tex'
 
 
-INF_K_FAST = dict(reps=5,
-                  pedge=0.2,
-                  gamma=1,
-                  nsim_nonad=200,
-                  nsim_ad=20,
-                  niter=20,
-                  workers=7)
-INF_K_SLOW = dict(reps=20,
-                  pedge=0.2,
-                  gamma=1,
-                  nsim_nonad=1000,
-                  nsim_ad=100,
-                  niter=100,
-                  workers=7)
-INF_SLOW = dict(gamma=1,
+INF_FAST = dict(reps=5,
+                pedge=0.1,
+                gamma=1,
+                nsim_nonad=100,
+                nsim_ad=50,
+                niter=20,
+                workers=7)
+INF_SLOW = dict(reps=20,
+                pedge=0.15,
+                gamma=1,
                 nsim_nonad=1000,
                 nsim_ad=100,
-                niter=50,
+                niter=100,
                 workers=7)
-MC_FAST = dict(reps=30,
+MC_FAST = dict(reps=10,
                nsim_nonad=100,
                niter=50)
-MC_SLOW = dict(reps=20,
-               nsim_nonad=100,
+MC_SLOW = dict(reps=30,
+               nsim_nonad=1000,
                niter=100)
 
 
@@ -56,20 +51,20 @@ def run_inf(model, nodes, fast=True, plot=False):
     outdir = os.path.join(util.DIR_RES, 'influence', model)
     if not os.path.isdir(outdir):
         os.makedirs(outdir)
-        g.write_edgelist(os.path.join(outdir, 'graph'))
+    g.write_edgelist(os.path.join(outdir, 'graph'))
     xs = []
     fs_rand = []
     fs_nonad = []
     fs_ad = []
-    n_available = 100#len(g.vs) / 10
+    n_available = 50#len(g.vs) / 10
     pcts = [0.01, 0.1, 0.3, 0.5, 0.7, 1]
     ks = list(np.unique([max(1, int(kr * n_available)) for kr in pcts]))
     print_info(name, g)
     for k in ks:
         if fast:
-            params = INF_K_FAST
+            params = INF_FAST
         else:
-            params = INF_K_SLOW
+            params = INF_SLOW
         r = influence.run(g, n_available=n_available, k=k, **params)
         fs_rand += r['f_rand']
         fs_nonad += r['f_nonad']
@@ -95,12 +90,12 @@ def run_mc(model, nodes, fast=True, plot=False):
     outdir = os.path.join(util.DIR_RES, 'maxcut', model)
     if not os.path.isdir(outdir):
         os.makedirs(outdir)
-        g.write_edgelist(os.path.join(outdir, 'graph'))
+    g.write_edgelist(os.path.join(outdir, 'graph'))
     xs = []
     fs_rand = []
     fs_nonad = []
     fs_ad = []
-    n_available = 100#len(g.vs) / 10
+    n_available = 50#len(g.vs) / 10
     pcts = [0.01, 0.1, 0.3, 0.5, 0.7, 1]
     ks = list(np.unique([max(1, int(kr * n_available)) for kr in pcts]))
     print_info(name, g)

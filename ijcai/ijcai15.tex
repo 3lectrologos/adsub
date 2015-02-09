@@ -56,9 +56,16 @@
 \usepackage{fixltx2e}                     % For subscripts in normal text
 \usepackage{bm}
 \usepackage{dsfont}                       % Indicator function (mathbb for numbers)
+\usepackage{caption}
+\usepackage{subcaption}
 \usepackage{algorithm}
 \usepackage{algorithmic}
+
 \usepackage{pgfplots}
+\pgfplotsset{compat=newest}
+\newlength\figureheight
+\newlength\figurewidth
+
 \iftoggle{short}
 {
 \usepackage{nohyperref}
@@ -220,6 +227,14 @@
 
 % Paragraph
 \renewcommand{\paragraph}[1]{\vspace{0.3em}\noindent\textbf{#1.}\makebox[0.5em]{}}
+
+% Shortcuts
+\newcommand{\fbook}{\textsc{Facebook}}
+\newcommand{\gnutella}{\textsc{Gnuttela}}
+\newcommand{\gplus}{\textsc{GPlus}}
+\newcommand{\twitter}{\textsc{Twitter}}
+\newcommand{\infmax}{IM}
+\newcommand{\maxcut}{MC}
 %-------------------------------------------------------------------------------
 
 \title{Non-monotone Adaptive Submodular Maximization}
@@ -282,10 +297,10 @@ Then, our goal is to come up with a policy that maximizes the expected utility, 
 
 \subsection{Monotonicity and Submodularity}
 \paragraph{Non-adaptive}
-Even in the non-adaptive setting, where the realization is fixed and known in advance, or equivalently, the objective function $f : 2^E \to \mathbb{R}_{\geq 0}$ depends only on the chosen subset, the problem of maximizing $f(A)$, subject to a cardinality constraint $|A| \leq k$, is NP-hard in general.
+Even in the non-adaptive setting, where we have to commit to selecting a subset without any feedback, the problem of maximizing the values of a set function $f : 2^E \to \mathbb{R}_{\geq 0}$, subject to a cardinality constraint $|A| \leq k$, is NP-hard in general.
 In this setting, the marginal gain of an element $e \in E$ given set $B \subseteq E$ is defined as $f(B \cup \{e\}) - f(B)$.
 Intuitively, the marginal gain quantifies the increase in utility if we add $e$ to our selection, given that we have already picked the elements in $B$.
-Function $f$ is called monotone if for any $B \subseteq C \subseteq E$, it holds that $f(B) \leq f(C)$, which is equivalent to saying that the marginal gain is always positive.
+Function $f$ is called monotone if, for any $B \subseteq C \subseteq E$, it holds that $f(B) \leq f(C)$, which is equivalent to saying that the marginal gain is always positive.
 Furthermore, $f$ is called submodular, if for any $B \subseteq C \subseteq E$ and any $e \in E \setminus C$, it holds that $f(C \cup \{e\}) - f(C) \leq  f(B \cup \{e\}) - f(B)$.
 This means that the marginal gain of any element decreases as the given set increases ($C \supseteq B$); in other words, it expresses a behavior of ``diminishing returns''.
 
@@ -457,6 +472,68 @@ Now, assume that each selected node incurs a unit cost, that is, we have a cost 
 Since our cost term is modular, $\tilde{f}_{\textrm{inf}}$ has the form of equation \eqref{eq:cost}, and, therefore, is non-monotone adaptive submodular.
 It is also non-negative, since $f_{\textrm{inf}}(A, \Phi) \geq |A|$.
 
+\setlength\figureheight{0.25\textwidth}
+\setlength\figurewidth{0.29\textwidth}
+\newcommand{\subflen}{0.245\textwidth}
+\newcommand{\scspacey}{-1.5em}
+\newcommand{\scspacex}{0.5em}
+\begin{figure*}[tb]
+  \captionsetup[subfigure]{oneside,margin={3em,0em}}
+  \begin{subfigure}[b]{\subflen}
+    \centering
+    \input{figures/inf_ego_fb.tex}
+    \vspace{\scspacey}
+    \caption{\hspace{\scspacex}\infmax -- \fbook}
+    \label{fig:inf_ego_fb}
+  \end{subfigure}
+  \begin{subfigure}[b]{\subflen}
+    \input{figures/inf_gnutella.tex}
+    \vspace{\scspacey}
+    \caption{\hspace{\scspacex}\infmax -- \gnutella}
+    \label{fig:inf_gnutella}
+  \end{subfigure}
+  \begin{subfigure}[b]{\subflen}
+    \input{figures/inf_gplus.tex}
+    \vspace{\scspacey}
+    \caption{\hspace{\scspacex}\infmax -- \gplus}
+    \label{fig:inf_gplus}
+  \end{subfigure}
+  \begin{subfigure}[b]{\subflen}
+    \input{figures/inf_twitter.tex}
+    \vspace{\scspacey}
+    \caption{\hspace{\scspacex}\infmax -- \twitter}
+    \label{fig:inf_twitter}
+  \end{subfigure}\\[0.5em]
+  \begin{subfigure}[b]{\subflen}
+    \input{figures/mc_ego_fb.tex}
+    \vspace{\scspacey}
+    \caption{\hspace{\scspacex}\maxcut -- \fbook}
+    \label{fig:mc_ego_fb}
+  \end{subfigure}
+  \begin{subfigure}[b]{\subflen}
+    \input{figures/mc_gnutella.tex}
+    \vspace{\scspacey}
+    \caption{\hspace{\scspacex}\maxcut -- \gnutella}
+    \label{fig:mc_gnutella}
+  \end{subfigure}
+  \begin{subfigure}[b]{\subflen}
+    \input{figures/mc_gplus.tex}
+    \vspace{\scspacey}
+    \caption{\hspace{\scspacex}\maxcut -- \gplus}
+    \label{fig:mc_gplus}
+  \end{subfigure}
+  \begin{subfigure}[b]{\subflen}
+    \input{figures/mc_twitter.tex}
+    \vspace{\scspacey}
+    \caption{\hspace{\scspacex}\maxcut -- \twitter}
+    \label{fig:mc_twitter}
+  \end{subfigure}
+  \caption{
+    \todo{}
+  }
+  \label{fig:exp}
+\end{figure*}
+
 \subsection{Objectives with Factorial Realizations}
 Assume we are given a utility function $f(A, \phi)$, whose dependence of $\phi$ is constrained to the outcomes of the selected elements.
 More formally, there exists a function $g : 2^{E \times O} \to \mathbb{R}_{\geq 0}$, such that $f(A, \phi) = g\left(\{(e, \phi(e)) \mid e \in A\}\right)$.
@@ -513,11 +590,11 @@ The concepts of adaptive monotonicity and adaptive submodularity were introduced
 Example application domains, apart from those we present in this paper, include active learning \cite{chen14} and incentive mechanism design \cite{singla13}.
 
 The problem of influence maximization was originally proposed by \citet{kempe03} and was extended to the adaptive setting by \citet{golovin11}.
-Various techniques have been proposed to make the computation of marginal gains feasible for large-scale networks \cite{cohen14,ohsaka14}.
-In this paper we chose to run experiments on smaller-scale networks, but these techniques can also be applied to scale up adaptive random greedy.
-In the same context, \citet{he14} recently introduced the problem of influence difference maximization, which interestingly results in maximizing a non-monotone submodular objective.
+Various techniques have been proposed to make the computation of marginal gains feasible for large-scale networks using, for instance, more efficient sampling methods \cite{ohsaka14}, and sketching-based approximations \cite{cohen14}.
+In this paper we chose to run experiments on smaller-scale networks, but these techniques could also be applied to scale up adaptive random greedy as well.
+\citet{he14} recently considered the problem of assessing the robustness of influence maximization algorithms under network parameter misspecification, which interestingly leads to maximizing a non-monotone submodular objective.
 
-Maximum cut has been a much-studied NP-complete problem with provable approximation guarantees given by SDP-based algorithms for both the unconstrained \cite{goemans95} and cardinality-constrained \cite{feige01} problems.
+Maximum cut has been a much-studied NP-complete problem with provable approximation guarantees given by SDP-based algorithms for both the unconstrained \cite{goemans95} and cardinality-constrained \cite{feige01} cases.
 An interesting application of maximum cut objectives has been proposed by \citet{lin11} for text summarization.
 
 \section{Conclusion}

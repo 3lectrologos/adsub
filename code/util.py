@@ -7,9 +7,10 @@ import networkx as nx
 import igraph as ig
 
 
-DIR_DATA = os.path.abspath('../data/')
-DIR_RES = os.path.abspath('../results/')
-DIR_TEMPLATE = os.path.abspath('../templates/')
+THIS_DIR = os.path.dirname(os.path.realpath(__file__))
+DIR_DATA = os.path.abspath(os.path.join(THIS_DIR, '../data'))
+DIR_RES = os.path.abspath(os.path.join(THIS_DIR, '../results'))
+DIR_TEMPLATE = os.path.abspath(os.path.join(THIS_DIR, '../templates'))
 
 
 def read_graph(filename, directed=False, nxgraph=False):

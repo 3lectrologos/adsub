@@ -1,0 +1,54 @@
+\begin{tikzpicture}
+
+\begin{axis}[%
+tick label style={font=\scriptsize},
+label style={font=\scriptsize},
+legend style={font=\scriptsize},
+view={0}{90},
+width=\figurewidth,
+height=\figureheight,
+xmin=0, xmax=50,
+xtick={0, 10, 20, 30, 40, 50},
+xlabel={$k$},
+xlabel shift=-0.5em,
+ymin=0, ymax=0.190968898488,
+ylabel={$f_{\textrm{avg}}$},
+ylabel shift=-0.5em,
+tick label style={/pgf/number format/fixed},
+major tick length=2pt,
+axis lines*=left,
+legend cell align=left,
+clip=false]
+
+\addplot [
+mark=*,
+mark size=1.5pt,
+color=green!70!black,
+line width=1pt
+]
+coordinates{
+(1,0.0044444924406)(5,0.0225127429806)(15,0.0680514038877)(25,0.10389762419)(35,0.133075593952)(50,0.190667818575)
+};
+
+\addplot [
+mark=*,
+mark size=1.5pt,
+color=orange!70!black,
+line width=1pt
+]
+coordinates{
+(1,0.0170293736501)(5,0.0538833693305)(15,0.102428077754)(25,0.123760691145)(35,0.145920950324)(50,0.179243196544)
+};
+
+\addplot [
+mark=*,
+mark size=1.5pt,
+color=cyan!70!black,
+line width=1pt
+]
+coordinates{
+(1,0.0170293736501)(5,0.0548950323974)(15,0.102796544276)(25,0.12435637149)(35,0.140808639309)(50,0.190968898488)
+};
+
+\end{axis}
+\end{tikzpicture}

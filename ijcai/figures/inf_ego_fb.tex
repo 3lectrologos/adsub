@@ -1,0 +1,54 @@
+\begin{tikzpicture}
+
+\begin{axis}[%
+tick label style={font=\scriptsize},
+label style={font=\scriptsize},
+legend style={font=\scriptsize},
+view={0}{90},
+width=\figurewidth,
+height=\figureheight,
+xmin=0, xmax=50,
+xtick={0, 10, 20, 30, 40, 50},
+xlabel={$k$},
+xlabel shift=-0.5em,
+ymin=0, ymax=0.24978,
+ylabel={$f_{\textrm{avg}}$},
+ylabel shift=-0.5em,
+tick label style={/pgf/number format/fixed},
+major tick length=2pt,
+axis lines*=left,
+legend cell align=left,
+clip=false]
+
+\addplot [
+mark=*,
+mark size=1.5pt,
+color=green!70!black,
+line width=1pt
+]
+coordinates{
+(1,0.015476)(5,0.072208)(15,0.149288)(25,0.204616)(35,0.232748)(50,0.24496)
+};
+
+\addplot [
+mark=*,
+mark size=1.5pt,
+color=orange!70!black,
+line width=1pt
+]
+coordinates{
+(1,0.019296)(5,0.09382)(15,0.170896)(25,0.203528)(35,0.226008)(50,0.244144)
+};
+
+\addplot [
+mark=*,
+mark size=1.5pt,
+color=cyan!70!black,
+line width=1pt
+]
+coordinates{
+(1,0.019168)(5,0.09534)(15,0.189792)(25,0.2363)(35,0.24978)(50,0.249344)
+};
+
+\end{axis}
+\end{tikzpicture}
