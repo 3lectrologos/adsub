@@ -25,16 +25,18 @@ for obj in ['influence', 'maxcut']:
                 norm = g.vcount()
             elif obj == 'maxcut':
                 norm = g.ecount()
-            print norm
             cs = {}
             for name in ['rand', 'nonad', 'ad']:
                 cs[name] = util.get_coords(data['ks'], data[name])
                 means = []
+                stds = []
                 ks = np.unique(data['ks'])
                 for k in ks:
-                    means.append(np.mean(np.array(data[name])[data['ks'] == k]))
-                means = [(1.0*m) / norm for m in means]
-                cs['mean_' + name] = util.get_coords(ks, means)
+                    reps = sum(data['ks'] == k)
+                    ys = [(1.0*y)/norm for y in np.array(data[name])[data['ks'] == k]]
+                    means.append(np.mean(ys))
+                    stds.append(np.std(ys)/np.sqrt(reps))
+                cs['mean_' + name] = util.get_coords(ks, means, stds)
             cs['xmax'] = str(max(data['ks']))
             cs['ymax'] = str(max(means))
             texname = OBJ_SHORT[obj] + '_' + lmodel + '.tex'

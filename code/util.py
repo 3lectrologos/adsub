@@ -192,12 +192,15 @@ def plot_degree_dist(g):
     plt.show()
 
 
-def get_coords(x, y):
-    s = ''
+def get_coords(x, y, s=None):
+    res = ''
     z = sorted(zip(x, y))
-    for e in z:
-        s += '(' + str(e[0]) + ',' + str(e[1]) + ')'
-    return s
+    for i, e in enumerate(z):
+        res += '(' + str(e[0]) + ',' + str(e[1]) + ')'
+        if s is not None:
+            si = '2*' + str(s[i])
+            res += '+- (' + ','.join([si, si]) + ')'
+    return res
 
     
 def replace(datadir, fname, d, outname=None):

@@ -14,7 +14,7 @@ TEMPLATE_FS = 'fs.tex'
 
 
 INF_FAST = dict(reps=5,
-                pedge=0.1,
+                pedge=0.3,
                 gamma=1,
                 nsim_nonad=100,
                 nsim_ad=50,
