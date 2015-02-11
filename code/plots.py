@@ -13,12 +13,12 @@ import maxcut
 TEMPLATE_FS = 'fs.tex'
 
 
-INF_FAST = dict(reps=5,
-                pedge=0.3,
+INF_FAST = dict(reps=10,
+                pedge=0.1,
                 gamma=1,
-                nsim_nonad=100,
-                nsim_ad=50,
-                niter=20,
+                nsim_nonad=300,
+                nsim_ad=100,
+                niter=50,
                 workers=7)
 INF_SLOW = dict(reps=20,
                 pedge=0.15,
@@ -31,7 +31,7 @@ MC_FAST = dict(reps=10,
                nsim_nonad=100,
                niter=50)
 MC_SLOW = dict(reps=30,
-               nsim_nonad=1000,
+               nsim_nonad=300,
                niter=100)
 
 
@@ -56,7 +56,7 @@ def run_inf(model, nodes, fast=True, plot=False):
     fs_rand = []
     fs_nonad = []
     fs_ad = []
-    n_available = 50#len(g.vs) / 10
+    n_available = 100#len(g.vs) / 10
     pcts = [0.01, 0.1, 0.3, 0.5, 0.7, 1]
     ks = list(np.unique([max(1, int(kr * n_available)) for kr in pcts]))
     print_info(name, g)
@@ -95,7 +95,7 @@ def run_mc(model, nodes, fast=True, plot=False):
     fs_rand = []
     fs_nonad = []
     fs_ad = []
-    n_available = 50#len(g.vs) / 10
+    n_available = 100#len(g.vs) / 10
     pcts = [0.01, 0.1, 0.3, 0.5, 0.7, 1]
     ks = list(np.unique([max(1, int(kr * n_available)) for kr in pcts]))
     print_info(name, g)
