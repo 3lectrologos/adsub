@@ -308,14 +308,14 @@ We would like to plan a birdwatching trip that visits a number of these location
 It is intuitive that taking into account the alread observed species in making a decision about which place to visit next can be greatly beneficial compared to committing to the full trip in advance.
 
 Since the general class of adaptive optimization problems in partially observable enviroments does not admit efficient policies, previous work has focused on characterizing subclasses of problems that can be solved efficiently.
-Most notably, \citet{golovin11} showed that when the objective function under consideration is adaptive monotone and adaptive submodular, then a simple greedy policy attains a $(1-1/e)$-approximation in terms of expected utility.
+Most notably, \citet{golovin11} showed that when the objective function under consideration is adaptive monotone and adaptive submodular, then a simple greedy policy attains a $1-1/e$ approximation ratio in terms of expected utility.
 
-In practice, while adaptive submodularity provides an intuitive ``diminishing returns'' property for the adaptive setting, and is satisfied by a number of objective functions of interest, the additional assumption of adaptive monotonicity is often unrealistic.
-In our birdwatching example, while the original objective is adaptive monotone submodular, if each subset of locations has an associated cost, e.g., the total required travel distance to visit all of them, then our new objective will be naturally non-monotone.
-More generally, a common way of obtaining adaptive submodular objectives is by generalizing non-adaptive submodular functions under independence assumptions on the form of stochastic feedback of each observed element.
-Despite the desire to generalize problems with non-monotone submodular objectives to the adaptive setting, no existing policies provide guarantees about non-monotone objectives.
+While adaptive submodularity and its intuitive meaning of ``diminishing returns'' is fundamental to a number of objective functions of interest in the adaptive setting, the additional assumption of adaptive monotonicity is often not satisfied in practice.
+In our birdwatching example, the original objective is adaptive monotone submodular; however, if each subset of locations has an associated cost, e.g., the total required travel distance to visit all of them, our new objective will naturally be non-monotone.
+More broadly, as we will see, a common way of obtaining adaptive submodular objectives is by generalizing non-adaptive submodular functions under certain assumptions about the form of stochastic feedback.
+Despite the desire to generalize problems with non-monotone submodular objectives to the adaptive setting, no existing policies provide guarantees about non-monotone objectives in this setting.
 
-In this paper, we propose the adaptive random greedy policy for maximizing non-monotone adaptive submodular functions.
+To resolve this, we propose a new policy for maximizing non-monotone adaptive submodular functions, called adaptive random greedy.
 We prove that this policy retains the $1-1/e$ approximation ratio, if the function at hand is additionally adaptive monotone, while it also provides a $1/e$-approximation for non-monotone functions.
 Our proposed policy generalizes the random greedy algorithm proposed by \citet{buchbinder14} for non-monotone submodular optimization to the adaptive setting.
 We further discuss two common ways in which non-monotone adaptive submodular objectives come about, and present a representative example objective for each of them.
@@ -654,7 +654,6 @@ An interesting application of maximum cut objectives has been proposed by \citet
 
 \section{Conclusion}
 
-\clearpage
 % The file named.bst is a bibliography style file for BibTeX 0.99c
 \bibliographystyle{named}
 \bibliography{ijcai15}
