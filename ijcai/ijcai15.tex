@@ -327,8 +327,8 @@ Each item $e \in E$ is associated with a state $o \in O$ through a function $\ph
 We also assume that the realization $\Phi$ is a random variable with known distribution $p(\phi)$.
 Furthermore, we are given an objective function $f : 2^E \times O^E \to \mathbb{R}_{\geq 0}$.
 For a set $A \subseteq E$ and a realization $\phi$, the quantity $f(A, \phi)$ represents the utility of selecting subset $A$ when the true realization is $\phi$.
-In our birdwatching example, the ground set $E = \{\ell_1, \ell_2$, $\ell_3\}$ consists of the three possible locations we may visit, and the state of each location is the (random) subset of the available bird species that we actually observe if we travel to that location; each realization maps locations to subsets of actually observed species.
-Then, our objective function is the size of the union of actually observed species given a subset of visited locations.
+In our birdwatching example, the ground set $E$ consists of the three possible locations $\{\ell_1, \ell_2$, $\ell_3\}$ we may visit, and the state of each location is the (random) subset of bird species that we actually observe if we travel to that location; each realization maps all locations to subsets of actually observed species.
+Our objective function is the total number of observed species given a subset of visited locations.
 
 Our goal is to come up with a sequential policy that builds up a set $A \subseteq E$, such that our utility $f(A, \Phi)$ is maximized.
 That is, we iteratively select an item $e \in E$ to add to $A$ and observe its state $\Phi(e)$.
@@ -342,7 +342,7 @@ In particular, we call this subset the \emph{domain} of $\psi$, which is formall
 Additionally, we write $\psi(e) = o$, if $(e, o) \in \psi$, and call $\psi$ \emph{consistent} with realization $\phi$ (denoted by $\phi \sim \psi$), if $\psi(e) = \phi(e)$, for all $e \in \dom(\psi)$, which means that the observations of a subset according to $\psi$ agree with the assignments over the whole ground set according to $\phi$.
 
 We can now define a \emph{policy} $\pi$ as a function from partial realizations to a distribution over which item to pick next, formally, $\pi : 2^{E \times O} \to \mathcal{P}(E)$.
-Our birdwatching policy would specify which location to visit next (or, more generally, a distribution of next locations), given the already visited locations and the already observed species in each of them.
+For birdwatching, our policy would specify which location to visit next (or, more generally, a distribution of next locations), given the already visited locations and the already observed species in each of them.
 The policy terminates when the current partial realization is not in its domain, which we denote by $\dom(\pi) \subseteq 2^{E \times O}$.
 We also use the shorthand notation $\pi(e\mmid\psi)$ for the probability of picking item $e$ given partial realization $\psi$.
 We call $E(\pi, \Phi) \subseteq E$ the set of items that have been selected upon termination of policy $\pi$ under realization $\Phi$ (our final set of visited birdwatching locations).
@@ -353,55 +353,54 @@ Finally, we can formally assess the performance of a policy $\pi$ via its expect
   \favg(\pi) \defeq \E[\Phi,\Pi]{f(E(\pi, \Phi), \Phi)}.
 \end{align*}
 Then, our goal is to come up with a policy that maximizes the expected utility, subject to a cardinality constraint on the number of items to be picked, $|E(\pi, \Phi)| \leq k$.
-That is, find a policy that maximizes the expected number of observed bird species, if we can visit at most $k$ locations.
+In birdwatching terms, find a policy that maximizes the expected number of observed bird species, if we can visit at most $k$ locations.
 
 \subsection{Monotonicity and Submodularity}
 \paragraph{Non-adaptive}
-Even in the non-adaptive setting, where we have to commit to selecting a subset without any feedback, the problem of maximizing the values of a set function $f : 2^E \to \mathbb{R}_{\geq 0}$, subject to a cardinality constraint $|A| \leq k$, is NP-hard in general.
+Even in the non-adaptive setting, where we have to commit to a subset in advance, the problem of maximizing a set function $f : 2^E \to \mathbb{R}_{\geq 0}$, subject to a cardinality constraint $|A| \leq k$, is NP-hard in general.
 In this setting, the marginal gain of an element $e \in E$ given set $B \subseteq E$ is defined as $f(B \cup \{e\}) - f(B)$.
 Intuitively, the marginal gain quantifies the increase in utility if we add $e$ to our selection, given that we have already picked the elements in $B$.
-Function $f$ is called monotone if, for any $B \subseteq C \subseteq E$, it holds that $f(B) \leq f(C)$, which is equivalent to saying that the marginal gain is always positive.
-Furthermore, $f$ is called submodular, if for any $B \subseteq C \subseteq E$ and any $e \in E \setminus C$, it holds that $f(C \cup \{e\}) - f(C) \leq  f(B \cup \{e\}) - f(B)$.
-This means that the marginal gain of any element decreases as the given set increases ($C \supseteq B$); in other words, it expresses a behavior of ``diminishing returns''.
+Function $f$ is called monotone if, for any $B \subseteq C \subseteq E$, it holds that $f(B) \leq f(C)$, which is equivalent to saying that the marginal gain is always non-negative.
+Furthermore, $f$ is called submodular, if, for any $B \subseteq C \subseteq E$ and any $e \in E \setminus C$, it holds that $f(C \cup \{e\}) - f(C) \leq  f(B \cup \{e\}) - f(B)$.
+This means that the marginal gain of any element decreases as the given set increases ($C \supseteq B$); in other words, submodularity expresses a behavior of ``diminishing returns'' as more and more elements are added to our selection.
 
-In their famous result, \citet{nemhauser78} showed that, if $f$ is non-negative, monotone, and submodular, then constructing a subset $A$ by picking elements greedily according to their marginal gains, guarantees that $f(A)$ is a ($1 - 1/e$)-approximation to the optimal value.
+In their famous result, \citet{nemhauser78} showed that, if $f$ is non-negative, monotone, and submodular, then constructing a subset $A$ by picking elements greedily according to their marginal gains, guarantees that $f(A)$ is a ($1 - 1/e$)-approximation of the optimal value.
 
 \paragraph{Adaptive}
-In the significantly more complex adaptive setting, the problem of computing an optimal policy is hard to approximate even for seemingly simple classes of objective functions (e.g., linear) \cite{golovin11}.
-However, they also showed that the notions of monotonicity and submodularity can be naturally generalized to this setting, and be used to give similar performance guarantees as in the non-adaptive case.
+In the significantly more complex adaptive setting, the problem of computing an optimal policy is hard to approximate even for seemingly simple classes of objective functions (e.g., linear), as shown by \citet{golovin11}.
+However, they also showed that the notions of monotonicity and submodularity can be naturally generalized to this setting, and lead to similar performance guarantees to the non-adaptive setting.
 
 More concretely, the expected marginal gain of element $e \in E$ given partial realization $\psi$ can be defined as
 \begin{align*}
   \D{e}{\psi} \defeq \E[\Phi]{f\big(\mathcal{D}(\psi) \cup \{e\}, \Phi\big) - f\big(\dom(\psi), \Phi\big)}[\Phi \sim \psi].
 \end{align*}
 The above expression is a conditional expectation, which only considers realizations that are consistent with $\psi$.
+In birdwatching terms, it quantifies how many new species we expect to observe if we visit a new location $e$ given the already visited locations and already observed species in $\psi$.
 Then, the following properties can be defined analogously to their non-adaptive counterparts:
 \begin{itemize}
 \item $f$ is called adaptive monotone, if $\D{e}{\psi} \geq 0$, for all $e \in E$ and all $\psi$ of positive probability,
 \item $f$ is called adaptive submodular, if $\D{e}{\psi'} \leq \D{e}{\psi}$, for all $e \in E \setminus \dom(\psi')$ and all $\psi' \supseteq \psi$.
 \end{itemize}
-A stronger condition, which is often much easier to verify in practice, is that $f(\cdot, \phi)$ be submodular for any $\phi$, which immediately implies adaptive submodularity of $f$ for any distribution $p(\phi)$.
 
-Given a number of previously selected elements and their corresponding observed states encoded in a partial realization $\psi$, the adaptive greedy policy $\pigr$ selects the element $e \in E \setminus \psi$ that achieves the highest marginal gain $\D{e}{\psi}$, and does so iteratively until $k$ elements have been selected.
-\citet{golovin11} showed that under the assumption of adaptive monotonicity and submodularity, $\pigr$ is a $(1-1/e)$-approximation to the optimal policy in terms of expected utility $\favg$.
+Given a number of previously selected elements and their corresponding observed states encoded in partial realization $\psi$, the adaptive greedy policy selects the element $e \in E \setminus \dom(\psi)$ of highest marginal gain $\D{e}{\psi}$, and continues to do so iteratively until $k$ elements have been selected.
+\citet{golovin11} showed that, if $f$ is adaptive monotone submodular, then adaptive greedy is a $(1-1/e)$-approximation of the optimal policy in terms of expected utility $\favg$.
 
 \section{Adaptive Random Greedy}
-While many functions of interest have been shown to satisfy adaptive monotonicity, there are naturally occuring non-monotone functions, for which there is no existing policy with provable performance gurantees.
-We now present our proposed adaptive random greedy policy ($\pig$) for maximizing adaptive submodular functions, and prove approximation ratios for both adaptive monotone and non-monotone objectives.
+While adaptive monotonicity is satisfied by many functions of interest, it is often the case that modeling practical problems naturally results in non-monotone objectives (cf. \sectref{sect:functions}); no existing policy provides provable performance gurantees in this case.
+We now present our proposed adaptive random greedy policy ($\pig$) for maximizing adaptive submodular functions, and prove approximation ratios whether adaptive monotonicity is satisfied or not.
 
 For technical reasons that will become apparent below, let us assume that we always add a set $D$ of $2k - 1$ dummy elements to the ground set, such that, for any $d \in D$, and any partial realization $\psi$, it holds that $\D{d}{\psi} = 0$.
 Obviously, these elements do not affect the optimal policy, and may be removed from the solution of any policy, without affecting its expected utility.
 
-The detailed pseudocode of using adaptive random greedy is presented \algoref{alg:rg}.
-As discussed before, we are given a ground set and an objective function, as well as a known distribution over realizations $\Phi$.
-After computing the marginal gains
-The key difference compared to the adaptive greedy policy is shown in \linesref{lin:upd1}{lin:upd2} of the algorithm.
-Rather than selecting the element with the largest expected marginal gain, $\pig$ randomly selects an element among the ones with the $k$ largest gains.
+The detailed pseudocode of running the adaptive random greedy policy is presented \algoref{alg:rg}.
+As discussed before, the algorithm is given a ground set and an objective function, as well as a known distribution over realizations $\Phi$.
+At each iteration, the first step is to compute the expected marginal gain of each remaining element (\lineref{lin:marg}).
+The key difference compared to the original adaptive greedy policy is shown in \linesref{lin:upd1}{lin:upd2}; rather than selecting the element with the largest expected marginal gain, $\pig$ randomly selects an element among the ones with the $k$ largest gains.
 The dummy elements added to the ground set ensure that the policy never picks an element with negative expected marginal gain.
-Also, note that, although in \algoref{alg:rg} the returned set $A$ contains exactly $k$ elements, since we remove any dummy elements from it, the actual selected set may very well contain less than $k$ elements.
+Also, note that, although in \algoref{alg:rg} the returned set $A$ contains exactly $k$ elements, the actual selected set may very well contain less than $k$ elements, since we implicitly assume that any dummy elements are removed from it after the policy terminates.
 
-When running the original adaptive greedy policy, non-monotonicity can lead to situations, where selecting the element of maximum marginal gain leads to traps of low utility that cannot be escaped by that policy.
-In contrast, the randomness introduced by adaptive random greedy to the selection of each element helps dealing with such traps (on average) and, thus, leads to guaranteed approximation guarantees for the expected utility, even for non-monotone objectives.
+When running the original adaptive greedy policy, non-monotonicity can lead to situations, where selecting the element of maximum marginal gain leads to traps of low utility that cannot be escaped.
+In contrast, the randomization introduced by adaptive random greedy to the selection of each element helps dealing with such traps (on average) and, thus, leads to guaranteed approximation guarantees for the expected utility, even for non-monotone objectives.
 
 \begin{algorithm}[tb]
   \caption{Adaptive random greedy}
@@ -413,7 +412,7 @@ In contrast, the randomness introduced by adaptive random greedy to the selectio
       \LET{$A$}{$\varnothing$}
       \LET{$\psi$}{$\varnothing$}
       \FOR{$i = 1$ \TO $k$}
-      \STATE Compute $\D{e}{\psi}$, for all $e \in E$ \label{lin:marg}
+      \STATE Compute $\D{e}{\psi}$, for all $e \in E \setminus A$ \label{lin:marg}
       \LET{$\Mk(\psi)$}{$\displaystyle\argmax_{S \subseteq E \setminus A,\,|S| = k}\left\{\sum_{e \in S} \D{e}{\psi} \right\}$} \label{lin:upd1}
       \STATE Sample $m$ uniformly at random from $\Mk(\psi)$ \label{lin:upd2}
       \LET{$A$}{$A \cup \{m\}$}
@@ -426,23 +425,23 @@ In contrast, the randomness introduced by adaptive random greedy to the selectio
 \end{algorithm}
 
 \paragraph{Theoretical analysis}
-More concretely, we now show that the adaptive random greedy policy retains the $1-1/e$ approximation ratio for adaptive monotone submodular objectives, while, at the same time, it achieves a $1/e$ approximation ratio for non-monotone objectives, under the somewhat stronger condition of submodularity for each realization.
-As stated in the previous section, this stronger condition implies adaptive submodularity and, in fact, is satisfied in the majority of practical applications, since it is the most common way to prove adaptive submodularity in the first place.
-Therefore, we do not consider it a major restriction in the choice of objective functions.
-Our proofs generalize the results of \cite{buchbinder14} for the random greedy algorithm and are present in detail in the longer version of this paper; in what follows, we provide an outline of our analysis.
+More concretely, we now show that the adaptive random greedy policy retains the $1-1/e$ approximation ratio for adaptive monotone submodular objectives, while, at the same time, it achieves a $1/e$ approximation ratio for non-monotone objectives, under the additional condition of submodularity for each realization.
+As we will see in \sectref{sect:functions}, for the vast majority of non-monotone objectives used in practice this condition holds by way of construction.
+We, therefore, do not consider it a major restriction in the choice of objectives.
+Our proofs generalize the results of \cite{buchbinder14} for the random greedy algorithm and are presented in detail in the longer version of this paper; in what follows, we provide an outline of our analysis.
 
 First, let us define the expected gain of running policy $\pi$ after having obtained a partial realization $\psi$, as
 {\small
 \begin{align*}
   \D{\pi}{\psi} \defeq \E[\Phi,\Pi]{f(\dom(\psi) \cup E(\pi, \Phi), \Phi) - f(\dom(\psi), \Phi)}[\Phi \sim \psi].
 \end{align*}}
-Also, for any policy $\pi$, we define a truncated policy $\pik$, which runs indentically to $\pi$ for $k$ steps and then terminates.
-Finally, given any two policies $\pi_1$, $\pi_2$, we denote by $\pi_1@\pi_2$ a new policy that first runs $\pi_1$ until it terminates and then continues with $\pi_2$, discarding the observations made by $\pi_1$.
-In the end, the subset selected by $\pi_1@\pi_2$ will be the union of the subsets selected by each policy individually.
+Also, for any policy $\pi$ and any positive integer $k$, we define the truncated policy $\pik$, which runs indentically to $\pi$ for $k$ steps and then terminates.
+Finally, given any two policies $\pi_1$, $\pi_2$, we denote by $\pi_1@\pi_2$ the policy that first runs $\pi_1$ until it terminates and then runs $\pi_2$, discarding all observations made by $\pi_1$.
+After $\pi_1@\pi_2$ terminates, the subset selected by it consists of the union of the subsets selected by each policy individually.
 
 The following is a key lemma for both monotone and non-monotone objectives.
 \setcounter{lemma}{0}
-\begin{lemma}
+\begin{lemma}\label{lem:submod}
   If $f$ is adaptive submodular, then, for any policy $\pi$, and any partial realization $\psi$, it holds that
   \begin{align*}
     \D{\pik}{\psi} \leq \sum_{e \in \Mk(\psi)} \D{e}{\psi}.
@@ -453,16 +452,17 @@ This is a consequence of adaptive submodularity, which guaratees that the expect
 
 Based on \lemmaref{lem:submod} and the fact that $\pig$ selects at each step one of the $k$ elements in $\Mk$ uniformly at random, we can show the following lemma, which also applies to both monotone and non-monotone objectives.
 \begin{lemma}\label{lem:mon_main}
-  For any policy $\pi$ and any non-negative integer $i < k$, if $f$ is adaptive submodular, then
+  For any policy $\pi$, and any non-negative integer $i < k$, if $f$ is adaptive submodular, then
   \begin{align*}
     \favg(\pigii) - \favg(\pigi) \geq \frac{1}{k}\left(\favg(\pigi @ \pi) - \favg(\pigi)\right).
   \end{align*}
 \end{lemma}
 \noindent The lemma compares the expected gain at the $i$-th step of $\pig$ to the total gain of running any other policy (e.g., the optimal one) after the $i$-th step and, thereby, provides a means for obtaining approximation guarantees for $\pig$, as long as we can bound the term $\favg(\pigi @ \pi)$.
+The dichotomy between adaptive monotone and non-monotone objectives in terms of theoretical guarantees stems from the different approaches in bounding this term.
 
-If $f$ is adaptive monotone, we may use the bound $\favg(\pigi @ \pi) \geq \favg(\pi)$, which readily follows from the definition of adaptive monotonicity, to obtain the following theorem.
+If $f$ is adaptive monotone, we may use the trivial bound $\favg(\pigi @ \pi) \geq \favg(\pi)$, which immediately follows from the definition of adaptive monotonicity, to obtain the following theorem.
 \begin{theorem}
-  If $f$ is adaptive monotone submodular, then for any policy $\pi$ and all integers $i, k > 0$ it holds that
+  If $f$ is adaptive monotone submodular, then for any policy $\pi$, and all integers $i, k > 0$ it holds that
   \begin{align*}
     \favg(\pigi) \geq \left(1 - e^{-i/k}\right)\favg(\pik).
   \end{align*}
@@ -478,31 +478,31 @@ For that purpose, we generalize to the adaptive setting the following lemma show
   \end{align*}
 \end{lemma}
 \noindent Roughly speaking, the lemma states that a ``random enough'' subset $A$ cannot have much worse value than that of the empty set.
-Note that $f$ here is not assumed to be monotone.
+Note that $f$ is not assumed to be monotone here.
 
 The following lemma extends the above claim to the adaptive setting.
 \begin{lemma}
-  If $f(\cdot\,, \phi) : 2^E \to \mathbb{R}_{\geq 0}$ is submodular for all $\phi \in O^E$, then for any policy $\pi$ such that each element of $e \in E$ is selected by it with probability at most $p$, that is, $\P[\Pi]{e \in E(\pi, \phi)} \leq p,\ \forall \phi \in O^E,\ \forall e \in E$, the expected value of running $\pi$ can be bounded as follows:
+  If $f$ is adaptive submodular, and, additionally, $f(\cdot\,, \phi) : 2^E \to \mathbb{R}_{\geq 0}$ is submodular for all $\phi \in O^E$, then for any policy $\pi$ such that each element of $e \in E$ is selected by it with probability at most $p$, that is, $\P[\Pi]{e \in E(\pi, \phi)} \leq p,\ \forall \phi \in O^E,\ \forall e \in E$, the expected value of running $\pi$ can be bounded as follows:
 \begin{align*}
   \favg(\pi) \geq (1-p)\,\favg(\pio).
 \end{align*}
 \end{lemma}
-\noindent Although we have not found concrete examples of adaptive submodular functions that do not satisfy this lemma, adaptive submodularity by itself does not seem to be a sufficient condition for it to hold; rather, we require the stronger assumption that $f$ be submodular for any realization.
+%\noindent Although we have not found concrete examples of adaptive submodular functions that do not satisfy this lemma, adaptive submodularity by itself does not seem to be a sufficient condition for it to hold; rather, we require the additional assumption that $f$ be submodular in its first argument for any realization.
 
-As a consequence of the above lemma, we get that $\favg(\pigi@\pi) = \favg(\pi@\pigi) \geq (1-p)\favg(\pi)$, meaning that the elements added by adaptive random greedy cannot reduce the average value obtained by any other policy $\pi$ by too much.
-The probability $p$ in this case can be bounded by using the fact that $\pig$ randomly selects one of $k$ elements at each step, therefore at the $i$-step we have $p \leq (1-1/k)^i$.
-Putting it all together, we obtain the following theorem for non-monotone objectives.
+As a consequence of the above lemma, we get that $\favg(\pigi@\pi) = \favg(\pi@\pigi) \geq (1-p)\favg(\pi)$, meaning that the elements added by adaptive random greedy cannot dramatically reduce the average value obtained by any other policy $\pi$.
+The probability $p$ in this case can be bounded by using the fact that $\pig$ randomly selects one of $k$ elements at each step, hence at the $i$-step we have $p \leq (1-1/k)^i$.
+Putting it all together, we obtain our main theorem for non-monotone objectives.
 \begin{theorem}\label{thm:nonm}
-  If $f(\cdot\,, \phi) : 2^E \to \mathbb{R}_{\geq 0}$ is submodular for all $\phi \in O^E$, then, for any policy $\pi$, and all integers $i, k > 0$, it holds that
+  If $f$ is adaptive submodular, and $f(\cdot\,, \phi) : 2^E \to \mathbb{R}_{\geq 0}$ is submodular for all $\phi \in O^E$, then, for any policy $\pi$, and all integers $i, k > 0$, it holds that
   \begin{align*}
     \favg(\pigi) \geq \frac{i}{k}\left(1 - \frac{1}{k}\right)^{i-1}\favg(\pik).
   \end{align*}
 \end{theorem}
-\noindent By setting $i = k$ we get a $1/e$ approximation ratio for $\pigk$.
+\noindent By setting $i = k$, we get a $1/e$ approximation ratio for $\pigk$.
 
-\section{Examples of Non-Monotone Objectives}
+\section{Examples of Non-Monotone Objectives} \label{sect:functions}
 To underline the importance of non-monotonicity, we now present two different ways, in which non-monotone adaptive submodular functions commonly arise in practice.
-The two resulting classes of functions satisfy the assumptions of \theoremref{thm:nonm}, and are, therefore, suitable to be maximized using adaptive random greedy.
+Both of the resulting classes of functions satisfy the assumptions of \theoremref{thm:nonm}, and are, therefore, suitable to be maximized using adaptive random greedy.
 We also introduce two representative example objectives, one for each class, which are themselves of practical interest.
 
 \subsection{Objectives with a Modular Cost Term}
