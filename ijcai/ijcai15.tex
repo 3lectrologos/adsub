@@ -258,7 +258,7 @@
 \maketitle
 
 \begin{abstract}
-A wide range of AI problems require sequentially selecting elements from a large set with the goal of optimizing the utility of the selected subset.
+A wide range of AI problems, such as sensor placement, active learning, and network influence maximization, require sequentially selecting elements from a large set with the goal of optimizing the utility of the selected subset.
 Moreover, each element that is picked may provide stochastic feedback, which can be used to make smarter decisions about future selections.
 Finding efficient policies for this general class of adaptive optimization problems can be extremely hard.
 However, when the objective function is adaptive monotone and adaptive submodular, a simple greedy policy attains a $1-1/e$ approximation ratio in terms of expected utility.
@@ -269,17 +269,18 @@ We showcase the benefits of adaptivity on several network data sets using two no
 
 \section{Introduction}
 
-Many practical problems in artificial intelligence boil down to selecting a number of elements from a large set of options in an initially unknown environment, so as to maximize some utility function defined over subsets of selected elements. \ak{Examples include ...}
+Many practical problems in artificial intelligence boil down to selecting a number of elements from a large set of options in an initially unknown environment, so as to maximize some utility function defined over subsets of selected elements.
+Example problems include sensor placement (selecting sensor locations), active learning (selecting examples to label), and network influence maximization (selecting seed nodes).
 In contrast to the \emph{non-adaptive} setting, where we commit to the selected elements all at once, in the \emph{adaptive} setting the selection process is performed in a sequential manner, and each element that is picked provides some form of stochastic feedback, or, in other words, reveals part of the environment.
 Naturally, we would like to leverage the acquired feedback to make smarter future selections.
 
 \begin{figure}[tb]
   \centering
   \begin{tikzpicture}[
-      scale=0.6,
+      scale=0.55,
       >=latex,
       line join=bevel,
-      LN/.style={draw=gray!80!black,rectangle,line width=0.1em,minimum size=2em},
+      LN/.style={draw=gray!80!black,rectangle,line width=0.1em,minimum size=1.7em},
       BN/.style={draw=gray!80!black,circle,line width=0.1em,minimum size=1em,inner sep=1pt},
       CN/.style={draw=gray,line width=0.1em,densely dashed,rectangle,rounded corners,fill opacity=0.3},
       LL/.style={->,draw=gray!80!black,line width=0.1em}
@@ -329,17 +330,17 @@ Finally, we evaluate our policy on these two objectives using a number of real-w
 \section{Problem Statement and Background}
 Assume we are given a finite ground set $E$ and a set $O$ of observable states.
 Each item $e \in E$ is associated with a state $o \in O$ through a function $\phi : E \to O$, which is called a \emph{realization} of the set of states.
-We also assume that the realization $\Phi$ is a random variable with known distribution $p(\phi)$ \ak{$\Phi$ vs $\phi$?}.
+We also assume that the realization $\Phi$ is a random variable with known distribution $p(\phi)$.
 Furthermore, we are given an objective function $f : 2^E \times O^E \to \mathbb{R}_{\geq 0}$.
 For a set $A \subseteq E$ and a realization $\phi$, the quantity $f(A, \phi)$ represents the utility of selecting subset $A$ when the true realization is $\phi$.
 In our birdwatching example, the ground set $E$ consists of the three possible locations $\{\ell_1, \ell_2$, $\ell_3\}$ we may visit, and the state of each location is the (random) subset of bird species that we actually observe if we travel to that location; each realization maps all locations to subsets of actually observed species.
 Our objective function is the total number of observed species given a subset of visited locations.
 
-Our goal is to come up with a sequential policy that---initially unaware of $\Phi$---builds up a set $A \subseteq E$, such that our utility $f(A, \Phi)$ is maximized.
-That is, we iteratively select an item $e \in E$ to add to $A$ and observe its state $\Phi(e)$.
+Our goal is to come up with a sequential policy that---initially unaware of $\phi$---builds up a set $A \subseteq E$, such that our utility $f(A, \phi)$ is maximized.
+That is, we iteratively select an item $e \in E$ to add to $A$ and observe its state $\phi(e)$.
 In this setting, there are two factors that complicate matters compared to its non-adaptive counterpart.
 First, since utility depends on the random realization, the quantity of focus is the \emph{expected} utility under the distribution of realizations $p(\phi)$.
-Second, the chosen set $A$ itself is a random variable that depends on the realization, since the choices of our policy will change according to each observation $\Phi(e)$, which is, of course, the whole point of adaptivity.
+Second, the chosen set $A$ itself is a random variable that depends on the realization, since the choices of our policy will change according to each observation $\phi(e)$, which is, of course, the whole point of adaptivity.
 In addition, the policy itself might make random decisions, which is an additional source of randomness for $A$.
 
 To address the above complications, we define a \emph{partial realization} as a set $ \psi \subseteq E \times O$, which represents the item-observation pairs over a subset of $E$.
@@ -350,8 +351,8 @@ We can now define a \emph{policy} $\pi$ as a function from partial realizations 
 For birdwatching, our policy would specify which location to visit next (or, more generally, a distribution of next locations), given the already visited locations and the already observed species in each of them.
 The policy terminates when the current partial realization is not in its domain denoted by $\dom(\pi) \subseteq 2^{E \times O}$.
 We also use the shorthand notation $\pi(e\mmid\psi)$ for the probability of picking item $e$ given partial realization $\psi$.
-We call $E(\pi, \Phi) \subseteq E$ the set of items that have been selected upon termination of policy $\pi$ under realization $\Phi$ (our final set of visited birdwatching locations).
-Note that this set is a random variable that depends on both the randomness of the policy, as well as the randomness of realizations.
+We call $E(\pi, \phi) \subseteq E$ the set of items that have been selected upon termination of policy $\pi$ under realization $\phi$ (our final set of visited birdwatching locations).
+Note that $E(\pi, \Phi)$ is a random variable that depends on both the randomness of the policy, as well as the randomness of realizations.
 
 Finally, we can formally assess the performance of a policy $\pi$ via its expected utility,
 \begin{align*}
@@ -400,7 +401,7 @@ Obviously, these elements do not affect the optimal policy, and may be removed f
 The detailed pseudocode of running the adaptive random greedy policy is presented \algoref{alg:rg}.
 As discussed before, the algorithm is given a ground set and an objective function, as well as a known distribution over realizations $\Phi$.
 At each iteration, the first step is to compute the expected marginal gain of each remaining element (\lineref{lin:marg}).
-The key difference compared to the original adaptive greedy policy is shown in \linesref{lin:upd1}{lin:upd2}; rather than selecting the element with the largest expected marginal gain, $\pig$ randomly selects an element among the ones with the $k$ largest gains \ak{Define and refer to $\Mk(\psi)$?}.
+The key difference compared to the original adaptive greedy policy is shown in \linesref{lin:upd1}{lin:upd2}; rather than selecting the element with the largest expected marginal gain, $\pig$ randomly selects an element from the set $\Mk(\psi)$, which contains the elements with the $k$ largest gains.
 The dummy elements added to the ground set ensure that the policy never picks an element with negative expected marginal gain.
 Also, note that, although in \algoref{alg:rg} the returned set $A$ contains exactly $k$ elements, the actual selected set may very well contain less than $k$ elements, since we implicitly assume that any dummy elements are removed from it after the policy terminates.
 
@@ -668,7 +669,7 @@ Compared to monotone submodular maximization, for which the $(1-1/e)$-approximat
 Even more recently, \citet{buchbinder14} introduced the random greedy algorithm for maximizing non-monotone submodular functions under a cardinality constraint, from which we drew inspiration for our proposed adaptive random greedy policy.
 
 The concepts of adaptive monotonicity and adaptive submodularity were introduced by \citet{golovin11}, who also showed that the greedy policy provides a $(1-1/e)$-approximation under these assumptions.
-Example application domains, apart from those we present in this paper, include active learning \cite{chen14} and incentive mechanism design \cite{singla13}. \ak{might want to cite Guillory and Bilmes Interactive Submodular Cover}
+Example application domains, apart from those we present in this paper, include active learning \cite{chen14}, interactive set coverage \cite{guillory10}, and incentive mechanism design \cite{singla13}.
 
 The problem of influence maximization was originally proposed by \citet{kempe03} and was extended to the adaptive setting by \citet{golovin11}.
 Various techniques have been proposed to make the computation of marginal gains feasible for large-scale networks using, for instance, more efficient sampling methods \cite{ohsaka14}, and sketching-based approximations \cite{cohen14}.
