@@ -514,6 +514,9 @@ In this case, the resulting objective is of the form
 \end{align}
 which is also adaptive submodular, but non-monotone.
 
+A common alternative to the above is to introduce a knapsack constraint $f_{\textrm{cost}}(A) \leq C$, while retaining a monotone objective.
+Choosing a budget $C$, in this case, might not be obvious depending on the problem formulation, whereas the formulation of equation \eqref{eq:cost} is often more straightforward, particularly when $f_{\textrm{cost}}$ is expressed in the same units as $f_{\textrm{utility}}$.
+
 \paragraph{Influence maximization}
 The concept of influence maximization in a social network was posed by \citet{kempe03} and has direct applications to problems such as viral marketing.
 Given a graph and a model of influence propagation, the goal is to select a subset of nodes that are initially active, in order to maximize the spread of influence measured by the expected number of nodes that will ultimately be active according to the propagation model.
@@ -565,11 +568,11 @@ Since we have no competitor policy for the adaptive non-monotone submodular sett
 For our experiments, we used $20$ networks from the KONECT\footnote{\url{http://konect.uni-koblenz.de/}} database, which accumulates network data sets from various other sources.
 The network sizes range from a few thousands to tens of thousands nodes.
 
-Computing the (expected) marginal gains is at the heart of both the non-adaptive random greedy algorithm and our proposed random greedy policy.
-This computation may range from being completely straightforward to extremely demanding, depending on the specific objective at hand.
+Computing the (expected) marginal gains is at the heart of both the non-adaptive random greedy algorithm and our proposed adaptive random greedy policy.
+In terms of computational complexity, this may range from being completely straightforward to extremely demanding, depending on the specific objective at hand.
 For the influence optimization objective, the exact computation of the expected influence of a subset of nodes has been shown to be NP-hard \cite{kempe03}.
 To obtain an estimate we use Monte Carlo sampling over the outcomes of the independent cascades.
-Note within adaptive random greedy we have to perform this simulation at every step conditioning on the observations obtained up to that step.
+Note that within adaptive random greedy we have to perform this simulation at every step, while conditioning on the observations obtained up to that step.
 For the maximum cut objective, it is very simple to compute the marginal gains in the adaptive case, since we already know at each step the outcomes of the previously selected nodes.
 In the non-adaptive setting, however, this is considerably harder, since we have to average over every possible outcome of the current selection; we again resort to sampling from the space of possible realizations to obtain estimates.
 To make the aforementioned computations more efficient, we subsample each network down to $2000$ nodes, using a technique based on random walks proposed by \citet{leskovec06}.
@@ -650,7 +653,7 @@ Example application domains, apart from those we present in this paper, include 
 
 The problem of influence maximization was originally proposed by \citet{kempe03} and was extended to the adaptive setting by \citet{golovin11}.
 Various techniques have been proposed to make the computation of marginal gains feasible for large-scale networks using, for instance, more efficient sampling methods \cite{ohsaka14}, and sketching-based approximations \cite{cohen14}.
-In this paper we chose to run experiments on smaller-scale networks, but these techniques could also be applied to scale up adaptive random greedy as well.
+In this paper we chose to run experiments on smaller-scale networks, but these techniques could be applied to scale up adaptive random greedy as well.
 \citet{he14} recently considered the problem of assessing the robustness of influence maximization algorithms under network parameter misspecification, which interestingly leads to maximizing a non-monotone submodular objective.
 
 Maximum cut has been a much-studied NP-complete problem with provable approximation guarantees given by SDP-based algorithms for both the unconstrained \cite{goemans95} and cardinality-constrained \cite{feige01} cases.
