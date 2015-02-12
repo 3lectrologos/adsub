@@ -593,49 +593,49 @@ For each ground set instance, we evaluate the algorithms' performance on \todo{$
     \centering
     \input{figures/inf_ego_fb.tex}
     \vspace{\scspacey}
-    \caption{\hspace{\scspacex}\infmax -- \fbook}
+    \caption{\hspace{\scspacex}\infmax{} -- \fbook}
     \label{fig:inf_ego_fb}
   \end{subfigure}
   \begin{subfigure}[b]{\subflen}
     \input{figures/inf_gnutella.tex}
     \vspace{\scspacey}
-    \caption{\hspace{\scspacex}\infmax -- \gnutella}
+    \caption{\hspace{\scspacex}\infmax{} -- \gnutella}
     \label{fig:inf_gnutella}
   \end{subfigure}
   \begin{subfigure}[b]{\subflen}
     \input{figures/inf_gplus.tex}
     \vspace{\scspacey}
-    \caption{\hspace{\scspacex}\infmax -- \gplus}
+    \caption{\hspace{\scspacex}\infmax{} -- \gplus}
     \label{fig:inf_gplus}
   \end{subfigure}
   \begin{subfigure}[b]{\subflen}
     \input{figures/inf_twitter.tex}
     \vspace{\scspacey}
-    \caption{\hspace{\scspacex}\infmax -- \twitter}
+    \caption{\hspace{\scspacex}\infmax{} -- \twitter}
     \label{fig:inf_twitter}
   \end{subfigure}\\[0.5em]
   \begin{subfigure}[b]{\subflen}
     \input{figures/mc_ego_fb.tex}
     \vspace{\scspacey}
-    \caption{\hspace{\scspacex}\maxcut -- \fbook}
+    \caption{\hspace{\scspacex}\maxcut{} -- \fbook}
     \label{fig:mc_ego_fb}
   \end{subfigure}
   \begin{subfigure}[b]{\subflen}
     \input{figures/mc_gnutella.tex}
     \vspace{\scspacey}
-    \caption{\hspace{\scspacex}\maxcut -- \gnutella}
+    \caption{\hspace{\scspacex}\maxcut{} -- \gnutella}
     \label{fig:mc_gnutella}
   \end{subfigure}
   \begin{subfigure}[b]{\subflen}
     \input{figures/mc_gplus.tex}
     \vspace{\scspacey}
-    \caption{\hspace{\scspacex}\maxcut -- \gplus}
+    \caption{\hspace{\scspacex}\maxcut{} -- \gplus}
     \label{fig:mc_gplus}
   \end{subfigure}
   \begin{subfigure}[b]{\subflen}
     \input{figures/mc_twitter.tex}
     \vspace{\scspacey}
-    \caption{\hspace{\scspacex}\maxcut -- \twitter}
+    \caption{\hspace{\scspacex}\maxcut{} -- \twitter}
     \label{fig:mc_twitter}
   \end{subfigure}
   \caption{
@@ -660,6 +660,9 @@ Maximum cut has been a much-studied NP-complete problem with provable approximat
 An interesting application of maximum cut objectives has been proposed by \citet{lin10} and \citet{lin11} for text summarization.
 
 \section{Conclusion}
+We presented the adaptive random greedy policy for adaptive submodular maximization, the first policy with provable approximation guarantees for non-monotone objectives.
+We also presented two simple ways of constructing non-monotone objectives in practice, and observed the advantage of adaptivity by evaluating our policy on two network-related functions obtained this way.
+We believe that our work is a step towards understanding the class of functions amenable to adaptive optimization, and hope that it will encourage the broader use of non-monotone objectives in modeling and solving practical AI problems.
 
 % The file named.bst is a bibliography style file for BibTeX 0.99c
 \bibliographystyle{named}
