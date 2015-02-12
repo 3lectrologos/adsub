@@ -196,7 +196,7 @@ def compare(g, pedge, n_available, k ,gamma, nsim_nonad, nsim_ad, niter, workers
 def run(g, reps, pedge, n_available, k, gamma, nsim_nonad, nsim_ad, niter, workers=0):
     res = {'f_rand': [], 'f_nonad': [], 'f_ad': []}
     for rep in range(reps):
-        print 'Rep:', rep, '(k = {0})'.format(k)
+        print 'Rep:', rep, '(k = {0}, p = {1})'.format(k, pedge)
         print '==============================='
         r = compare(g, pedge, n_available, k, gamma, nsim_nonad, nsim_ad, niter, workers)
         res['f_rand'].append(r['f_rand'])

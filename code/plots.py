@@ -13,7 +13,7 @@ import maxcut
 TEMPLATE_FS = 'fs.tex'
 
 
-INF_FAST = dict(reps=10,
+INF_FAST = dict(reps=50,
                 pedge=0.1,
                 gamma=1,
                 nsim_nonad=300,
@@ -27,6 +27,20 @@ INF_SLOW = dict(reps=20,
                 nsim_ad=100,
                 niter=100,
                 workers=7)
+PINF_FAST = dict(reps=10,
+                 k=30,
+                 gamma=1,
+                 nsim_nonad=300,
+                 nsim_ad=100,
+                 niter=50,
+                 workers=7)
+PINF_SLOW = dict(reps=20,
+                 pedge=0.15,
+                 gamma=1,
+                 nsim_nonad=1000,
+                 nsim_ad=100,
+                 niter=100,
+                 workers=7)
 MC_FAST = dict(reps=10,
                nsim_nonad=100,
                niter=50)
@@ -82,6 +96,44 @@ def run_inf(model, nodes, fast=True, plot=False):
         pcl.dump(data, f)
 
 
+def run_pinf(model, nodes, fast=True, plot=False):
+    (name, g) = util.get_tc(model, nodes, directed=False)
+    if plot:
+        ig.plot(g)
+        util.plot_degree_dist(g)
+    outdir = os.path.join(util.DIR_RES, 'pinfluence', model)
+    if not os.path.isdir(outdir):
+        os.makedirs(outdir)
+    g.write_edgelist(os.path.join(outdir, 'graph'))
+    xs = []
+    fs_rand = []
+    fs_nonad = []
+    fs_ad = []
+    n_available = 100#len(g.vs) / 10
+    ps = [0.1, 0.3, 0.5, 0.75, 1]
+    print_info(name, g)
+    for p in ps:
+        if fast:
+            params = PINF_FAST
+        else:
+            params = PINF_SLOW
+        r = influence.run(g, n_available=n_available, pedge=p, **params)
+        fs_rand += r['f_rand']
+        fs_nonad += r['f_nonad']
+        fs_ad += r['f_ad']
+        xs += [p] * params['reps']
+    data = {
+        'model': model,
+        'ks': xs,
+        'rand': fs_rand,
+        'nonad': fs_nonad,
+        'ad': fs_ad
+        }
+    plot_fs(data, outdir)
+    with open(os.path.join(outdir, model.lower() + '.pickle'), 'w') as f:
+        pcl.dump(data, f)
+
+
 def run_mc(model, nodes, fast=True, plot=False):
     (name, g) = util.get_tc(model, nodes, directed=False)
     if plot:
@@ -97,7 +149,8 @@ def run_mc(model, nodes, fast=True, plot=False):
     fs_ad = []
     n_available = 100#len(g.vs) / 10
     pcts = [0.01, 0.1, 0.3, 0.5, 0.7, 1]
-    ks = list(np.unique([max(1, int(kr * n_available)) for kr in pcts]))
+    ks = [1, 5, 10, 15, 20, 30, 40, 60, 80, 100]
+#    ks = list(np.unique([max(1, int(kr * n_available)) for kr in pcts]))
     print_info(name, g)
     for k in ks:
         if fast:
@@ -142,7 +195,7 @@ if __name__ == "__main__":
     parser = argparse.ArgumentParser(
         description='Adaptive monotone submodular experiments')
     parser.add_argument('objective',
-                        choices=['inf', 'mc'],
+                        choices=['inf', 'pinf', 'mc'],
                         help='objective function to maximize')
     parser.add_argument('model',
                         help='data set')
@@ -164,5 +217,7 @@ if __name__ == "__main__":
     runargs = [model, nodes, fast, plot]
     if objective == 'inf':
         run_inf(*runargs)
+    elif objective == 'pinf':
+        run_pinf(*runargs)
     elif objective == 'mc':
         run_mc(*runargs)

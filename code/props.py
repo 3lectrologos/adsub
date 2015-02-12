@@ -60,7 +60,7 @@ def get_features(gdir):
     X = []
     labels = []
     subdirs = sorted(os.listdir(gdir))
-    for subdir in subdirs:
+    for subdir in ['EGO_FB', 'GNUTELLA', 'GPLUS', 'TWITTER']:#subdirs:
         if not os.path.isdir(os.path.join(gdir, subdir)):
             continue
         with open(os.path.join(gdir, subdir, 'props'), 'r') as f:
@@ -145,18 +145,20 @@ if __name__ == '__main__':
     args = parser.parse_args()
     if args.objective == 'inf':
         subdir = 'influence'
-        Y = [0, 1, 1, 0, 1, 0,
-             1, 0, 0, 1, 1, 0,
-             1, 0, 0, 0, 0, 1,
-             1, 1, 1, 1, 0, 1,
-             1, 0]
+        Y = [1, 0, 0, 1]
+#        Y = [0, 1, 1, 0, 1, 0,
+#             1, 0, 0, 1, 1, 0,
+#             1, 0, 0, 0, 0, 1,
+#             1, 1, 1, 1, 0, 1,
+#             1, 0]
     elif args.objective == 'mc':
         subdir = 'maxcut'
-        Y = [0, 0, 1, 1, 0, 0,
-             0, 1, 0, 0, 0, 0,
-             0, 0, 1, 0, 0, 1,
-             1, 0, 0, 0, 1, 0,
-             1, 1]
+        Y = [1, 0, 1, 0]
+#        Y = [0, 0, 1, 1, 0, 0,
+#             0, 1, 0, 0, 0, 0,
+#             0, 0, 1, 0, 0, 1,
+#             1, 0, 0, 0, 1, 0,
+#             1, 1]
     if args.generate:
         save_features(os.path.join(util.DIR_RES, subdir))
     (X, labels) = get_features(os.path.join(util.DIR_RES, subdir))
@@ -173,4 +175,4 @@ if __name__ == '__main__':
         print 'best:', [x[0] for x in scores if x[1] == m[1]]
         print 'score:', m[1]
     else:
-        train_2d(X, Y, labels, [7, 8])
+        train_2d(X, Y, labels, [2, 7])
