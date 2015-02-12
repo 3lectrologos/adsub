@@ -7,7 +7,7 @@ import igraph as ig
 import util
 
 
-TEMPLATE_FS = 'fs_ijcai.tex'
+TEMPLATE_FS = 'imp_ijcai.tex'
 OUTDIR = '.'
 MODELS = ['EGO_FB', 'GNUTELLA', 'GPLUS', 'TWITTER']
 OBJ = ['influence', 'maxcut']
@@ -26,19 +26,17 @@ for obj in ['influence', 'maxcut']:
             elif obj == 'maxcut':
                 norm = g.ecount()
             cs = {}
-            for name in ['rand', 'nonad', 'ad']:
-                cs[name] = util.get_coords(data['ks'], data[name])
-                means = []
-                stds = []
-                ks = np.unique(data['ks'])
-                for k in ks:
-                    reps = sum(data['ks'] == k)
-                    ys = [(1.0*y)/norm for y in np.array(data[name])[data['ks'] == k]]
-                    means.append(np.mean(ys))
-                    stds.append(np.std(ys)/np.sqrt(reps))
-                cs['mean_' + name] = util.get_coords(ks, means, stds)
-            cs['xmax'] = str(max(data['ks']))
-            cs['ymax'] = str(max(means))
+            means = []
+            stds = []
+            ks = np.unique(data['ks'])
+            for k in ks:
+                reps = sum(data['ks'] == k)
+                ys_ad = np.array(data['ad'])[data['ks'] == k]
+                ys_nonad = np.array(data['nonad'])[data['ks'] == k]
+                ys = [(100.0*(foo-bar))/bar for foo, bar in zip(ys_ad, ys_nonad)]
+                means.append(np.mean(ys))
+                stds.append(np.std(ys)/np.sqrt(reps))
+            cs['imp'] = util.get_coords(ks, means, stds)
             texname = OBJ_SHORT[obj] + '_' + lmodel + '.tex'
             util.replace(OUTDIR, TEMPLATE_FS, cs, texname)
             print '---------'
