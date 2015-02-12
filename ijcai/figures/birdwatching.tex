@@ -1,6 +1,6 @@
 \documentclass{standalone}
 \usepackage{tikz}
-\usetikzlibrary{shapes,fit}
+\usetikzlibrary{shapes,fit,backgrounds}
 
 \begin{document}
 \begin{tikzpicture}[
@@ -9,7 +9,7 @@
     line join=bevel,
     LN/.style={draw=gray!80!black,rectangle,line width=0.1em,minimum size=1.7em},
     BN/.style={draw=gray!80!black,circle,line width=0.1em,minimum size=1em,inner sep=1pt},
-    CN/.style={draw=gray,line width=0.1em,densely dashed,rectangle,rounded corners,fill opacity=0.3},
+    CN/.style={draw=gray,line width=0.1em,densely dashed,rectangle,rounded corners,fill opacity=0.25},
     LL/.style={->,draw=gray!80!black,line width=0.1em}
   ]
   \node[LN] (l1) at (-150bp,0bp) {$\ell_1$};
@@ -24,9 +24,9 @@
   \node[BN] (b7) at (110bp,-75bp) {\includegraphics[width=0.5cm,trim=0 20 0 20,clip]{shorebird.png}};
   
   \node[CN,fill=magenta!50!black,fit=(b1)(b2)(b3)(b4)] (fit1) {};
-  \node[CN,fill=lime!70!black,yscale=1.5,fit=(b3)(b4)(b5)] (fit2) {};
+  \node[CN,fill=lime!30!green,yscale=1.5,fit=(b3)(b4)(b5)] (fit2) {};
   \node[CN,fill=cyan!80!black,fit=(b6)(b7)] (fit3) {};
-  
+
   \draw[LL] (l1) -- (-150bp,-48bp);
   \draw[LL] (l2) -- (fit2);
   \draw[LL] (l3) -- (fit3);
