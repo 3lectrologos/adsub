@@ -648,7 +648,7 @@ At the extreme values of $p$, adaptivity provides no benefit, since the network 
 In plot (h) we show the improvement on \gplus for varying cut distributions.
 The parameter $\beta$ quantifies the probability of a node being cut when it is selected.
 A value of $\beta=0$ corresponds to the setting of plots (e)--(g), where the cutting probability is uniformly distributed among the selected node and each of its neighbors; $\beta=1$ corresponds to deterministically cutting the selected node.
-We can see that, as the cutting distribution gets more deterministic ($\beta \to 1$), the benefit of adaptivity diminishes.
+We can see that, as the cutting distribution gets close to deterministic ($\beta \to 1$), the benefit of adaptivity diminishes.
 
 \section{Related Work}
 Compared to monotone submodular maximization, for which the $(1-1/e)$-approximation of the greedy algorithm was shown by \citet{nemhauser78}, constant-factor approximations for non-monotone submodular functions have been much more recent, for both the unconstrained case \cite{feige07}, as well as under matroid and knapsack constraints \cite{lee09}.
