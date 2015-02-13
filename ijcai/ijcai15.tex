@@ -505,7 +505,7 @@ Choosing a budget $C$, in this case, might not be obvious, whereas the formulati
 \paragraph{Influence maximization}
 The concept of influence maximization in a social network was posed by \citet{kempe03} and has direct applications to problems such as viral marketing.
 Given a graph and a model of influence propagation, the goal is to select a subset of nodes that are initially active, in order to maximize the spread of influence measured by the expected number of nodes that will ultimately be active according to the propagation model.
-We focus here on the independent cascade model, according to which, each edge of the graph is randomly set ``live'' or ``blocked'', independent of any other edge in the network, and influence can only flow along ``live'' edges.
+We focus here on the independent cascade model, according to which, each edge of the graph is randomly set to be ``live'' or ``blocked'', independently of any other edge in the network, and influence can only flow along ``live'' edges.
 
 For this problem, the ground set $E$ consists of network nodes, and each realization $\phi$ corresponds to a full outcome of the independent cascade model, that is, an assignment to each network edge of being either ``live'' or ``blocked''.
 The objective $f_{\textrm{inf}}(A, \phi)$ is the number of ultimately active nodes under realization $\phi$, if the nodes in the selected subset $A$ are initially active.
@@ -565,7 +565,7 @@ To make the aforementioned computations more efficient, we subsample each networ
 For both objectives, we select uniformly at random a subset of $100$ nodes as the ground set $E$, and repeat the experiments for $50$ such sets.
 For each ground set instance, we evaluate the algorithms' performance on $100$ random realizations.
 
-\setlength\figureheight{0.22\textwidth}
+\setlength\figureheight{0.205\textwidth}
 \setlength\figurewidth{0.29\textwidth}
 \newcommand{\subflen}{0.245\textwidth}
 \newcommand{\scspacey}{-1.8em}
@@ -596,7 +596,7 @@ For each ground set instance, we evaluate the algorithms' performance on $100$ r
     \vspace{\scspacey}
     \caption{\hspace{\scspacex}\infmax{} -- \fbook}
     \label{fig:pinf_ego_fb}
-  \end{subfigure}\\[0.5em]
+  \end{subfigure}\\[0.3em]
   \begin{subfigure}[b]{\subflen}
     \input{figures/mc_ego_fb.tex}
     \vspace{\scspacey}
