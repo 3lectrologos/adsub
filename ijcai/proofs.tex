@@ -1,41 +1,7 @@
 \section{Proofs}
 
-\todo{Needs cleanup}
-
-\subsection{Definitions}
-\begin{description}[labelindent=0pt,leftmargin=7pt,itemindent=-2pt,itemsep=0pt]
-  \uitem{Ground set} $E$
-  \uitem{Observation set} $O$
-  \uitem{Realization} $\phi : E \to O$
-  \uitem{Partial realization} $\psi \subseteq E \times O$ with $\psi(e) \defeq o,\ \forall (e, o) \in \psi$
-  \uitem{Partial realiz. domain} $\dom(\psi) \defeq \sdef{e \in E}{\exists o \in O : (e, o) \in \psi}$
-  \uitem{Consistency} $\phi \sim \psi \iff \phi(e) = \psi(e),\ \forall e \in \dom(\psi)$
-  \uitem{Subrealization} $\psi_1 \subseteq \psi_2$
-  \uitem{Probability simplex} $\mathcal{P}(E) \defeq \sdef{\*x \in \mathbb{R}^E}{\sum_{e \in E} x_e = 1,\ x_e \geq 0\ \forall e \in E}$
-  \uitem{Policy} $\pi \subseteq 2^{E \times O} \times \mathcal{P}(E)$ with $\pi(e\mid\psi) \defeq p(e),\ \forall (\psi, p) \in \pi$
-  \uitem{Policy domain} $\dom(\pi) \defeq \sdef{\psi \in 2^{E \times O}}{\exists p \in \mathcal{P}(E) : (\psi, p) \in \pi}$
-  \uitem{Truncated policy} $\pik \subseteq 2^{E \times O} \times \mathcal{P}(E)$ such that $\dom(\pik) = \sdef{\psi \in \dom(\pi)}{|\psi| < k}$ and $\pik(\psi) = \pi(\psi),\ \forall \psi \in \dom(\pik)$
-  \uitem{Selected items} $E(\pi, \phi) \subseteq E$
-  \uitem{Function} $f : 2^E \times O^E \to \mathbb{R}_{\geq 0}$
-  \uitem{Exp. value of policy} $\favg(\pi) \defeq \E[\Phi,\Pi]{f(E(\pi, \Phi), \Phi)}$
-  \uitem{Expected gain of element} $\D{e}{\psi} \defeq \E[\Phi]{f(\dom(\psi) \cup \{e\}, \Phi) - f(\dom(\psi), \Phi)}[\Phi \sim \psi]$
-  \uitem{Expected gain of policy} $\D{\pi}{\psi} \defeq \E[\Phi,\Pi]{f(\dom(\psi) \cup E(\pi, \Phi), \Phi) - f(\dom(\psi), \Phi)}[\Phi \sim \psi]$
-  \uitem{Policy concatenation} $\pi_1 @ \pi_2$ (note that $\favg(\pi_1 @ \pi_2) = \favg(\pi_2 @ \pi_1)$)
-  \uitem{Random greedy policy} $\pig$
-  \uitem{Random greedy set} $\mathcal{M}_k(\psi) \in \displaystyle\argmax_{S \subseteq E, |S| \leq k}\left\{\sum_{e \in S} \D{e}{\psi} \right\}$
-\end{description}
-
-\subsection{Problem statement}
-We consider the problem of adaptive maximization, i.e., of finding a policy $\pi$ that solves the following problem
-\begin{align*}
-  \textrm{maximize}&\quad  \favg(\pi)\\
-  \textrm{subject to}&\quad  |E(\pi, \phi)| \leq k,\ \forall \phi \in O^E.
-\end{align*}
-
-\section{Adaptive monotone case}
-
 \begin{lemma}\label{lem:submod}
-  If $f$ is adaptive submodular, then for any policy $\pi$ and any partial realization $\psi$ it holds that
+  If $f$ is adaptive submodular, then,for any policy $\pi$, and any partial realization $\psi$, it holds that
   \begin{align*}
     \D{\pik}{\psi} \leq \sum_{e \in \mathcal{M}_k(\psi)} \D{e}{\psi}.
   \end{align*}
@@ -67,7 +33,7 @@ We consider the problem of adaptive maximization, i.e., of finding a policy $\pi
   \begin{align*}
     m_e = \twopartdefo{1}{e \in \mathcal{M}_k(\psi)}{0}
   \end{align*}
-  is an optimal solution. \todo{Could add a proof by contradiction here if this isn't obvious.}
+  is an optimal solution.
   Therefore, we have
   \begin{align}\label{eq:knap}
                     &\ g(\*p) \leq g(\*m) \notag\\
@@ -75,9 +41,11 @@ We consider the problem of adaptive maximization, i.e., of finding a policy $\pi
   \end{align}
   
   Let $p(\psi'\mmid\psi)$ be the probability that partial realization $\psi' \supseteq \psi$ will come up when running policy $\pik$ given partial realization $\psi$, that is,
+  {\small
   \begin{align*}
     p(\psi'\mmid\psi) \defeq \P[\Phi, \Pi]{\sdef{\left(e, \Phi(e)\right)}{e \in E(\pik, \Phi)} = \psi'\setminus\psi}[\Phi \sim \psi].
   \end{align*}
+  }
   Then, the gain $\D{\pik}{\psi}$ can be bounded as follows:
   \begin{align*}
     \D{\pik}{\psi} &= \sum_{\psi' \in \dom(\pik)}p(\psi'\mmid\psi)\sum_{e \in E}\pik(e\mmid\psi')\D{e}{\psi'}\\
@@ -117,6 +85,8 @@ We consider the problem of adaptive maximization, i.e., of finding a policy $\pi
   \end{align*}
 \end{proof}
 
+\let\oldthelemma\thelemma
+\renewcommand{\thelemma}{GK}
 \begin{lemma}\label{lem:mon_mon}
   Function $f$ is adaptive monotone if and only if for all policies $\pi_1$ and $\pi_2$ it holds that
   \begin{align*}
@@ -126,15 +96,17 @@ We consider the problem of adaptive maximization, i.e., of finding a policy $\pi
 \begin{proof}
 See Lemma A.8 of \citet{golovin11}.
 \end{proof}
+\let\thelemma\oldthelemma
 
 \begin{theorem}
-  If $f$ is adaptive monotone submodular, then for any policy $\pi$ and all integers $i, k > 0$ it holds that
+  If $f$ is adaptive monotone submodular, then, for any policy $\pi$, and all integers $i, k > 0$, it holds that
   \begin{align*}
     \favg(\pigi) \geq \left(1 - e^{-i/k}\right)\favg(\pik).
   \end{align*}
 \end{theorem}
 \begin{proof}
   By combining \lemmasref{lem:mon_main} and~\ref{lem:mon_mon} it immediately follows that for all $i$, $k \geq 1$
+  {\small
   \begin{align*}
                    &\ \favg(\pigii) - \favg(\pigi) \geq \frac{1}{k}\left(\favg(\pik) - \favg(\pigi)\right)\\
     \Leftrightarrow&\ \favg(\pigii) \geq \frac{1}{k}\favg(\pik) + \left(1 - \frac{1}{k}\right) \favg(\pigi)\\
@@ -143,16 +115,17 @@ See Lemma A.8 of \citet{golovin11}.
     \Leftrightarrow&\ \favg(\pigi) \geq \left(1 - \left(1 - \frac{1}{k}\right)^{i}\right)\favg(\pik)\tag*{by non-negativity of $f$}\\
     \Leftrightarrow&\ \favg(\pigi) \geq \left(1 - e^{-i/k}\right)\favg(\pik)\tag*{($1 - x \leq e^{-x},\ \forall x \geq 0$)}
   \end{align*}
+  }
 \end{proof}
 
 \begin{cor}
-  If $f$ is adaptive monotone submodular, then for any policy $\pi$ and any integer $k > 0$ it holds that
+  If $f$ is adaptive monotone submodular, then, for any policy $\pi$, and any integer $k > 0$, it holds that
   \begin{align*}
     \favg(\pigk) \geq (1 - e^{-1})\favg(\pik).
   \end{align*}
 \end{cor}
 
-\section{Non-monotone case}
+\setcounter{lemma}{2}
 \begin{lemma}\label{lem:buch}
   If $f : 2^E \to \mathbb{R}_{\geq 0}$ is submodular and $A$ is a random subset of $E$, such that each element $e \in E$ is contained in $A$ with probability at most $p$, that is, $\P[A]{e \in A} \leq p,\ \forall e \in E$, then it holds that
   \begin{align*}
@@ -164,7 +137,7 @@ See Lemma A.8 of \citet{golovin11}.
 \end{proof}
 
 \begin{lemma}\label{lem:nmon}
-  If $f(\cdot\,, \phi) : 2^E \to \mathbb{R}_{\geq 0}$ is submodular for all $\phi \in O^E$, then for any policy $\pi$ such that each element of $e \in E$ is selected by it with probability at most $p$, that is, $\P[\Pi]{e \in E(\pi, \phi)} \leq p,\ \forall \phi \in O^E,\ \forall e \in E$, the expected value of running $\pi$ can be bounded as follows:
+  If $f$ is adaptive submodular, and $f(\cdot\,, \phi) : 2^E \to \mathbb{R}_{\geq 0}$ is submodular for all $\phi \in O^E$, then, for any policy $\pi$, such that each element of $e \in E$ is selected by it with probability at most $p$, that is, $\P[\Pi]{e \in E(\pi, \phi)} \leq p,\ \forall \phi \in O^E,\ \forall e \in E$, the expected value of running $\pi$ can be bounded as follows:
 \begin{align*}
   \favg(\pi) \geq (1-p)\,\favg(\pio).
 \end{align*}
@@ -179,12 +152,11 @@ See Lemma A.8 of \citet{golovin11}.
 \end{proof}
 
 \begin{cor}\label{cor:nmon}
-  If $f(\cdot\,, \phi) : 2^E \to \mathbb{R}_{\geq 0}$ is submodular for all $\phi \in O^E$, then for any policy $\pi$ such that each element of $e \in E$ is selected by it with probability at most $p$, that is, $\P[\Pi]{e \in E(\pi, \phi)} \leq p,\ \forall \phi \in O^E,\ \forall e \in E$, and any policy $\pi'$, the expected value of running $\pi'@\pi$ can be bounded as follows:
+  If $f$ is adaptive submodular, and $f(\cdot\,, \phi) : 2^E \to \mathbb{R}_{\geq 0}$ is submodular for all $\phi \in O^E$, then, for any policy $\pi$, such that each element of $e \in E$ is selected by it with probability at most $p$, that is, $\P[\Pi]{e \in E(\pi, \phi)} \leq p,\ \forall \phi \in O^E,\ \forall e \in E$, and any policy $\pi'$, the expected value of running $\pi'@\pi$ can be bounded as follows:
 \begin{align*}
   \favg(\pi' @ \pi) \geq (1-p)\favg(\pi').
 \end{align*}
 \end{cor}
-\todo{Add proof?}
 
 \begin{lemma}\label{lem:sel}
   For every $\phi \in O^E$, after running the random greedy policy for $i$ steps, the probability of any element $e \in E$ having been selected can be bounded  as follows:
@@ -195,12 +167,13 @@ See Lemma A.8 of \citet{golovin11}.
 \begin{proof}
   Similarly to Observation 3.2 by \citet{buchbinder14}, at each step of the random greedy policy, an element $e$ is \emph{not} selected by the policy with probability at least $1 - 1/k$. After $i$ steps we have
   \begin{align*}
-    \P[\Pi]{e \not\in E(\pigi, \phi)} \geq \left(1 - \frac{1}{k}\right)^i \Rightarrow\ \P[\Pi]{e \in E(\pigi, \phi)} \leq 1 - \left(1 - \frac{1}{k}\right)^i
+    &\P[\Pi]{e \not\in E(\pigi, \phi)} \geq \left(1 - \frac{1}{k}\right)^i\\
+    \Rightarrow\ \ &\P[\Pi]{e \in E(\pigi, \phi)} \leq 1 - \left(1 - \frac{1}{k}\right)^i
   \end{align*}
 \end{proof}
 
 \begin{theorem}\label{thm:nonm}
-  If $f(\cdot\,, \phi) : 2^E \to \mathbb{R}_{\geq 0}$ is submodular for all $\phi \in O^E$, then for any policy $\pi$ and all integers $i, k > 0$ it holds that
+  If $f$ is adaptive submodular, and $f(\cdot\,, \phi) : 2^E \to \mathbb{R}_{\geq 0}$ is submodular for all $\phi \in O^E$, then, for any policy $\pi$, and all integers $i, k > 0$, it holds that
   \begin{align*}
     \favg(\pigi) \geq \frac{i}{k}\left(1 - \frac{1}{k}\right)^{i-1}\favg(\pik).
   \end{align*}
@@ -211,15 +184,17 @@ See Lemma A.8 of \citet{golovin11}.
     \favg(\pigi @ \pi) = \favg(\pi @ \pigi) \geq \left(1 - \frac{1}{k}\right)^i \favg(\pi).
   \end{align}
   Then, \lemmaref{lem:mon_main} gives
+  {\small
   \begin{align*}
     &\favg(\pigii) - \favg(\pigi) \geq \frac{1}{k}\left(\favg(\pigi @ \pi) - \favg(\pigi)\right)\\
     \Rightarrow\ &\favg(\pigii) - \favg(\pigi) \geq \frac{1}{k}\left(1 - \frac{1}{k}\right)^{i-1}\favg(\pi) - \frac{1}{k}\favg(\pigi) \tag*{by \eqref{eq:rec}}
   \end{align*}
+  }
   From the last equation the theorem follows by induction as in the proof of Theorem 1.3 by \citet{buchbinder14}.
 \end{proof}
 
 \begin{cor}
-  If $f(\cdot\,, \phi)$ is submodular for all $\phi \in O^E$, then for any policy $\pi$ and any integer $k > 0$ it holds that
+  If $f$ is adaptive submodular, and $f(\cdot\,, \phi)$ is submodular for all $\phi \in O^E$, then, for any policy $\pi$, and any integer $k > 0$, it holds that
   \begin{align*}
     \favg(\pigk) \geq e^{-1}\favg(\pik).
   \end{align*}

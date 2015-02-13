@@ -44,7 +44,7 @@
 \newtoggle{short}
 \toggletrue{short}
 % Uncomment for long version
-%\togglefalse{short}
+\togglefalse{short}
 
 \usepackage[scaled=0.9]{inconsolata}
 \usepackage[usenames,dvipsnames]{xcolor}
@@ -242,7 +242,13 @@
 \newcommand{\ak}[1]{{\color{green!40!darkgray}\textbf{[AK: #1]}}\xspace}
 %-------------------------------------------------------------------------------
 
+\iftoggle{short}
+{
 \title{Non-monotone Adaptive Submodular Maximization}
+}
+{
+\title{Non-monotone Adaptive Submodular Maximization\\\emph{\footnotesize (extended version with supplementary material)}}
+}
 %% \author{Alkis Gotovos\\
 %% ETH Zurich
 %% \And
@@ -671,7 +677,7 @@ We believe that our work is a step towards understanding the class of functions 
 {}
 {
 \clearpage
-\onecolumn
+%\onecolumn
 \appendix
 \setcounter{lemma}{0}
 \setcounter{theorem}{0}
