@@ -292,7 +292,7 @@ We would like to plan a birdwatching trip to visit a number of these locations a
 It is intuitive that taking into account the already observed species in deciding which place to visit next can be greatly beneficial compared to committing to the full trip in advance.
 
 Since the general class of adaptive optimization problems in partially observable enviroments does not admit efficient policies, previous work has focused on characterizing subclasses of problems that can be solved efficiently.
-Most notably, \citet{golovin11} showed that when the objective function under consideration is adaptive monotone and adaptive submodular, then a simple greedy policy attains a $1-1/e$ approximation ratio in terms of expected utility.
+Most notably, \citet{golovin11} showed that, when the objective function under consideration is adaptive monotone and adaptive submodular, then a simple greedy policy attains a $1-1/e$ approximation ratio in terms of expected utility.
 
 Adaptive submodularity and its intuitive meaning of ``diminishing returns'' is fundamental to a number of objective functions of interest in the adaptive setting.
 However, the additional assumption of adaptive monotonicity, i.e., that adding an element to our selection always leads to an increase in expected utility, is often not satisfied in practice.
@@ -327,7 +327,7 @@ In particular, we call this subset the \emph{domain} of $\psi$, which is formall
 Additionally, we write $\psi(e) = o$, if $(e, o) \in \psi$, and call $\psi$ \emph{consistent} with realization $\phi$ (denoted by $\phi \sim \psi$), if $\psi(e) = \phi(e)$, for all $e \in \dom(\psi)$, which means that the observations of a subset according to $\psi$ agree with the assignments over the whole ground set according to $\phi$.
 
 We can now define a \emph{policy} $\pi$ as a function from partial realizations to a distribution $\mathcal{P}(E)$ over items that specifies which item to pick next, formally, $\pi : 2^{E \times O} \to \mathcal{P}(E)$. 
-For birdwatching, our policy would specify which location to visit next (or, more generally, a distribution of next locations), given the already visited locations and the already observed species in each of them.
+For birdwatching, our policy would specify which location to visit next (or, more generally, a distribution of next locations), given the already visited locations and the already observed species at each of them.
 The policy terminates when the current partial realization is not in its domain denoted by $\dom(\pi) \subseteq 2^{E \times O}$.
 We also use the shorthand notation $\pi(e\mmid\psi)$ for the probability of picking item $e$ given partial realization $\psi$.
 We call $E(\pi, \phi) \subseteq E$ the set of items that have been selected upon termination of policy $\pi$ under realization $\phi$ (our final set of visited birdwatching locations).
@@ -363,8 +363,8 @@ The above expression is a conditional expectation, which only considers realizat
 In birdwatching terms, it quantifies how many new species we expect to observe if we visit a new location $e$ given the already visited locations and already observed species in $\psi$.
 Then, the following properties can be defined analogously to their non-adaptive counterparts:
 \begin{itemize}
-\item $f$ is called \emph{adaptive monotone}, if $\D{e}{\psi} \geq 0$, for all $e \in E$ and all $\psi$ of positive probability,
-\item $f$ is called \emph{adaptive submodular}, if $\D{e}{\psi'} \leq \D{e}{\psi}$, for all $e \in E \setminus \dom(\psi')$ and all $\psi' \supseteq \psi$.
+\item $f$ is called \emph{adaptive monotone}, if $\D{e}{\psi} \geq 0$, for all $e \in E$, and all $\psi$ of positive probability,
+\item $f$ is called \emph{adaptive submodular}, if $\D{e}{\psi'} \leq \D{e}{\psi}$, for all $e \in E \setminus \dom(\psi')$, and all $\psi' \supseteq \psi$.
 \end{itemize}
 
 Given a number of previously selected elements and their corresponding observed states encoded in partial realization $\psi$, the adaptive greedy policy selects the element $e \in E \setminus \dom(\psi)$ of highest marginal gain $\D{e}{\psi}$, and continues to do so iteratively until $k$ elements have been selected.
@@ -503,7 +503,7 @@ A common alternative to the above is to introduce a knapsack constraint $f_{\tex
 Choosing a budget $C$, in this case, might not be obvious, whereas the formulation of equation \eqref{eq:cost} is often more straightforward, particularly when $f_{\textrm{cost}}$ is expressed in the same units as $f_{\textrm{utility}}$.
 
 \paragraph{Influence maximization}
-The concept of influence maximization in a social network was posed by \citet{kempe03} and has direct applications to problems such as viral marketing.
+The concept of influence maximization in a social network was posed by \citet{kempe03}, and has direct applications to problems such as viral marketing.
 Given a graph and a model of influence propagation, the goal is to select a subset of nodes that are initially active, in order to maximize the spread of influence measured by the expected number of nodes that will ultimately be active according to the propagation model.
 We focus here on the independent cascade model, according to which, each edge of the graph is randomly set to be ``live'' or ``blocked'', independently of any other edge in the network, and influence can only flow along ``live'' edges.
 
@@ -633,7 +633,7 @@ For each ground set instance, we evaluate the algorithms' performance on $100$ r
 We present here results for three of the network data sets, which are ego networks from Facebook, Google+, and Twitter respectively \cite{mcauley12}.
 \figref{fig:exp} shows the $\%$ relative improvement of adaptive random greedy over its non-adaptive counterpart in terms of expected utility for influence maximization (top) and maximum cut (bottom).
 In the first three figures of each row, we plot the improvement for different values of the cardinality constraint $k$.
-For the influence maximization objective, the influence propagation probability of each edge is chosen to be $p=0.1$, and for the maximum cut objective, selecting a node cuts itself or one of its neighbors with equal probability.
+For the influence maximization objective, the influence propagation probability of each edge is chosen to be $p=0.1$, and for the maximum cut objective, selecting a node cuts that node or one of its neighbors with equal probability.
 
 We can see that adaptivity is beneficial in general, while the improvement it provides varies substantially depending on the properties of each network.
 As an example, for networks containing a few nodes of very high degree, like the Google+ network in plots (c) and (g), adaptivity provides little benefit for influence maximization, since these nodes are the main source of influence, hence are almost always selected by the non-adaptive algorithm as well.
