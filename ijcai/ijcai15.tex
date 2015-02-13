@@ -231,12 +231,12 @@
 \renewcommand{\paragraph}[1]{\vspace{0.3em}\noindent\textbf{#1.}\makebox[0.5em]{}}
 
 % Shortcuts
-\newcommand{\fbook}{\textsc{Facebook}}
-\newcommand{\gnutella}{\textsc{Gnuttela}}
-\newcommand{\gplus}{\textsc{Google+}}
-\newcommand{\twitter}{\textsc{Twitter}}
-\newcommand{\infmax}{IM}
-\newcommand{\maxcut}{MC}
+\newcommand{\fbook}{\textsc{Facebook}\xspace}
+\newcommand{\gnutella}{\textsc{Gnuttela}\xspace}
+\newcommand{\gplus}{\textsc{Google+}\xspace}
+\newcommand{\twitter}{\textsc{Twitter}\xspace}
+\newcommand{\infmax}{IM\xspace}
+\newcommand{\maxcut}{MC\xspace}
 
 \newcommand{\am}[1]{{\color{red!40!darkgray}\textbf{[Amin: #1]}}\xspace}
 \newcommand{\ak}[1]{{\color{green!40!darkgray}\textbf{[AK: #1]}}\xspace}
@@ -362,7 +362,7 @@ Then, the following properties can be defined analogously to their non-adaptive 
 \end{itemize}
 
 Given a number of previously selected elements and their corresponding observed states encoded in partial realization $\psi$, the adaptive greedy policy selects the element $e \in E \setminus \dom(\psi)$ of highest marginal gain $\D{e}{\psi}$, and continues to do so iteratively until $k$ elements have been selected.
-\citet{golovin11} showed that, if $f$ is adaptive monotone submodular, then adaptive greedy is a $(1-1/e)$-approximation of the optimal policy in terms of expected utility $\favg$.
+\citet{golovin11} showed that, if $f$ is adaptive monotone submodular, then adaptive greedy is a $(1-1/e)$-approximation in terms of expected utility $\favg$.
 
 \section{Adaptive Random Greedy}
 While adaptive monotonicity is satisfied by many functions of interest, it is often the case that modeling practical problems naturally results in non-monotone objectives (see \sectref{sect:functions}); no existing policy provides provable performance gurantees in this case.
@@ -407,7 +407,7 @@ In contrast, the randomization introduced by adaptive random greedy to the selec
 More concretely, we now show that the adaptive random greedy policy retains the $1-1/e$ approximation ratio for adaptive monotone submodular objectives, while, at the same time, it achieves a $1/e$ approximation ratio for non-monotone objectives, under the additional condition of submodularity for each realization.
 As we will see in \sectref{sect:functions}, for the vast majority of non-monotone objectives used in practice this condition holds by way of construction.
 We, therefore, do not consider it a major restriction in the choice of objectives.
-Our proofs generalize the results of \citet{buchbinder14} for the random greedy algorithm, and are presented in detail in the long version of this paper;\footnote{\todo{add link}} in what follows, we provide an outline of our analysis.
+Our proofs generalize the results of \citet{buchbinder14} for the random greedy algorithm, and are presented in detail in the long version of this paper;\footnote{\url{http://sites.google.com/site/nonmonijcai15/long.pdf}} in what follows, we provide an outline of our analysis.
 
 First, let us define the expected gain of running policy $\pi$ after having obtained a partial realization $\psi$, as
 {\small
@@ -439,7 +439,7 @@ Based on \lemmaref{lem:submod} and the fact that $\pig$ selects at each step one
 \noindent The lemma compares the expected gain at the $i$-th step of $\pig$ to the total gain of running any other policy (e.g., the optimal one) after the $i$-th step and, thereby, provides a means for obtaining approximation guarantees for $\pig$, as long as we can bound the term $\favg(\pigi @ \pi)$.
 The dichotomy between adaptive monotone and non-monotone objectives in terms of theoretical guarantees stems from the different approaches in bounding this term.
 
-If $f$ is adaptive monotone, we may use the trivial bound $\favg(\pigi @ \pi) \geq \favg(\pi)$, which immediately follows from the definition of adaptive monotonicity, to obtain the following theorem.
+If $f$ is adaptive monotone, we may use the trivial bound $\favg(\pigi @ \pi) \geq \favg(\pi)$, which follows from the definition of adaptive monotonicity, to obtain the following theorem.
 \begin{theorem}
   If $f$ is adaptive monotone submodular, then for any policy $\pi$, and all integers $i, k > 0$ it holds that
   \begin{align*}
@@ -468,8 +468,8 @@ The following lemma extends the above claim to the adaptive setting.
 \end{lemma}
 %\noindent Although we have not found concrete examples of adaptive submodular functions that do not satisfy this lemma, adaptive submodularity by itself does not seem to be a sufficient condition for it to hold; rather, we require the additional assumption that $f$ be submodular in its first argument for any realization.
 
-As a consequence of the above lemma, we get that $\favg(\pigi@\pi) = \favg(\pi@\pigi) \geq (1-p)\favg(\pi)$, meaning that the elements added by adaptive random greedy cannot dramatically reduce the average value obtained by any other policy $\pi$.
-The probability $p$ in this case can be bounded by using the fact that $\pig$ randomly selects one of $k$ elements at each step, hence at the $i$-step we have $p \leq (1-1/k)^i$.
+As a consequence of the above lemma, we get that $\favg(\pigi@\pi) = \favg(\pi@\pigi) \geq (1-p)\favg(\pi)$, i.e., the elements added by adaptive random greedy cannot dramatically reduce the average value obtained by any other policy $\pi$.
+Here, the probability $p$ can be bounded by using the fact that $\pig$ randomly selects one of $k$ elements at each step, hence at the $i$-step we have $p \leq (1-1/k)^i$.
 Putting it all together, we obtain our main theorem for non-monotone objectives.
 \begin{theorem}\label{thm:nonm}
   If $f$ is adaptive submodular, and $f(\cdot\,, \phi) : 2^E \to \mathbb{R}_{\geq 0}$ is submodular for all $\phi \in O^E$, then, for any policy $\pi$, and all integers $i, k > 0$, it holds that
@@ -501,10 +501,10 @@ The concept of influence maximization in a social network was posed by \citet{ke
 Given a graph and a model of influence propagation, the goal is to select a subset of nodes that are initially active, in order to maximize the spread of influence measured by the expected number of nodes that will ultimately be active according to the propagation model.
 We focus here on the independent cascade model, according to which, each edge of the graph is randomly either ``live'' or ``blocked'', independently of any other edge in the network, and influence can only flow along ``live'' edges.
 
-For this problem, the ground set $E$ consists of network nodes and each realization $\Phi$ corresponds to a full outcome of the independent cascade model, that is, a boolean assignment to each network edge of being either ``live'' or ``blocked''.
-The objective function $f_{\textrm{inf}}(A, \Phi)$ is the number of ultimately active nodes under realization $\Phi$, if the nodes in the selected subset $A$ are initially active.
+For this problem, the ground set $E$ consists of network nodes, and each realization $\phi$ corresponds to a full outcome of the independent cascade model, that is, an assignment to each network edge of being either ``live'' or ``blocked''.
+The objective $f_{\textrm{inf}}(A, \phi)$ is the number of ultimately active nodes under realization $\phi$, if the nodes in the selected subset $A$ are initially active.
 In the adaptive version of the problem, when a node $v$ is selected, it reveals the status (``live'' or ``blocked'') of all outgoing edges of $v$ and of any other node that can be reached from $v$ through ``live'' edges.
-\citet{kempe03} showed that $f_{\textrm{inf}}$ is non-negative, monotone, and submodular, for any realization $\Phi$, and \citet{golovin11} showed that it is also adaptive monotone submodular.
+\citet{kempe03} showed that $f_{\textrm{inf}}$ is non-negative, monotone, and submodular, for any realization $\phi$; \citet{golovin11} showed that it is also adaptive monotone submodular.
 
 Now, assume that each selected node incurs a unit cost, that is, we have a cost term $f_{\textrm{cost}}(A) = |A|$, which results in the following objective:
 \begin{align*}
@@ -520,7 +520,7 @@ Furthermore, assume that $f$ is submodular in its first argument, for any realiz
 Given the above assumptions, it follows that $f$ is adaptive submodular (see Theorem 6.1 of \citet{golovin11}).
 
 \paragraph{Maximum graph cut}
-The problem of finding the maximum cut in a graph $(\mathcal{V}, \mathcal{E})$ can be posed using the following objective:
+The problem of finding the maximum cut in a graph $(\mathcal{V}, \mathcal{E})$ has the following objective:
 \begin{align*}
   f_{\textrm{cut}}(A) = \sum_{(v, w) \in \mathcal{E}} \mathds{1}_{\left\{v \in A, w \in \mathcal{V}\setminus A\ \textrm{or}\ v \in \mathcal{V}\setminus A, w \in A\right\}},
 \end{align*}
@@ -541,10 +541,10 @@ It is also non-negative, because $f_{\textrm{cut}}$ is non-negative.
 
 \section{Experiments}
 We have evaluated our proposed algorithm on the two objective functions, namely influence maximization, and maximum cut, described in the previous section on several real-world data sets.
-Since we have no competitor policy for the adaptive non-monotone submodular setting, we rather focus here on showcasing the potential benefits of adaptivity by comparing adaptive to non-adaptive random greedy on these two objectives.
+Since we have no competitor policy for the adaptive non-monotone submodular setting, we rather focus here on showcasing the potential benefits of adaptivity by comparing adaptive to non-adaptive random greedy.
 
 \subsection{Data Sets and Experimental Setup}
-For our experiments, we used $20$ networks from the KONECT\footnote{\url{http://konect.uni-koblenz.de/}} database, which accumulates network data sets from various other sources.
+For our experiments, we used $10$ networks from the KONECT\footnote{\url{http://konect.uni-koblenz.de/}} database, which accumulates network data sets from various other sources.
 The network sizes range from a few thousands to tens of thousands nodes.
 
 Computing the (expected) marginal gains is at the heart of both the non-adaptive random greedy algorithm and our proposed adaptive random greedy policy.
@@ -556,28 +556,22 @@ For the maximum cut objective, it is very simple to compute the marginal gains i
 In the non-adaptive setting, however, this is considerably harder, since we have to average over every possible outcome of the current selection; we again resort to sampling from the space of possible realizations to obtain estimates.
 To make the aforementioned computations more efficient, we subsample each network down to $2000$ nodes, using a technique based on random walks proposed by \citet{leskovec06}.
 
-For both objectives, we select uniformly at random a subset of $100$ nodes as the ground set $E$, and repeat the experiments for \todo{$100$} such random ground sets.
-For each ground set instance, we evaluate the algorithms' performance on \todo{$100$} random realizations.
+For both objectives, we select uniformly at random a subset of $100$ nodes as the ground set $E$, and repeat the experiments for $50$ such sets.
+For each ground set instance, we evaluate the algorithms' performance on $100$ random realizations.
 
-\setlength\figureheight{0.23\textwidth}
+\setlength\figureheight{0.22\textwidth}
 \setlength\figurewidth{0.29\textwidth}
 \newcommand{\subflen}{0.245\textwidth}
-\newcommand{\scspacey}{-1.5em}
-\newcommand{\scspacex}{0.5em}
+\newcommand{\scspacey}{-1.8em}
+\newcommand{\scspacex}{0.2em}
 \begin{figure*}[tb]
-  \captionsetup[subfigure]{oneside,margin={3em,0em}}
+  \captionsetup[subfigure]{oneside,margin={2em,0em}}
   \begin{subfigure}[b]{\subflen}
     \centering
     \input{figures/inf_ego_fb.tex}
     \vspace{\scspacey}
     \caption{\hspace{\scspacex}\infmax{} -- \fbook}
     \label{fig:inf_ego_fb}
-  \end{subfigure}
-  \begin{subfigure}[b]{\subflen}
-    \input{figures/inf_gnutella.tex}
-    \vspace{\scspacey}
-    \caption{\hspace{\scspacex}\infmax{} -- \gnutella}
-    \label{fig:inf_gnutella}
   \end{subfigure}
   \begin{subfigure}[b]{\subflen}
     \input{figures/inf_gplus.tex}
@@ -590,18 +584,18 @@ For each ground set instance, we evaluate the algorithms' performance on \todo{$
     \vspace{\scspacey}
     \caption{\hspace{\scspacex}\infmax{} -- \twitter}
     \label{fig:inf_twitter}
+  \end{subfigure}
+  \begin{subfigure}[b]{\subflen}
+    \input{figures/pinf_ego_fb.tex}
+    \vspace{\scspacey}
+    \caption{\hspace{\scspacex}\infmax{} -- \fbook}
+    \label{fig:pinf_ego_fb}
   \end{subfigure}\\[0.5em]
   \begin{subfigure}[b]{\subflen}
     \input{figures/mc_ego_fb.tex}
     \vspace{\scspacey}
     \caption{\hspace{\scspacex}\maxcut{} -- \fbook}
     \label{fig:mc_ego_fb}
-  \end{subfigure}
-  \begin{subfigure}[b]{\subflen}
-    \input{figures/mc_gnutella.tex}
-    \vspace{\scspacey}
-    \caption{\hspace{\scspacex}\maxcut{} -- \gnutella}
-    \label{fig:mc_gnutella}
   \end{subfigure}
   \begin{subfigure}[b]{\subflen}
     \input{figures/mc_gplus.tex}
@@ -615,27 +609,39 @@ For each ground set instance, we evaluate the algorithms' performance on \todo{$
     \caption{\hspace{\scspacex}\maxcut{} -- \twitter}
     \label{fig:mc_twitter}
   \end{subfigure}
+  \begin{subfigure}[b]{\subflen}
+    \input{figures/pmc_gplus.tex}
+    \vspace{\scspacey}
+    \caption{\hspace{\scspacex}\maxcut{} -- \fbook}
+    \label{fig:pmc_gplus}
+  \end{subfigure}
   \caption{
-    \todo{}
+    Improvement in expected utiliy of using adaptive vs. non-adaptive random greedy.
+    Top: influence maximization; \emph{(a)--(c)} improvement vs. node budget $k$; \emph{(d)} improvement vs. independent cascade edge probability $p$.
+    Bottom: maximum cut; \emph{(e)--(g)} improvement vs. node budget $k$; \emph{(h)} improvement vs. cut distribution parameter $\beta$.
   }
   \label{fig:exp}
 \end{figure*}
 
 \subsection{Results}
-We present here results for three ego network data sets from Facebook, Google+, and Twitter respectively \cite{mcauley12}.
+We present here results for three of the network data sets, which are ego networks from Facebook, Google+, and Twitter respectively \cite{mcauley12}.
 \figref{fig:exp} shows the $\%$ relative improvement of adaptive random greedy over its non-adaptive counterpart in terms of expected utility for influence maximization (top) and maximum cut (bottom).
 In the first three figures of each row, we plot the improvement for different values of the cardinality constraint $k$.
 For the influence maximization objective, the influence propagation probability of each edge is chosen to be $p=0.1$, and for the maximum cut objective, selecting a node cuts itself or one of its neighbors with equal probability.
 
 We can see that adaptivity is beneficial in general, while the improvement it provides varies substantially depending on the properties of each network.
 As an example, for networks containing a few nodes of very high degree, like the Google+ network in plots (c) and (g), adaptivity provides little benefit for influence maximization, since these nodes are the main source of influence, hence are almost always selected by the non-adaptive algorithm as well.
-On the other hand, adaptivity is much more beneficial for the maximum cut objective in such networks, since the feedback of whether such high degree nodes have already been cut by some of their neighbors greatly helps making future selections more efficient.
+On the other hand, adaptivity is much more beneficial for the maximum cut objective in such networks, since the feedback of whether such high degree nodes have already been cut by some of their neighbors helps making future selections more efficient.
 
-Furthermore, although this is not visible in \figref{fig:exp}, if our goal is to reach a level of objective value, e.g., cut $1000$ edges, using as few nodes as possible, then the gains of adaptivity in terms of nodes required can be even more considerable \ak{quantify?}.
+Furthermore, although this is not directly visible in these plots, if our goal is to reach a specific level of objective value using as few nodes as possible, then our gains due to adaptivity can be even more considerable in terms of number of required nodes.
+For example, if we want to attain a maximum cut objective value of $2,000$ for the \fbook network, a budget $k$ of $15$ nodes is enough for adaptive random greedy, while a budget of more than $40$ nodes is required for non-adaptive random greedy.
 
-In \figref{fig:infp_ego_fb} we show the improvement for different values of the edge probabilities.
-As expected, at the two extremes, adaptivity provides no benefit.
-\todo{add figures and briefly explain about maxcut as well}
+In plot (d) we show the improvement on \fbook for varying edge probabilities $p$ of the independent cascade model.
+At the extreme values of $p$, adaptivity provides no benefit, since the network is essentially disconnected ($p=0$) or fully connected ($p=1$).
+In plot (h) we show the improvement on \gplus for varying cut distributions.
+The parameter $\beta$ quantifies the probability of a node being cut when it is selected.
+A value of $\beta=0$ corresponds to the setting of plots (e)--(g), where the cutting probability is uniformly distributed among the selected node and each of its neighbors; $\beta=1$ corresponds to deterministically cutting the selected node.
+We can see that, as the cutting distribution gets more deterministic ($\beta \to 1$), the benefit of adaptivity diminishes.
 
 \section{Related Work}
 Compared to monotone submodular maximization, for which the $(1-1/e)$-approximation of the greedy algorithm was shown by \citet{nemhauser78}, constant-factor approximations for non-monotone submodular functions have been much more recent, for both the unconstrained case \cite{feige07}, as well as under matroid and knapsack constraints \cite{lee09}.
@@ -649,7 +655,7 @@ Various techniques have been proposed to make the computation of marginal gains 
 In this paper we chose to run experiments on smaller-scale networks, but these techniques could be applied to scale up adaptive random greedy as well.
 \citet{he14} recently considered the problem of assessing the robustness of influence maximization algorithms under network parameter misspecification, which interestingly leads to maximizing a non-monotone submodular objective.
 
-Maximum cut has been a much-studied NP-complete problem with provable approximation guarantees given by SDP-based algorithms for both the unconstrained \cite{goemans95} and cardinality-constrained \cite{feige01} cases.
+Maximum graph cut has been a much-studied NP-complete problem with constant-factor SDP-based approximation algorithms for both the unconstrained \cite{goemans95} and cardinality-constrained \cite{feige01} cases.
 An interesting application of maximum cut objectives has been proposed by \citet{lin10} and \citet{lin11} for text summarization.
 
 \section{Conclusion}
