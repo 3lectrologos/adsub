@@ -377,7 +377,7 @@ We now present our proposed adaptive random greedy policy ($\pig$) for maximizin
 For technical reasons that will become apparent below, let us assume that we always add a set $D$ of $2k - 1$ dummy elements to the ground set, such that, for any $d \in D$, and any partial realization $\psi$, it holds that $\D{d}{\psi} = 0$.
 Obviously, these elements do not affect the optimal policy, and may be removed from the solution of any policy, without affecting its expected utility.
 
-The detailed pseudocode of running the adaptive random greedy policy is presented \algoref{alg:rg}.
+The detailed pseudocode of running the adaptive random greedy policy is presented in \algoref{alg:rg}.
 As discussed before, the algorithm is given a ground set and an objective function, as well as a known distribution over realizations $\Phi$.
 At each iteration, the first step is to compute the expected marginal gain of each remaining element (\lineref{lin:marg}).
 The key difference compared to the original adaptive greedy policy is shown in \linesref{lin:upd1}{lin:upd2}; rather than selecting the element with the largest expected marginal gain, $\pig$ randomly selects an element from the set $\Mk(\psi)$, which contains the elements with the $k$ largest gains.
@@ -385,7 +385,7 @@ The dummy elements added to the ground set ensure that the policy never picks an
 Also, note that, although in \algoref{alg:rg} the returned set $A$ contains exactly $k$ elements, the actual selected set may very well contain less than $k$ elements, since we implicitly assume that any dummy elements are removed from it after the policy terminates.
 
 When running the original adaptive greedy policy, non-monotonicity can lead to situations, where selecting the element of maximum marginal gain leads to traps of low utility that cannot be escaped.
-In contrast, the randomization introduced by adaptive random greedy to the selection of each element helps dealing with such traps (on average) and, thus, leads to guaranteed approximation guarantees for the expected utility, even for non-monotone objectives.
+In contrast, the randomization introduced by adaptive random greedy to the selection of each element helps dealing with such traps (on average) and, thus, leads to provable approximation guarantees for the expected utility, even for non-monotone objectives.
 
 \begin{algorithm}[tb]
   \caption{Adaptive random greedy}
@@ -410,7 +410,7 @@ In contrast, the randomization introduced by adaptive random greedy to the selec
 \end{algorithm}
 
 \paragraph{Theoretical analysis}
-More concretely, we now show that the adaptive random greedy policy retains the $1-1/e$ approximation ratio for adaptive monotone submodular objectives, while, at the same time, it achieves a $1/e$ approximation ratio for non-monotone objectives, under the additional condition of submodularity for each realization.
+More concretely, in this paper we show that the adaptive random greedy policy retains the $1-1/e$ approximation ratio for adaptive monotone submodular objectives, while, at the same time, it achieves a $1/e$ approximation ratio for non-monotone objectives, under the additional condition of submodularity for each realization.
 As we will see in \sectref{sect:functions}, for the vast majority of non-monotone objectives used in practice this condition holds by way of construction.
 We, therefore, do not consider it a major restriction in the choice of objectives.
 Our proofs generalize the results of \citet{buchbinder14} for the random greedy algorithm, and are presented in detail in the long version of this paper;\footnote{\url{http://sites.google.com/site/nonmonijcai15/long.pdf}} in what follows, we provide an outline of our analysis.
@@ -420,7 +420,7 @@ First, let us define the expected gain of running policy $\pi$ after having obta
 \begin{align*}
   \D{\pi}{\psi} \defeq \E[\Phi,\Pi]{f(\dom(\psi) \cup E(\pi, \Phi), \Phi) - f(\dom(\psi), \Phi)}[\Phi \sim \psi].
 \end{align*}}
-Also, for any policy $\pi$ and any positive integer $k$, we define the truncated policy $\pik$, which runs indentically to $\pi$ for $k$ steps and then terminates.
+Also, for any policy $\pi$ and any positive integer $k$, we define the truncated policy $\pik$, which runs identically to $\pi$ for $k$ steps and then terminates.
 Finally, given any two policies $\pi_1$, $\pi_2$, we denote by $\pi_1@\pi_2$ the policy that first runs $\pi_1$ until it terminates and then runs $\pi_2$, discarding all observations made by $\pi_1$.
 After $\pi_1@\pi_2$ terminates, the subset selected by it consists of the union of the subsets selected by each policy individually.
 
@@ -492,7 +492,7 @@ We also introduce two representative example objectives, one for each class, whi
 
 \subsection{Objectives with a Modular Cost Term}
 Assume we are given an adaptive monotone submodular function $f_{\textrm{utility}}(A, \phi)$.
-In practice, apart from benefit, there might also be some associated cost with the selection of each element, which can be directly incorporated into the objective function via a modular cost term a cost term $f_{\textrm{cost}}(A) = \sum_{a \in A} c_a$.
+In practice, apart from benefit, there might also be some associated cost with the selection of each element, which can be directly incorporated into the objective function via a modular  cost term $f_{\textrm{cost}}(A) = \sum_{a \in A} c_a$.
 In this case, the resulting objective is of the form
 \begin{align} \label{eq:cost}
   f(A, \phi) = f_{\textrm{utility}}(A, \phi) - f_{\textrm{cost}}(A),
@@ -505,7 +505,7 @@ Choosing a budget $C$, in this case, might not be obvious, whereas the formulati
 \paragraph{Influence maximization}
 The concept of influence maximization in a social network was posed by \citet{kempe03} and has direct applications to problems such as viral marketing.
 Given a graph and a model of influence propagation, the goal is to select a subset of nodes that are initially active, in order to maximize the spread of influence measured by the expected number of nodes that will ultimately be active according to the propagation model.
-We focus here on the independent cascade model, according to which, each edge of the graph is randomly either ``live'' or ``blocked'', independently of any other edge in the network, and influence can only flow along ``live'' edges.
+We focus here on the independent cascade model, according to which, each edge of the graph is randomly set ``live'' or ``blocked'', independent of any other edge in the network, and influence can only flow along ``live'' edges.
 
 For this problem, the ground set $E$ consists of network nodes, and each realization $\phi$ corresponds to a full outcome of the independent cascade model, that is, an assignment to each network edge of being either ``live'' or ``blocked''.
 The objective $f_{\textrm{inf}}(A, \phi)$ is the number of ultimately active nodes under realization $\phi$, if the nodes in the selected subset $A$ are initially active.
@@ -565,7 +565,7 @@ To make the aforementioned computations more efficient, we subsample each networ
 For both objectives, we select uniformly at random a subset of $100$ nodes as the ground set $E$, and repeat the experiments for $50$ such sets.
 For each ground set instance, we evaluate the algorithms' performance on $100$ random realizations.
 
-\setlength\figureheight{0.205\textwidth}
+\setlength\figureheight{0.22\textwidth}
 \setlength\figurewidth{0.29\textwidth}
 \newcommand{\subflen}{0.245\textwidth}
 \newcommand{\scspacey}{-1.8em}
@@ -621,7 +621,6 @@ For each ground set instance, we evaluate the algorithms' performance on $100$ r
     \caption{\hspace{\scspacex}\maxcut{} -- \twitter}
     \label{fig:pmc_twitter}
   \end{subfigure}
-  \vspace{-0.2em}
   \caption{
     Improvement in expected utiliy of using adaptive vs. non-adaptive random greedy.
     Top: influence maximization; \emph{(a)--(c)} improvement vs. node budget $k$; \emph{(d)} improvement vs. independent cascade edge probability $p$.
