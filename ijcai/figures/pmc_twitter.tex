@@ -1,0 +1,38 @@
+\begin{tikzpicture}
+
+\begin{axis}[%
+tick label style={font=\scriptsize},
+label style={font=\scriptsize},
+legend style={font=\scriptsize},
+view={0}{90},
+width=\figurewidth,
+height=\figureheight,
+xmin=0, xmax=1,
+xtick={0, 0.2, 0.4, 0.6, 0.8, 1},
+xlabel={$\beta$},
+xlabel shift=-0.7em,
+ymin=0, ymax=25,
+ylabel={$\%$ imp.},
+ylabel shift=-0.7em,
+tick label style={/pgf/number format/fixed},
+major tick length=2pt,
+axis lines*=left,
+legend cell align=left,
+clip=true]
+
+\addplot [
+mark=*,
+mark size=1.7pt,
+color=orange!70!black,
+line width=1.3pt,
+error bars/.cd,
+error bar style={line width=1pt},
+y dir=both,
+y explicit
+]
+coordinates{
+(0.0,5.13812950589)+- (2*0.573233591808,2*0.573233591808)(0.2,5.16884873742)+- (2*0.631370403375,2*0.631370403375)(0.4,4.2050408687)+- (2*0.612632341345,2*0.612632341345)(0.6,2.58737479526)+- (2*0.907094746934,2*0.907094746934)(0.8,2.32418126481)+- (2*1.59527432864,2*1.59527432864)(1.0,0.51104313314)+- (2*2.39915042051,2*2.39915042051)
+};
+
+\end{axis}
+\end{tikzpicture}

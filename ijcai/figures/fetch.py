@@ -47,5 +47,5 @@ if __name__ == '__main__':
             get_one(obj, model)
     print 'pinfluence', 'EGO_FB'
     get_one('pinfluence', 'EGO_FB')
-    print 'pmaxcut', 'GPLUS'
-    get_one('pmaxcut', 'GPLUS')
+    print 'pmaxcut', 'TWITTER'
+    get_one('pmaxcut', 'TWITTER')
