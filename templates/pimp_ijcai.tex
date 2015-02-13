@@ -7,9 +7,9 @@ legend style={font=\scriptsize},
 view={0}{90},
 width=\figurewidth,
 height=\figureheight,
-xmin=0, xmax=100,
-xtick={0, 20, 40, 60, 80, 100},
-xlabel={$k$},
+xmin=0, xmax=1,
+xtick={0, 0.2, 0.4, 0.6, 0.8, 1},
+xlabel={$p$},
 xlabel shift=-0.7em,
 ymin=0, ymax=25,
 ylabel={$\%$ imp.},
@@ -23,7 +23,7 @@ clip=true]
 \addplot [
 mark=*,
 mark size=1.7pt,
-color=cyan!60!black,
+color=orange!70!black,
 line width=1.3pt,
 error bars/.cd,
 error bar style={line width=1pt},
@@ -31,7 +31,7 @@ y dir=both,
 y explicit
 ]
 coordinates{
-(1,0.696522489083)+- (2*3.03413358384,2*3.03413358384)(10,7.85355180893)+- (2*1.55428481286,2*1.55428481286)(30,5.56795703127)+- (2*0.501794416201,2*0.501794416201)(50,6.96889887354)+- (2*0.807792478119,2*0.807792478119)(70,8.76175623121)+- (2*0.571860090691,2*0.571860090691)(100,3.4993021708)+- (2*0.0982055482729,2*0.0982055482729)
+%imp%
 };
 
 \end{axis}

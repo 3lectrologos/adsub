@@ -22,24 +22,24 @@ def cutdif(g, u, cut, cut_edges):
     return (len(added_edges) - len(removed_edges), added_edges, removed_edges)
 
 
-def pcut(g, cset, cut, cut_edges):
+def pcut(g, cset, p, cut, cut_edges):
     cut_edges = set(cut_edges)
     dif = []
     for u in cset:
         (diflen, _, _) = cutdif(g, u, cut, cut_edges)
         dif.append(diflen)
-    return np.mean(dif)
+    return np.average(dif, weights=p)
 
 
 class NonAdaptiveMaxCut(submod.AdaptiveMax):
     def __init__(self, g, csets, nsim):
-        super(NonAdaptiveMaxCut, self).__init__(csets.keys())
+        super(NonAdaptiveMaxCut, self).__init__(csets[0].keys())
         self.g = g
         self.csets = csets
         self.ins = [(set(), set(), 0)] * nsim
 
     def mean_pcut(self, cid):
-        return np.mean([pcut(self.g, self.csets[cid], cut, cut_edges) + val
+        return np.mean([pcut(self.g, self.csets[0][cid], self.csets[1][cid], cut, cut_edges) + val
                         for (cut, cut_edges, val) in self.ins])
 
     def init_f_hook(self):
@@ -50,9 +50,10 @@ class NonAdaptiveMaxCut(submod.AdaptiveMax):
         sys.stdout.write('.')
         sys.stdout.flush()
         self.fsol = self.f(self.sol[-1], self.sol[:-1])
-        cset = self.csets[self.sol[-1]]
+        cset = self.csets[0][self.sol[-1]]
+        p = self.csets[1][self.sol[-1]]
         for i, (cut, cut_edges, val) in enumerate(self.ins):
-            vcut = np.random.choice(cset)
+            vcut = np.random.choice(cset, p=p)
             elen, eadd, erem = cutdif(self.g, vcut, cut, cut_edges)
             new_val = val + elen
             new_cut = cut | set([vcut])
@@ -62,7 +63,7 @@ class NonAdaptiveMaxCut(submod.AdaptiveMax):
 
 class AdaptiveMaxCut(submod.AdaptiveMax):
     def __init__(self, g, csets, instance):
-        super(AdaptiveMaxCut, self).__init__(csets.keys())
+        super(AdaptiveMaxCut, self).__init__(csets[0].keys())
         self.g = g
         self.csets = csets
         self.instance = instance
@@ -71,7 +72,7 @@ class AdaptiveMaxCut(submod.AdaptiveMax):
         super(AdaptiveMaxCut, self).init_f_hook()
         self.cut = set()
         self.cut_edges = set()
-        self.f = lambda v, a: pcut(self.g, self.csets[v], self.cut, self.cut_edges)
+        self.f = lambda v, a: pcut(self.g, self.csets[0][v], self.csets[1][v], self.cut, self.cut_edges)
 
     def update_f_hook(self):
         vcut = self.instance[self.sol[-1]]
@@ -79,13 +80,14 @@ class AdaptiveMaxCut(submod.AdaptiveMax):
         self.fsol += elen
         self.cut.add(vcut)
         self.cut_edges = (self.cut_edges - erem) | eadd
-        self.f = lambda v, a: pcut(self.g, self.csets[v], self.cut, self.cut_edges) + self.fsol
+        self.f = lambda v, a: pcut(self.g, self.csets[0][v], self.csets[1][v], self.cut, self.cut_edges) + self.fsol
 
 
 def random_instance(csets):
+    cs, ps = csets
     inst = {}
-    for cid in csets:
-        inst[cid] = np.random.choice(csets[cid])
+    for cid in cs:
+        inst[cid] = np.random.choice(cs[cid], p=ps[cid])
     return inst
 
 
@@ -124,21 +126,22 @@ def compare(g, csets, k, nsim_nonad, niter):
         }
 
 
-def all_csets(g):
-    return {str(v.index): [v.index] + g.neighbors(v) for v in g.vs}
-
-
-def k_csets(g, k):
+def k_csets(g, k, p):
     vs = np.random.choice(g.vs, k, replace=False)
-    return {str(v.index): [v.index] + g.neighbors(v) for v in vs}
+    cs = {str(v.index): [v.index] + g.neighbors(v) for v in vs}
+    ps = {}
+    for v in vs:
+        s = len(g.neighbors(v))
+        ps[str(v.index)] = [(p + (1.0-p)/(1 + s))] + [(1.0-p)/(1+s)]*s
+    return (cs, ps)
 
 
-def run(g, reps, n_available, k, niter, nsim_nonad):
+def run(g, reps, n_available, p, k, niter, nsim_nonad):
     res = {'f_rand': [], 'f_nonad': [], 'f_ad': []}
     for rep in range(reps):
-        print 'Rep:', rep, '(k = {0})'.format(k)
+        print 'Rep:', rep, '(k = {0}, p = {1})'.format(k, p)
         print '==============================='
-        r = compare(g, k_csets(g, n_available), k, nsim_nonad, niter)
+        r = compare(g, k_csets(g, n_available, p), k, nsim_nonad, niter)
         res['f_rand'].append(r['f_rand'])
         res['f_nonad'].append(r['f_nonad'])
         res['f_ad'].append(r['f_ad'])
