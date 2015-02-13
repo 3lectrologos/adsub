@@ -28,7 +28,7 @@ def get_one(obj, model):
             reps = sum(data['ks'] == k)
             ys_ad = np.array(data['ad'])[data['ks'] == k]
             ys_nonad = np.array(data['nonad'])[data['ks'] == k]
-            ys = [(100.0*(foo-bar))/foo for foo, bar in zip(ys_ad, ys_nonad)]
+            ys = [(100.0*(foo-bar))/max(foo,bar) for foo, bar in zip(ys_ad, ys_nonad)]
             means.append(np.mean(ys))
             stds.append(np.std(ys)/np.sqrt(reps))
         cs['imp'] = util.get_coords(ks, means, stds)

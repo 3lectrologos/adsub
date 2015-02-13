@@ -13,7 +13,7 @@ import maxcut
 TEMPLATE_FS = 'fs.tex'
 
 
-INF_FAST = dict(reps=50,
+INF_FAST = dict(reps=30,
                 pedge=0.1,
                 gamma=1,
                 nsim_nonad=300,
@@ -34,19 +34,18 @@ PINF_FAST = dict(reps=10,
                  nsim_ad=100,
                  niter=50,
                  workers=7)
-PINF_SLOW = dict(reps=20,
-                 pedge=0.15,
-                 gamma=1,
-                 nsim_nonad=1000,
-                 nsim_ad=100,
-                 niter=100,
-                 workers=7)
 MC_FAST = dict(reps=10,
+               p=0,
                nsim_nonad=100,
                niter=50)
 MC_SLOW = dict(reps=30,
+               p=0,
                nsim_nonad=300,
                niter=100)
+PMC_FAST = dict(reps=30,
+                k=20,
+                nsim_nonad=300,
+                niter=100)
 
 
 def print_info(name, g):
@@ -71,8 +70,9 @@ def run_inf(model, nodes, fast=True, plot=False):
     fs_nonad = []
     fs_ad = []
     n_available = 100#len(g.vs) / 10
-    pcts = [0.01, 0.1, 0.3, 0.5, 0.7, 1]
-    ks = list(np.unique([max(1, int(kr * n_available)) for kr in pcts]))
+#    pcts = [0.01, 0.1, 0.3, 0.5, 0.7, 1]
+#    ks = list(np.unique([max(1, int(kr * n_available)) for kr in pcts]))
+    ks = [1, 5, 10, 15, 20, 30, 40, 60, 80, 100]
     print_info(name, g)
     for k in ks:
         if fast:
@@ -110,7 +110,7 @@ def run_pinf(model, nodes, fast=True, plot=False):
     fs_nonad = []
     fs_ad = []
     n_available = 100#len(g.vs) / 10
-    ps = [0.1, 0.3, 0.5, 0.75, 1]
+    ps = [0.01, 0.05, 0.1, 0.3, 0.5, 0.75, 1]
     print_info(name, g)
     for p in ps:
         if fast:
@@ -149,7 +149,7 @@ def run_mc(model, nodes, fast=True, plot=False):
     fs_ad = []
     n_available = 100#len(g.vs) / 10
     pcts = [0.01, 0.1, 0.3, 0.5, 0.7, 1]
-    ks = [1, 5, 10, 15, 20, 30, 40, 60, 80, 100]
+    ks = [1, 2, 5, 10, 15, 20, 30, 40, 60, 80, 100]
 #    ks = list(np.unique([max(1, int(kr * n_available)) for kr in pcts]))
     print_info(name, g)
     for k in ks:
@@ -162,6 +162,44 @@ def run_mc(model, nodes, fast=True, plot=False):
         fs_nonad += r['f_nonad']
         fs_ad += r['f_ad']
         xs += [k] * params['reps']
+    data = {
+        'model': model,
+        'ks': xs,
+        'rand': fs_rand,
+        'nonad': fs_nonad,
+        'ad': fs_ad
+        }
+    plot_fs(data, outdir)
+    with open(os.path.join(outdir, model.lower() + '.pickle'), 'w') as f:
+        pcl.dump(data, f)
+
+
+def run_pmc(model, nodes, fast=True, plot=False):
+    (name, g) = util.get_tc(model, nodes, directed=False)
+    if plot:
+        ig.plot(g)
+        util.plot_degree_dist(g)
+    outdir = os.path.join(util.DIR_RES, 'pmaxcut', model)
+    if not os.path.isdir(outdir):
+        os.makedirs(outdir)
+    g.write_edgelist(os.path.join(outdir, 'graph'))
+    xs = []
+    fs_rand = []
+    fs_nonad = []
+    fs_ad = []
+    n_available = 100#len(g.vs) / 10
+    ps = [0, 0.2, 0.4, 0.6, 0.8, 1]
+    print_info(name, g)
+    for p in ps:
+        if fast:
+            params = PMC_FAST
+        else:
+            params = PMC_SLOW
+        r = maxcut.run(g, n_available=n_available, p=p, **params)
+        fs_rand += r['f_rand']
+        fs_nonad += r['f_nonad']
+        fs_ad += r['f_ad']
+        xs += [p] * params['reps']
     data = {
         'model': model,
         'ks': xs,
@@ -195,7 +233,7 @@ if __name__ == "__main__":
     parser = argparse.ArgumentParser(
         description='Adaptive monotone submodular experiments')
     parser.add_argument('objective',
-                        choices=['inf', 'pinf', 'mc'],
+                        choices=['inf', 'pinf', 'mc', 'pmc'],
                         help='objective function to maximize')
     parser.add_argument('model',
                         help='data set')
@@ -221,3 +259,5 @@ if __name__ == "__main__":
         run_pinf(*runargs)
     elif objective == 'mc':
         run_mc(*runargs)
+    elif objective == 'pmc':
+        run_pmc(*runargs)
