@@ -43,7 +43,7 @@ MC_SLOW = dict(reps=30,
                nsim_nonad=300,
                niter=100)
 PMC_FAST = dict(reps=30,
-                k=20,
+                k=30,
                 nsim_nonad=300,
                 niter=100)
 
