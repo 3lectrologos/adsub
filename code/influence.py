@@ -164,10 +164,13 @@ def worker(i, g, gset, pedge, k, gamma, nsim_ad, v_rand, v_nonad):
     (v_ad, _) = solver_ad.random_greedy(k)
     if f_ic_base(h, v_ad, fc) != solver_ad.fsol:
         raise 'Inconsistent adaptive function values'
+    solver_ad = AdaptiveInfluence(g, gset, h, pedge, fc, nsim_ad)
+    (v_ad_g, _) = solver_ad.greedy(k)
     return {
         'f_rand': f_ic_base(h, v_rand, fc),
         'f_nonad': f_ic_base(h, v_nonad, fc),
-        'f_ad': f_ic_base(h, v_ad, fc)
+        'f_ad': f_ic_base(h, v_ad, fc),
+        'f_ad_g': f_ic_base(h, v_ad_g, fc)
         }
 
 
@@ -189,12 +192,13 @@ def compare(g, pedge, n_available, k ,gamma, nsim_nonad, nsim_ad, niter, workers
         return {
             'f_rand': np.mean([x['f_rand'] for x in r]),
             'f_nonad': np.mean([x['f_nonad'] for x in r]),
-            'f_ad': np.mean([x['f_ad'] for x in r])
+            'f_ad': np.mean([x['f_ad'] for x in r]),
+            'f_ad_g': np.mean([x['f_ad_g'] for x in r])
             }
 
 
 def run(g, reps, pedge, n_available, k, gamma, nsim_nonad, nsim_ad, niter, workers=0):
-    res = {'f_rand': [], 'f_nonad': [], 'f_ad': []}
+    res = {'f_rand': [], 'f_nonad': [], 'f_ad': [], 'f_ad_g': []}
     for rep in range(reps):
         print 'Rep:', rep, '(k = {0}, p = {1})'.format(k, pedge)
         print '==============================='
@@ -202,9 +206,11 @@ def run(g, reps, pedge, n_available, k, gamma, nsim_nonad, nsim_ad, niter, worke
         res['f_rand'].append(r['f_rand'])
         res['f_nonad'].append(r['f_nonad'])
         res['f_ad'].append(r['f_ad'])
+        res['f_ad_g'].append(r['f_ad_g'])
         print ''
         print 'f_rand =', r['f_rand']
         print 'f_nonad =', r['f_nonad']
         print 'f_ad =', r['f_ad']
+        print 'f_ad_g =', r['f_ad_g']
         print '===============================\n'
     return res

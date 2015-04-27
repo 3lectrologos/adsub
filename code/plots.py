@@ -21,7 +21,7 @@ INF_FAST = dict(reps=30,
                 niter=50,
                 workers=7)
 INF_SLOW = dict(reps=20,
-                pedge=0.15,
+                pedge=0.3,
                 gamma=1,
                 nsim_nonad=1000,
                 nsim_ad=100,
@@ -69,10 +69,11 @@ def run_inf(model, nodes, fast=True, plot=False):
     fs_rand = []
     fs_nonad = []
     fs_ad = []
-    n_available = 100#len(g.vs) / 10
+    fs_ad_g = []
+    n_available = 4#len(g.vs) / 10
 #    pcts = [0.01, 0.1, 0.3, 0.5, 0.7, 1]
 #    ks = list(np.unique([max(1, int(kr * n_available)) for kr in pcts]))
-    ks = [1, 5, 10, 15, 20, 30, 40, 60, 80, 100]
+    ks = [1, 2, 3, 4]
     print_info(name, g)
     for k in ks:
         if fast:
@@ -83,13 +84,15 @@ def run_inf(model, nodes, fast=True, plot=False):
         fs_rand += r['f_rand']
         fs_nonad += r['f_nonad']
         fs_ad += r['f_ad']
+        fs_ad_g += r['f_ad_g']
         xs += [k] * params['reps']
     data = {
         'model': model,
         'ks': xs,
         'rand': fs_rand,
         'nonad': fs_nonad,
-        'ad': fs_ad
+        'ad': fs_ad,
+        'ad_g': fs_ad_g
         }
     plot_fs(data, outdir)
     with open(os.path.join(outdir, model.lower() + '.pickle'), 'w') as f:
@@ -147,9 +150,10 @@ def run_mc(model, nodes, fast=True, plot=False):
     fs_rand = []
     fs_nonad = []
     fs_ad = []
-    n_available = 100#len(g.vs) / 10
+    fs_ad_g = []
+    n_available = 4#len(g.vs) / 10
     pcts = [0.01, 0.1, 0.3, 0.5, 0.7, 1]
-    ks = [1, 2, 5, 10, 15, 20, 30, 40, 60, 80, 100]
+    ks = [1, 2, 3, 4]
 #    ks = list(np.unique([max(1, int(kr * n_available)) for kr in pcts]))
     print_info(name, g)
     for k in ks:
@@ -161,13 +165,15 @@ def run_mc(model, nodes, fast=True, plot=False):
         fs_rand += r['f_rand']
         fs_nonad += r['f_nonad']
         fs_ad += r['f_ad']
+        fs_ad_g += r['f_ad_g']
         xs += [k] * params['reps']
     data = {
         'model': model,
         'ks': xs,
         'rand': fs_rand,
         'nonad': fs_nonad,
-        'ad': fs_ad
+        'ad': fs_ad,
+        'ad_g': fs_ad_g
         }
     plot_fs(data, outdir)
     with open(os.path.join(outdir, model.lower() + '.pickle'), 'w') as f:
@@ -214,7 +220,7 @@ def run_pmc(model, nodes, fast=True, plot=False):
 
 def plot_fs(data, outdir):
     cs = {}
-    for name in ['rand', 'nonad', 'ad']:
+    for name in ['rand', 'nonad', 'ad', 'ad_g']:
         cs[name] = util.get_coords(data['ks'], data[name])
         means = []
         ks = np.unique(data['ks'])

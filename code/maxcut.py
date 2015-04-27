@@ -100,6 +100,7 @@ def compare(g, csets, k, nsim_nonad, niter):
     f_rand = []
     f_nonad = []
     f_ad = []
+    f_ad_g = []
     solver_nonad = NonAdaptiveMaxCut(g, csets, nsim_nonad)
     cut_rand, _ = solver_nonad.random(k)
     print 'nonad ',
@@ -112,17 +113,21 @@ def compare(g, csets, k, nsim_nonad, niter):
         sys.stdout.flush()
         instance = random_instance(csets)
         solver_ad = AdaptiveMaxCut(g, csets, instance)
+        cut_ad_g, _ = solver_ad.greedy(k)
         cut_ad, _ = solver_ad.random_greedy(k)
         f_rand.append(eval_instance(g, instance, cut_rand))
         f_nonad.append(eval_instance(g, instance, cut_nonad))
         f_ad.append(eval_instance(g, instance, cut_ad))
+        f_ad_g.append(eval_instance(g, instance, cut_ad_g))
     fm_rand = np.mean(f_rand)
     fm_nonad = np.mean(f_nonad)
     fm_ad = np.mean(f_ad)
+    fm_ad_g = np.mean(f_ad_g)
     return {
         'f_rand': fm_rand,
         'f_nonad': fm_nonad,
-        'f_ad': fm_ad
+        'f_ad': fm_ad,
+        'f_ad_g': fm_ad_g
         }
 
 
@@ -137,7 +142,7 @@ def k_csets(g, k, p):
 
 
 def run(g, reps, n_available, p, k, niter, nsim_nonad):
-    res = {'f_rand': [], 'f_nonad': [], 'f_ad': []}
+    res = {'f_rand': [], 'f_nonad': [], 'f_ad': [], 'f_ad_g': []}
     for rep in range(reps):
         print 'Rep:', rep, '(k = {0}, p = {1})'.format(k, p)
         print '==============================='
@@ -145,9 +150,11 @@ def run(g, reps, n_available, p, k, niter, nsim_nonad):
         res['f_rand'].append(r['f_rand'])
         res['f_nonad'].append(r['f_nonad'])
         res['f_ad'].append(r['f_ad'])
+        res['f_ad_g'].append(r['f_ad_g'])
         print ''
         print 'f_rand =', r['f_rand']
         print 'f_nonad =', r['f_nonad']
         print 'f_ad =', r['f_ad']
+        print 'f_ad_g =', r['f_ad_g']
         print '===============================\n'
     return res

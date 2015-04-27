@@ -61,7 +61,19 @@ color=cyan!70!black,
 coordinates{
 %ad%
 };
-p
+
+\addplot [
+only marks,
+mark=*,
+mark size=3.5pt,
+color=darkgray,
+%solid,
+%line width=2pt,
+]
+coordinates{
+%ad_g%
+};
+
 \addplot [
 color=green!70!black,
 solid,
@@ -87,6 +99,15 @@ line width=3pt
 ]
 coordinates{
 %mean_ad%
+};
+
+\addplot [
+color=darkgray,
+solid,
+line width=3pt
+]
+coordinates{
+%mean_ad_g%
 };
 
 
