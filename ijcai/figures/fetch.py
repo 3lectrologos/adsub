@@ -60,10 +60,10 @@ def get_one(obj, model):
                 reps = sum(data['ks'] == k)
                 ys_ad = np.array(data['ad'])[data['ks'] == k]
                 means_ad.append(np.mean(ys_ad))
-                stds_ad.append(np.std(ys_ad))
+                stds_ad.append(np.std(ys_ad)/np.sqrt(reps))
                 ys_nonad = np.array(data['nonad'])[data['ks'] == k]
                 means_nonad.append(np.mean(ys_nonad))
-                stds_nonad.append(np.std(ys_nonad))
+                stds_nonad.append(np.std(ys_nonad)/np.sqrt(reps))
             cs['mean_ad'] = util.get_coords(ks, means_ad, stds_ad)
             cs['mean_nonad'] = util.get_coords(ks, means_nonad, stds_nonad)
             texname = OBJ_SHORT[obj] + '_' + lmodel + '.tex'
