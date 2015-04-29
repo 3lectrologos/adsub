@@ -1,0 +1,69 @@
+Review 1
+--------
+PAPER SUMMARY:
+
+This paper extends a recent result on sub-modularity optimisation with non-monotone utility function [Buchbinder et al., 2014] into the adaptive sub-modularity settings. The resulting randomised adaptive greedy strategy is shown to retain [Buchbinder et al., 2014]'s approximation ratio of 1 - 1/e for monotone and 1/e for non-monotone utility functions, respectively. 
+
+The random selection among the best k decisions is the main factor that helps securing the 1/e approximation ratio when the utility function is non-monotone.
+
+ORIGINALITY, SIGNIFICANCE AND TECHNICAL SOUNDNESS:
+
+While the extension of Buchbinder's randomised greedy algorithm into the adaptive settings appears incremental (i.e., simply replacing the marginal gain by the adaptive marginal gain), the theoretical analysis is non-trivial and, in my opinion, interesting.
+
+I am not exactly an expert in adaptive sub-modularity optimisation so I cannot comment on the significance of this result. However, from the pure technical point of view, I think the theory presented in this paper is very solid and well-presented. I have no trouble following the proofs and cannot find any mistake.
+
+The experiments also appear to be carefully evaluated. Nonetheless, I have one question: 
+
+Why don't you compare the randomised greedy adaptive strategy against its deterministic (adaptive) counterpart? This could be an interesting experiment to show how the randomisation helps the greedy strategy to escape low-utility traps (caused by non-monotone utility function) in practice (other than help securing the 1/e approximation ratio).
+
+READABILITY:
+
+This paper is well-written. 
+
+Summary of review
+An interesting (though incremental) paper with rigorous mathematical support. The experiments could be demonstrated better (see my comment above).
+
+
+Review 2
+--------
+This paper proposes a greedy algorithm for submodular maximization in the adaptive setting. The authors extend the results of [Buchbinder et al, 2014] to prove an approximation guarantee for their algorithm in the case of non-monotone submodular functions. According to the authors (and to the best of my knowledge), the proposed algorithm is the first one to have an approximation bound for adaptive non-monotone submodular optimization problems.
+
+
+
+Main questions:
+
+* In line 5 of algorithm 1, why do you need a set of size k on every step? The intuitive thing would be to build a set of size k-i+1 and uniformly sample on element of it. Do you have a counterexample for algorithm 1 using sets of size k-i+1?
+
+* I agree with the baseline used; however, I believe you also need to compare with the adaptive monotone greedy, i.e., to solve the problem using the monotone version of the objective function and then evaluate the obtained policy using the non-monotone objective function. It would be interesting to see the improvement and the behavior of the improvement curve as k increases. What is your intuition of what would happen?
+
+* In the end of column 2 of p. 5, the authors mention that, given a (minimum) value for the objective function, the proposed algorithm is able to achieve such bound using less nodes than the baseline. Could you elaborate more? For instance, is it possible to add a plot of number of nodes vs objective value for the 3 domains? (Figure 1 could be omitted to make space of these plots since the running example is simple enough).
+
+* In the experiments, did you use 10 (as stated in the beginning of section 5.1) or 3 datasets? If 10, could you comment on the result of the other 7 datasets? (And please, add the comments to the main paper and the plots to the long paper)
+
+* In the plots, what is the first value of k? 1?
+
+
+
+Comments:
+
+P.5, column 2, 'Google+ network in plots (c) and (g)': according to the plots legend, the Google+ plots are (b) and (f).
+
+P.6, column 1, 'we show the improvement on Google+ for varying': the legend of plot (h) says it is the Twitter dataset.
+
+
+Summary of review
+This paper proposes a greedy algorithm for adaptive non-monotone submodular optimization and provides an approximation bound. According to the authors (and to the best of my knowledge), their algorithm is the first one to have an approximation bound. The paper is well written, clear, and relevant to the AI community.
+
+
+Review 3
+--------
+The authors present a new algorithm for adaptive submodular maximization. The provide performance guarantees for this algorithm in the case where the objective function is monotone (1-1/e) and non-monotone (1/e).
+
+The authors put forward a clear set of contributions. An algorithm for the adaptive submodular maximization problem and proofs establishing performance bounds when the objective is and is not monotone. A strength of the paper is the discussion of sample problems with non-monotone objectives. This will help readers to evaluate the impact of the technical result. 
+
+I have not seen technical issues with the proof. 
+
+Overall the paper is presented well. It clearly articulates the main ideas. 
+
+Summary of review
+This is a well written paper with a clear set of novel contributions. 

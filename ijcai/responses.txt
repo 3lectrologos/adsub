@@ -1,0 +1,25 @@
+Response 1
+----------
+Thank you for the comments.
+
+The behavior of adaptive greedy (AG) on non-monotone objectives varies. It is easy to construct instances of both our experimental objectives, where AG gets trapped and does much worse than adaptive random greedy (ARG). On the other hand, in many of the graph instances we use, AG achieves comparable performance, because the objectives are approximately monotone---especially for low values of k. Of course, this still means that ARG is at least as good as AG on the "good" instances, while also providing performance guarantees for the "bad" instances. This behavior is analogous to greedy vs. random greedy in the non-adaptive setting. We will consider adding some experimental comparison between AG and ARG in the final version.
+
+
+Response 2
+----------
+Thank you for the comments.
+
+* A set of size k is required, so that the probability of choosing each element is 1/k (see discussion after Lemma 4).
+
+* It is easy to construct instances where adaptive greedy (AG) does much worse than adaptive random greedy (ARG). On the other hand, in many of the graph instances we use, AG achieves comparable performance, because the objectives are approximately monotone---especially for small k. Still, ARG is at least as good as AG on the "good" instances, while also providing performance guarantees for the "bad" instances (similarly to non-adaptive greedy vs. random greedy). We will consider experimentally comparing to AG in the final version.
+
+* We will consider adding plots to visualize this point.
+
+* The results on the other data sets is similar to those we already show; we will add plots in the longer version.
+
+* First value is k = 1.
+
+
+Response 3
+----------
+Thank you for the comments.
