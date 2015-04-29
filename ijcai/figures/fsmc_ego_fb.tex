@@ -1,0 +1,83 @@
+\begin{tikzpicture}
+
+\begin{axis}[%
+tick label style={font=\scriptsize},
+label style={font=\scriptsize},
+legend style={font=\scriptsize},
+view={0}{90},
+width=\figurewidth,
+height=\figureheight,
+xmin=1, xmax=100,
+xtick={1, 20, 40, 60, 80, 100},
+xlabel={$k$},
+xlabel shift=-0.5em,
+ymin=300, ymax=2100,
+ylabel={$f_{\textrm{avg}}$},
+ylabel shift=-0.5em,
+tick label style={/pgf/number format/fixed},
+major tick length=2pt,
+axis lines*=left,
+legend cell align=left,
+legend style={at={(1.03,0)},anchor=south east,fill=none,draw=none,align=left,row sep=-0.2em},
+clip=false]
+
+\addplot [
+mark=*,
+mark size=1.7pt,
+color=orange!70!black,
+line width=1.3pt,
+error bars/.cd,
+error bar style={line width=1pt},
+y dir=both,
+y explicit
+]
+coordinates{
+(1,344.559)+- (2*42.9309882913,2*42.9309882913)(2,623.072666667)+- (2*49.5132086709,2*49.5132086709)(3,809.521)+- (2*37.1794820073,2*37.1794820073)(5,998.978965517)+- (2*44.796341395,2*44.796341395)(10,1445.04466667)+- (2*36.3837530347,2*36.3837530347)(15,1674.99533333)+- (2*33.863678254,2*33.863678254)(20,1817.36633333)+- (2*28.0670270939,2*28.0670270939)(30,1921.124)+- (2*37.7617953846,2*37.7617953846)(40,1985.05466667)+- (2*24.4777395107,2*24.4777395107)(60,1997.963)+- (2*24.9130026492,2*24.9130026492)(80,1994.711)+- (2*38.5288596898,2*38.5288596898)(100,1998.45366667)+- (2*21.3647724823,2*21.3647724823)
+};
+\addlegendentry{non-adaptive};
+
+\addplot [
+mark=*,
+mark size=1.7pt,
+color=cyan!70!black,
+line width=1.3pt,
+error bars/.cd,
+error bar style={line width=1pt},
+y dir=both,
+y explicit
+]
+coordinates{
+(1,344.559)+- (2*42.9309882913,2*42.9309882913)(2,695.847666667)+- (2*52.7309821442,2*52.7309821442)(3,952.075666667)+- (2*36.1194682208,2*36.1194682208)(5,1228.16448276)+- (2*35.85766273,2*35.85766273)(10,1758.48233333)+- (2*29.958009467,2*29.958009467)(15,1977.95433333)+- (2*17.8966890203,2*17.8966890203)(20,2029.67966667)+- (2*10.5093404434,2*10.5093404434)(30,2033.947)+- (2*21.9272521686,2*21.9272521686)(40,2036.98233333)+- (2*12.1639219781,2*12.1639219781)(60,2033.32166667)+- (2*19.1845389282,2*19.1845389282)(80,2040.29533333)+- (2*14.7744046092,2*14.7744046092)(100,2040.331)+- (2*13.6120636079,2*13.6120636079)
+};
+\addlegendentry{adaptive};
+
+\addplot [
+  solid,
+  darkgray,
+  line width=1pt
+]
+coordinates{
+(1,1900)(29.5,1900)
+};
+
+\addplot [
+  dashed,
+  cyan!70!black,
+  line width=1pt
+]
+coordinates{
+(13,300)(13,1900)
+};
+
+\addplot [
+  dashed,
+  orange!70!black,
+  line width=1pt
+]
+coordinates{
+(29.5,300)(29.5,1900)
+};
+
+
+\end{axis}
+\end{tikzpicture}

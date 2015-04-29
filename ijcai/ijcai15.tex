@@ -99,6 +99,7 @@
 \newcommand{\chapref}[1]{\hyperref[#1]{Chapter \ref*{#1}}}
 \newcommand{\figref}[1]{\hyperref[#1]{Figure \ref*{#1}}}
 \newcommand{\figsref}[1]{\hyperref[#1]{Figures \ref*{#1}}}
+\newcommand{\subcapref}[1]{\hyperref[#1]{\mbox{(\subref*{#1})}}}
 \newcommand{\tabref}[1]{\hyperref[#1]{ Table \ref*{#1}}}
 \newcommand{\algoref}[1]{\hyperref[#1]{Algorithm \ref*{#1}}}
 \newcommand{\theoremref}[1]{\hyperref[#1]{Theorem \ref*{#1}}}
@@ -249,15 +250,17 @@
 {
 \title{Non-monotone Adaptive Submodular Maximization\\\emph{\footnotesize (extended version with supplementary material)}}
 }
-%% \author{Alkis Gotovos\\
-%% ETH Zurich
-%% \And
-%% Amin Karbasi\\
-%% Yale University
-%% \And
-%% Andreas Krause\\
-%% ETH Zurich}
 
+
+
+\author{Alkis Gotovos\\
+ETH Zurich
+\And
+Amin Karbasi\\
+Yale University
+\And
+Andreas Krause\\
+ETH Zurich}
 
 \begin{document}
 
@@ -636,19 +639,36 @@ In the first three figures of each row, we plot the improvement for different va
 For the influence maximization objective, the influence propagation probability of each edge is chosen to be $p=0.1$, and for the maximum cut objective, selecting a node cuts that node or one of its neighbors with equal probability.
 
 We can see that adaptivity is beneficial in general, while the improvement it provides varies substantially depending on the properties of each network.
-As an example, for networks containing a few nodes of very high degree, like the Google+ network in plots (c) and (g), adaptivity provides little benefit for influence maximization, since these nodes are the main source of influence, hence are almost always selected by the non-adaptive algorithm as well.
+As an example, for networks containing a few nodes of very high degree, like the Google+ network in plots~\subcapref{fig:inf_gplus} and~\subcapref{fig:mc_gplus}, adaptivity provides little benefit for influence maximization, since these nodes are the main source of influence, hence are almost always selected by the non-adaptive algorithm as well.
 On the other hand, adaptivity is much more beneficial for the maximum cut objective in such networks, since the feedback of whether such high degree nodes have already been cut by some of their neighbors helps making future selections more efficient.
 
 Furthermore, although this is not directly visible in these plots, if our goal is to reach a specific level of objective value using as few nodes as possible, then our gains due to adaptivity can be even more considerable in terms of number of required nodes.
-For example, if we want to attain a maximum cut objective value of $2,000$ for the \fbook network, a budget $k$ of $15$ nodes is enough for adaptive random greedy, while a budget of more than $40$ nodes is required for non-adaptive random greedy.
+For example, if we want to attain a maximum cut objective value of $1900$ for the \fbook network, a budget $k$ of about $13$ nodes is enough for adaptive random greedy, while a budget of almost $30$ nodes is required for non-adaptive random greedy.
 
 For the remaining two plots we fix $k=20$.
-In plot (d) we show the improvement on \fbook for varying edge probabilities $p$ of the independent cascade model.
+In plot~\subcapref{fig:pinf_ego_fb} we show the improvement on \fbook for varying edge probabilities $p$ of the independent cascade model.
 At the extreme values of $p$, adaptivity provides no benefit, since the network is either disconnected ($p=0$), or fully connected ($p=1$).
-In plot (h) we show the improvement on \gplus for varying cut distributions.
+In plot~\subcapref{fig:pmc_twitter} we show the improvement on \twitter for varying cut distributions.
 The parameter $\beta$ quantifies the probability of a node being cut when it is selected.
-A value of $\beta=0$ corresponds to the setting of plots (e)--(g), where the cutting probability is uniformly distributed among the selected node and each of its neighbors; $\beta=1$ corresponds to deterministically cutting the selected node.
+A value of $\beta=0$ corresponds to the setting of plots~\subcapref{fig:mc_ego_fb}--\subcapref{fig:mc_twitter}, where the cutting probability is uniformly distributed among the selected node and each of its neighbors; $\beta=1$ corresponds to deterministically cutting the selected node.
 We can see that, as the cutting distribution gets close to deterministic ($\beta \to 1$), the benefit of adaptivity diminishes.
+
+Finally, we would like to comment on the behavior of the simple adaptive greedy algorithm with the additional modification to stop when the largest marginal gain becomes negative.
+In particular, for the specific objectives considered here, we have observed that its performance is very close to that of adaptive random greedy.
+This is presumably because both these objectives are approximately monotone for small values of $k$, and also fairly benign in the sense that they do not create traps that would severely diminish the performance of adaptive greedy.
+(Intuitively, choosing one element cannot reduce the marginal gain of many other elements by much.)
+Still, adaptive random greedy is comparable to adaptive greedy for these ``easy'' objectives, while also providing performance guarantees for harder ones, which is a behavior analogous to comparing greedy vs. random greedy in the non-adaptive setting.
+
+\setlength\figureheight{0.6\linewidth}
+\setlength\figurewidth{0.8\linewidth}
+\begin{figure}[tb]
+  \centering
+  \input{figures/fsmc_ego_fb.tex}
+%  \vspace{\scspacey}
+  \caption{The budget $k$ required by adaptive random greedy to reach a certain objective value (here $1900$) is considerably smaller compared to its non-adaptive counterpart.}
+  \label{fig:fs_ego_fb}
+\end{figure}
+
 
 \section{Related Work}
 Compared to monotone submodular maximization, for which the $(1-1/e)$-approximation of the greedy algorithm was shown by \citet{nemhauser78}, constant-factor approximations for non-monotone submodular functions have been much more recent, for both the unconstrained case \cite{feige07}, as well as under matroid and knapsack constraints \cite{lee09}.
@@ -665,10 +685,14 @@ In this paper we chose to run experiments on smaller-scale networks, but these t
 Maximum graph cut has been a much-studied NP-complete problem with constant-factor SDP-based approximation algorithms for both the unconstrained \cite{goemans95} and cardinality-constrained \cite{feige01} cases.
 An interesting application of maximum cut objectives has been proposed by \citet{lin10} and \citet{lin11} for text summarization.
 
+
 \section{Conclusion}
 We proposed the adaptive random greedy policy for adaptive submodular maximization, the first policy with provable approximation guarantees for non-monotone objectives.
 We also presented two simple ways of constructing non-monotone objectives in practice, and observed the advantage of adaptivity by evaluating our policy on two network-related functions obtained this way.
 We believe that our work is a step towards understanding the class of functions amenable to adaptive optimization, and hope that it will encourage the broader use of non-monotone objectives in modeling and solving practical AI problems.
+
+
+\section*{Acknowledgments}
 
 % The file named.bst is a bibliography style file for BibTeX 0.99c
 \bibliographystyle{named}
