@@ -54,7 +54,7 @@ coordinates{
 \addplot [
   solid,
   darkgray,
-  line width=1pt
+  line width=1.3pt
 ]
 coordinates{
 (1,1900)(29.5,1900)
@@ -70,6 +70,16 @@ coordinates{
 };
 
 \addplot [
+  mark=x,
+  cyan!70!black,
+  mark size=3,
+  line width=1pt
+]
+coordinates{
+(13,300)
+};
+
+\addplot [
   dashed,
   orange!70!black,
   line width=1pt
@@ -78,6 +88,15 @@ coordinates{
 (29.5,300)(29.5,1900)
 };
 
+\addplot [
+  mark=x,
+  orange!70!black,
+  mark size=3,
+  line width=1pt
+]
+coordinates{
+(29.5,300)
+};
 
 \end{axis}
 \end{tikzpicture}
