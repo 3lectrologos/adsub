@@ -12,6 +12,9 @@
 
 % Use the postscript times font!
 \usepackage{times}
+\pdfinfo{
+/Title (Non-monotone Adaptive Submodular Maximization)
+/Author (Alkis Gotovos, Amin Karbasi, Andreas Krause) }
 
 % the following package is optional:
 %\usepackage{latexsym} 
@@ -362,9 +365,11 @@ In the significantly more complex adaptive setting, the problem of computing an 
 However, they also showed that the notions of monotonicity and submodularity can be naturally generalized to this setting, and lead to similar performance guarantees to the non-adaptive setting.
 
 More concretely, the \emph{expected marginal gain} of an element $e \in E$ given partial realization $\psi$ can be defined as
+{\small
 \begin{align*}
   \D{e}{\psi} \defeq \E[\Phi]{f\big(\mathcal{D}(\psi) \cup \{e\}, \Phi\big) - f\big(\dom(\psi), \Phi\big)}[\Phi \sim \psi].
 \end{align*}
+}
 The above expression is a conditional expectation, which only considers realizations that are consistent with $\psi$.
 In birdwatching terms, it quantifies how many new species we expect to observe if we visit a new location $e$ given the already visited locations and already observed species in $\psi$.
 Then, the following properties can be defined analogously to their non-adaptive counterparts:
@@ -424,15 +429,14 @@ Our proofs generalize the results of \citet{buchbinder14} for the random greedy 
 First, let us define the expected gain of running policy $\pi$ after having obtained a partial realization $\psi$, as
 {\small
 \begin{align*}
-  \D{\pi}{\psi} \defeq \E[\Phi,\Pi]{f(\dom(\psi) \cup E(\pi, \Phi), \Phi) - f(\dom(\psi), \Phi)}[\Phi \sim \psi].
+  \D{\pi}{&\psi} \defeq \\
+          &\E[\Phi,\Pi]{f(\dom(\psi) \cup E(\pi, \Phi), \Phi) - f(\dom(\psi), \Phi)}[\Phi \sim \psi].
 \end{align*}}
 Also, for any policy $\pi$ and any positive integer $k$, we define the truncated policy $\pik$, which runs identically to $\pi$ for $k$ steps and then terminates.
 Finally, given any two policies $\pi_1$, $\pi_2$, we denote by $\pi_1@\pi_2$ the policy that first runs $\pi_1$ until it terminates and then runs $\pi_2$, discarding all observations made by $\pi_1$.
 After $\pi_1@\pi_2$ terminates, the subset selected by it consists of the union of the subsets selected by each policy individually.
 
 The following is a key lemma for both monotone and non-monotone objectives.
-It states the intuitive fact that, at any point, no $k$-step policy can give us a larger expected gain than the sum of the $k$ currently largest expected marginal gains.
-
 \setcounter{lemma}{0}
 \begin{lemma}\label{lem:submod}
   If $f$ is adaptive submodular, then, for any policy $\pi$, and any partial realization $\psi$, it holds that
@@ -441,6 +445,7 @@ It states the intuitive fact that, at any point, no $k$-step policy can give us 
   \end{align*}
 \end{lemma}
 \noindent 
+It states the intuitive fact that, at any point, no $k$-step policy can give us a larger expected gain than the sum of the $k$ currently largest expected marginal gains.
 This is a consequence of adaptive submodularity, which guaratees that the expected marginal gains of any element decrease as our selection grows larger.
 
 Based on \lemmaref{lem:submod} and the fact that $\pig$ selects at each step one of the $k$ elements in $\Mk$ uniformly at random, we can show the following lemma, which also applies to both monotone and non-monotone objectives.
@@ -574,8 +579,8 @@ For both objectives, we select uniformly at random a subset of $100$ nodes as th
 For each ground set instance, we evaluate the algorithms on $100$ random realizations.
 
 \setlength\figureheight{0.25\textwidth}
-\setlength\figurewidth{0.34\textwidth}
-\newcommand{\subflen}{0.34\textwidth}
+\setlength\figurewidth{0.33\textwidth}
+\newcommand{\subflen}{0.33\textwidth}
 \newcommand{\scspacey}{0em}
 \newcommand{\scspacex}{0.2em}
 \begin{figure*}[tb]
@@ -587,30 +592,34 @@ For each ground set instance, we evaluate the algorithms on $100$ random realiza
     \caption{\hspace{\scspacex}\infmax{} -- \fbook}
     \label{fig:inf_ego_fb}
   \end{subfigure}
+  \hfill
   \begin{subfigure}[b]{\subflen}
     \input{figures/inf_gplus.tex}
     \vspace{\scspacey}
     \caption{\hspace{\scspacex}\infmax{} -- \gplus}
     \label{fig:inf_gplus}
   \end{subfigure}
+  \hfill
   \begin{subfigure}[b]{\subflen}
     \input{figures/inf_twitter.tex}
     \vspace{\scspacey}
     \caption{\hspace{\scspacex}\infmax{} -- \twitter}
     \label{fig:inf_twitter}
-  \end{subfigure}\\[0.3em]
+  \end{subfigure}\\[0.5em]
   \begin{subfigure}[b]{\subflen}
     \input{figures/mc_ego_fb.tex}
     \vspace{\scspacey}
     \caption{\hspace{\scspacex}\maxcut{} -- \fbook}
     \label{fig:mc_ego_fb}
   \end{subfigure}
+  \hfill
   \begin{subfigure}[b]{\subflen}
     \input{figures/mc_gplus.tex}
     \vspace{\scspacey}
     \caption{\hspace{\scspacex}\maxcut{} -- \gplus}
     \label{fig:mc_gplus}
   \end{subfigure}
+  \hfill
   \begin{subfigure}[b]{\subflen}
     \input{figures/mc_twitter.tex}
     \vspace{\scspacey}
